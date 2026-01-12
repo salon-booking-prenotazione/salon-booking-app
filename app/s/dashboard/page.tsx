@@ -11,9 +11,18 @@ export default async function Dashboard() {
     .eq("slug", "salon-demo")
     .single();
 
-  if (salonErr || !salon) {
-    return <p>Salone non trovato (slug: salon-demo)</p>;
-  }
+  if (salonErr) {
+  return (
+    <pre style={{ whiteSpace: "pre-wrap" }}>
+      Errore Supabase (salons): {salonErr.message}
+    </pre>
+  );
+}
+
+if (!salon) {
+  return <p>Salone non trovato (slug: salon-demo)</p>;
+}
+
 
   const { data: rows, error } = await supabase
     .from("appointments")
