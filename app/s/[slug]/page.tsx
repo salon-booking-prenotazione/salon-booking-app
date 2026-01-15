@@ -17,8 +17,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   const [salon, setSalon] = useState<Salon | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [serviceId, setServiceId] = useState<string>("");
+
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -30,6 +32,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   useEffect(() => {
     (async () => {
       setMsg("");
+
       const { data: salonData, error: sErr } = await supabase
         .from("salons")
         .select("id,name,slug,phone")
@@ -52,6 +55,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         setMsg("Errore caricamento servizi.");
         return;
       }
+
       setServices(svc || []);
       if (svc?.[0]?.id) setServiceId(svc[0].id);
     })();
@@ -75,6 +79,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       return;
     }
 
+    // start/end in ISO
     const start = new Date(`${date}T${time}:00`);
     const duration = selectedService?.duration_minutes ?? 30;
     const end = new Date(start.getTime() + duration * 60 * 1000);
@@ -102,10 +107,8 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      // Link gestione prenotazione (lo useremo dopo per disdetta)
       const manageLink = `${window.location.origin}/manage/${json.manage_token}`;
-
-      setMsg(`✅ Prenotazione confermata!\nLink gestione/disdetta: ${manageLink}`);
+      setMsg(`✅ Prenotazione confermata!\nLink gestione/disdetta:\n${manageLink}`);
     } finally {
       setLoading(false);
     }
@@ -126,7 +129,11 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       <p>Prenota in pochi secondi.</p>
 
       <label>Servizio</label>
-      <select value={serviceId} onChange={(e) => setServiceId(e.target.value)} style={{ width: "100%", padding: 8 }}>
+      <select
+        value={serviceId}
+        onChange={(e) => setServiceId(e.target.value)}
+        style={{ width: "100%", padding: 8 }}
+      >
         {services.map((s) => (
           <option key={s.id} value={s.id}>
             {s.name} ({s.duration_minutes} min)
@@ -137,11 +144,21 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
         <div>
           <label>Data</label>
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} style={{ width: "100%", padding: 8 }} />
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            style={{ width: "100%", padding: 8 }}
+          />
         </div>
         <div>
           <label>Ora</label>
-          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} style={{ width: "100%", padding: 8 }} />
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            style={{ width: "100%", padding: 8 }}
+          />
         </div>
       </div>
 
@@ -152,30 +169,4 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
       <div style={{ marginTop: 12 }}>
         <label>Telefono</label>
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} style={{ width: "100%", padding: 8 }} />
-      </div>
-
-      <div style={{ marginTop: 12 }}>
-        <label>Conferma via</label>
-        <select value={channel} onChange={(e) => setChannel(e.target.value as any)} style={{ width: "100%", padding: 8 }}>
-          <option value="email">Email (consigliato)</option>
-          <option value="sms">SMS</option>
-          <option value="both">Email + SMS</option>
-        </select>
-      </div>
-
-      {(channel === "email" || channel === "both") && (
-        <div style={{ marginTop: 12 }}>
-          <label>Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", padding: 8 }} />
-        </div>
-      )}
-
-      <button onClick={submit} disabled={loading} style={{ marginTop: 16, width: "100%", padding: 12 }}>
-        {loading ? "Invio..." : "Conferma prenotazione"}
-      </button>
-
-      {msg && <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{msg}</pre>}
-    </div>
-  );
-}
+        <input valu
