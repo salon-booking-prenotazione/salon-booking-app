@@ -169,4 +169,30 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
       <div style={{ marginTop: 12 }}>
         <label>Telefono</label>
-        <input valu
+        <input value={phone} onChange={(e) => setPhone(e.target.value)} style={{ width: "100%", padding: 8 }} />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <label>Conferma via</label>
+        <select value={channel} onChange={(e) => setChannel(e.target.value as any)} style={{ width: "100%", padding: 8 }}>
+          <option value="email">Email (consigliato)</option>
+          <option value="sms">SMS</option>
+          <option value="both">Email + SMS</option>
+        </select>
+      </div>
+
+      {(channel === "email" || channel === "both") && (
+        <div style={{ marginTop: 12 }}>
+          <label>Email</label>
+          <input value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", padding: 8 }} />
+        </div>
+      )}
+
+      <button onClick={submit} disabled={loading} style={{ marginTop: 16, width: "100%", padding: 12 }}>
+        {loading ? "Invio..." : "Conferma prenotazione"}
+      </button>
+
+      {msg && <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{msg}</pre>}
+    </div>
+  );
+}
