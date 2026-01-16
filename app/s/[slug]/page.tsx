@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,9 +22,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
+  
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [loadingTimes, setLoadingTimes] = useState(false);
-
+  
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
