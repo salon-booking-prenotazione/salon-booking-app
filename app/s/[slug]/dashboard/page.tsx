@@ -11,20 +11,23 @@ export default async function Dashboard({
     .from("salons")
     .select("id,name,slug")
     .eq("slug", params.slug)
-
     .single();
+
   if (salonErr || !salon) {
-  return (
-    <pre style={{ whiteSpace: "pre-wrap" }}>
-      {JSON.stringify(
-        {
-          slug: params.slug,
-          salon: salon ?? null,
-          error: salonErr ?? null,
-        },
-        null,
-        2
-      )}
-    </pre>
-  );
+    return (
+      <pre style={{ whiteSpace: "pre-wrap" }}>
+        {JSON.stringify(
+          {
+            slug: params.slug,
+            salon: salon ?? null,
+            error: salonErr ?? null,
+          },
+          null,
+          2
+        )}
+      </pre>
+    );
+  }
+
+  return <h3>Agenda - {salon.name}</h3>;
 }
