@@ -193,10 +193,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         </div>
         <div>
           <label>Ora</label>
-          
+       
 <select
   value={time}
-  onChange={(e) => setTime(""); // ogni volta che ricalcoli gli orari
+  onChange={(e) => setTime(e.target.value)}
   style={{ width: "100%", padding: 8 }}
   disabled={!date || !serviceId || loadingTimes}
 >
@@ -205,18 +205,18 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   </option>
 
   {availableTimes.length === 0 && !loadingTimes && (
-  <option value="" disabled>
-    ⛔ Nessun orario disponibile
-  </option>
-)}
+    <option value="" disabled>
+      ⛔ Nessun orario disponibile
+    </option>
+  )}
 
-{availableTimes.map((t) => (
-  <option key={t} value={t}>
-    {t}
-  </option>
-))}
-
+  {availableTimes.map((t) => (
+    <option key={t} value={t}>
+      {t}
+    </option>
+  ))}
 </select>
+
 
           {availableTimes.length === 0 && !loadingTimes && (
   <p style={{ marginTop: 8, color: "#b00020" }}>
