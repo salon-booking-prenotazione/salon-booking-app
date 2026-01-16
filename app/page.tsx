@@ -14,7 +14,7 @@ export default function Home() {
           </Link>
         </li>
         <li>
-          <Link href={`/s/${slug}/appointments/new`}>
+          <Link href={`/s/${slug}`}>
             ➕ Aggiungi appuntamento
           </Link>
         </li>
