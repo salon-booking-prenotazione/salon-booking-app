@@ -17,14 +17,20 @@ type Body = {
 const OPEN_MIN = 9 * 60;    // 09:00
 const CLOSE_MIN = 19 * 60; // 19:00
 const STEP_MIN = 30;       // 30 minuti
-const dayStart = new Date(body.date + "T00:00:00");
-// 0 = Domenica, 1 = Lunedì, 2 = Martedì...
-const dayOfWeek = dayStart.getDay();
+export async function POST(req: Request) {
+  try {
+    const body = (await req.json()) as Body;
 
-// Lunedì chiuso
-if (dayOfWeek === 1) {
-  return NextResponse.json({ times: [] });
-}
+    if (!body.service_id || !body.date) {
+      return NextResponse.json({ error: "Dati mancanti" }, { status: 400 });
+    }
+
+    // Lunedì chiuso
+    const dayStart = new Date(body.date + "T00:00:00");
+    const dayOfWeek = dayStart.getDay();
+    if (dayOfWeek === 1) {
+      return NextResponse.json({ times: [] });
+    }
 
 function hhmm(min: number) {
   const h = Math.floor(min / 60);
