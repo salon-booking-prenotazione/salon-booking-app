@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 import crypto from "crypto";
 
 const supabase = createClient(
@@ -85,6 +89,40 @@ export async function POST(req: Request) {
 
   return NextResponse.json(
     {
+      // ✅ INVIO EMAIL con Resend (se richiesto)
+const wantsEmail =
+  body.confirmation_channel === "email" || body.confirmation_channel === "both";
+
+if (wantsEmail && email) {
+  const from = process.env.RESEND_FROM;
+
+  if (!from) {
+    console.warn("⚠️ RESEND_FROM mancante su Vercel");
+  } else {
+    const manageLink = `${new URL(req.url).origin}/manage/${appt.manage_token}`;
+
+    const subject = `Conferma prenotazione - ${body.name}`;
+    const html = `
+      <h2>Prenotazione confermata ✅</h2>
+      <p><b>Inizio:</b> ${body.start_time}</p>
+      <p><b>Fine:</b> ${body.end_time}</p>
+      <p>Gestisci / disdici: <a href="${manageLink}">${manageLink}</a></p>
+    `;
+
+    const { error: mailErr } = await resend.emails.send({
+      from,
+      to: [email],
+      subject,
+      html,
+    });
+
+    if (mailErr) {
+      console.error("❌ Errore Resend:", mailErr);
+      // Non blocchiamo la prenotazione se l’email fallisce
+    }
+  }
+}
+
       ok: true,
       appointment_id: appt.id,
       manage_token: appt.manage_token,
