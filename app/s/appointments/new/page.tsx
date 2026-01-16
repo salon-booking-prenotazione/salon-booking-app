@@ -36,3 +36,4 @@ export default async function NewAppointment() {
     </div>
   );
 }
+<a href="/s/salon-demo">Aggiungi appuntamento</a>
