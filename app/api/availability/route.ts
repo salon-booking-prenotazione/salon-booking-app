@@ -14,9 +14,17 @@ type Body = {
   tzOffsetMinutes: number;
 };
 
-const OPEN_MIN = 9 * 60;
-const CLOSE_MIN = 18 * 60;
-const STEP_MIN = 15;
+const OPEN_MIN = 9 * 60;    // 09:00
+const CLOSE_MIN = 19 * 60; // 19:00
+const STEP_MIN = 30;       // 30 minuti
+const dayStart = new Date(body.date + "T00:00:00");
+// 0 = Domenica, 1 = Lunedì, 2 = Martedì...
+const dayOfWeek = dayStart.getDay();
+
+// Lunedì chiuso
+if (dayOfWeek === 1) {
+  return NextResponse.json({ times: [] });
+}
 
 function hhmm(min: number) {
   const h = Math.floor(min / 60);
