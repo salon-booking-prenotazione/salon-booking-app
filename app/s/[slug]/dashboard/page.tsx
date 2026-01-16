@@ -13,10 +13,18 @@ export default async function Dashboard({
     .eq("slug", params.slug)
 
     .single();
-
   if (salonErr || !salon) {
-    return <p>Salone non trovato (slug: {params.slug})</p>;
-  }
-
-  return <h3>Agenda — {salon.name}</h3>;
+  return (
+    <pre style={{ whiteSpace: "pre-wrap" }}>
+      {JSON.stringify(
+        {
+          slug: params.slug,
+          salon: salon ?? null,
+          error: salonErr ?? null,
+        },
+        null,
+        2
+      )}
+    </pre>
+  );
 }
