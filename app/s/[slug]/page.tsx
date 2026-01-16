@@ -20,6 +20,8 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [loadingTimes, setLoadingTimes] = useState(false);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -32,6 +34,41 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   useEffect(() => {
     (async () => {
       setMsg("");
+
+      useEffect(() => {
+  (async () => {
+    if (!salon || !serviceId || !date) {
+      setAvailableTimes([]);
+      return;
+    }
+
+    setLoadingTimes(true);
+    try {
+      const res = await fetch("/api/availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          salon_id: salon.id,
+          service_id: serviceId,
+          date,
+          tzOffsetMinutes: new Date().getTimezoneOffset(),
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        setMsg(json?.error || "Errore caricamento orari.");
+        setAvailableTimes([]);
+        return;
+      }
+
+      setAvailableTimes(json.times || []);
+      if (time && !(json.times || []).includes(time)) setTime("");
+    } finally {
+      setLoadingTimes(false);
+    }
+  })();
+}, [salon, serviceId, date]);
 
       const { data: salonData, error: sErr } = await supabase
         .from("salons")
@@ -153,14 +190,27 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         </div>
         <div>
           <label>Ora</label>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            style={{ width: "100%", padding: 8 }}
-          />
-        </div>
-      </div>
+         <label>Ora</label>
+<select
+  value={time}
+  onChange={(e) => setTime(e.target.value)}
+  style={{ width: "100%", padding: 8 }}
+  disabled={!date || !serviceId || loadingTimes}
+>
+  <option value="">
+    {loadingTimes ? "Caricamento..." : "Seleziona ora"}
+  </option>
+
+  {availableTimes.map((t) => (
+    <option key={t} value={t}>
+      {t}
+    </option>
+  ))}
+</select>
+
+{date && serviceId && !loadingTimes && availableTimes.length === 0 && (
+  <p style={{ marginTop: 8 }}>Nessun orario disponibile per questa data.</p>
+)}
 
       <div style={{ marginTop: 12 }}>
         <label>Nome</label>
