@@ -10,7 +10,7 @@ export default async function Dashboard({
   const { data: salon, error: salonErr } = await supabase
     .from("salons")
     .select("id,name,slug")
-    .eq("slug", "salon-demo")
+    .eq("slug", params.slug)
 
     .single();
 
