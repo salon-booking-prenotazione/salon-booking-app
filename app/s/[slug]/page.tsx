@@ -190,10 +190,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         </div>
         <div>
           <label>Ora</label>
-         <label>Ora</label>
+          
 <select
   value={time}
-  onChange={(e) => setTime(e.target.value)}
+  onChange={(e) => setTime(""); // ogni volta che ricalcoli gli orari
   style={{ width: "100%", padding: 8 }}
   disabled={!date || !serviceId || loadingTimes}
 >
@@ -201,12 +201,25 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     {loadingTimes ? "Caricamento..." : "Seleziona ora"}
   </option>
 
-  {availableTimes.map((t) => (
-    <option key={t} value={t}>
-      {t}
-    </option>
-  ))}
+  {availableTimes.length === 0 && !loadingTimes && (
+  <option value="" disabled>
+    ⛔ Nessun orario disponibile
+  </option>
+)}
+
+{availableTimes.map((t) => (
+  <option key={t} value={t}>
+    {t}
+  </option>
+))}
+
 </select>
+
+          {availableTimes.length === 0 && !loadingTimes && (
+  <p style={{ marginTop: 8, color: "#b00020" }}>
+    Prova a cambiare data o servizio
+  </p>
+)}
 
 {date && serviceId && !loadingTimes && availableTimes.length === 0 && (
   <p style={{ marginTop: 8 }}>Nessun orario disponibile per questa data.</p>
@@ -238,9 +251,13 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         </div>
       )}
 
-      <button onClick={submit} disabled={loading} style={{ marginTop: 16, width: "100%", padding: 12 }}>
-        {loading ? "Invio..." : "Conferma prenotazione"}
-      </button>
+      <button
+  onClick={submit}
+  disabled={loading || !time || loadingTimes}
+  style={{ marginTop: 16, width: "100%", padding: 12 }}
+>
+  {loading ? "Invio..." : "Conferma prenotazione"}
+</button>
 
       {msg && <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{msg}</pre>}
     </div>
