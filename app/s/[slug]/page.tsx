@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,12 +18,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   const [services, setServices] = useState<Service[]>([]);
   const [serviceId, setServiceId] = useState<string>("");
 
-  const [date, setDate] = useState<string>("");
-  const [time, setTime] = useState<string>("");
-  
-  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [loadingTimes, setLoadingTimes] = useState(false);
-  
+  const [date, setDate] = useState<string>(""); // YYYY-MM-DD
+  const [slots, setSlots] = useState<string[]>([]);
+  const [slotIso, setSlotIso] = useState<string>("");
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -34,44 +30,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string>("");
 
+  // Load salon + services
   useEffect(() => {
     (async () => {
       setMsg("");
-
-      useEffect(() => {
-  (async () => {
-    if (!salon || !serviceId || !date) {
-      setAvailableTimes([]);
-      return;
-    }
-
-    setLoadingTimes(true);
-    try {
-      const res = await fetch("/api/availability", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          salon_id: salon.id,
-          service_id: serviceId,
-          date,
-          tzOffsetMinutes: new Date().getTimezoneOffset(),
-        }),
-      });
-
-      const json = await res.json();
-      if (!res.ok) {
-        setMsg(json?.error || "Errore caricamento orari.");
-        setAvailableTimes([]);
-        return;
-      }
-
-      setAvailableTimes(json.times || []);
-      if (time && !(json.times || []).includes(time)) setTime("");
-    } finally {
-      setLoadingTimes(false);
-    }
-  })();
-}, [salon, serviceId, date]);
 
       const { data: salonData, error: sErr } = await supabase
         .from("salons")
@@ -106,11 +68,31 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     [services, serviceId]
   );
 
+  // Load slots when date/service changes
+  useEffect(() => {
+    (async () => {
+      setSlots([]);
+      setSlotIso("");
+
+      if (!salon || !serviceId || !date) return;
+
+      const res = await fetch(
+        `/api/available-times?salon_id=${salon.id}&service_id=${serviceId}&date=${date}`
+      );
+      const json = await res.json();
+      if (!res.ok) {
+        setMsg(json?.error || "Errore caricamento orari.");
+        return;
+      }
+      setSlots(json.slots || []);
+    })();
+  }, [salon, serviceId, date]);
+
   async function submit() {
     if (!salon) return;
     setMsg("");
 
-    if (!serviceId || !date || !time || !name || !phone) {
+    if (!serviceId || !date || !name || !phone) {
       setMsg("Compila tutti i campi obbligatori.");
       return;
     }
@@ -118,9 +100,12 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       setMsg("Se scegli Email, l’email è obbligatoria.");
       return;
     }
+    if (!slotIso) {
+      setMsg("Seleziona un orario disponibile.");
+      return;
+    }
 
-    // start/end in ISO
-    const start = new Date(`${date}T${time}:00`);
+    const start = new Date(slotIso);
     const duration = selectedService?.duration_minutes ?? 30;
     const end = new Date(start.getTime() + duration * 60 * 1000);
 
@@ -147,8 +132,12 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      const manageLink = `${window.location.origin}/manage/${json.manage_token}`;
-      setMsg(`✅ Prenotazione confermata!\nLink gestione/disdetta:\n${manageLink}`);
+      if (json.manage_token) {
+        const manageLink = `${window.location.origin}/manage/${json.manage_token}`;
+        setMsg(`✅ Prenotazione confermata!\nLink gestione/disdetta:\n${manageLink}`);
+      } else {
+        setMsg("✅ Prenotazione confermata!");
+      }
     } finally {
       setLoading(false);
     }
@@ -181,66 +170,70 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         ))}
       </select>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 12 }}>
-        <div>
-          <label>Data</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            style={{ width: "100%", padding: 8 }}
-          />
-        </div>
-        <div>
-          <label>Ora</label>
-       
-<select
-  value={time}
-  onChange={(e) => setTime(e.target.value)}
-  style={{ width: "100%", padding: 8 }}
-  disabled={!date || !serviceId || loadingTimes}
->
-  <option value="">
-    {loadingTimes ? "Caricamento..." : "Seleziona ora"}
-  </option>
+      <div style={{ marginTop: 12 }}>
+        <label>Data</label>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          style={{ width: "100%", padding: 8 }}
+        />
+      </div>
 
-  {availableTimes.length === 0 && !loadingTimes && (
-    <option value="" disabled>
-      ⛔ Nessun orario disponibile
-    </option>
-  )}
+      <div style={{ marginTop: 12 }}>
+        <label>Orario disponibile</label>
+        <select
+          value={slotIso}
+          onChange={(e) => setSlotIso(e.target.value)}
+          style={{ width: "100%", padding: 8 }}
+          disabled={slots.length === 0}
+        >
+          <option value="">
+            {slots.length ? "Seleziona un orario" : "Nessun orario disponibile"}
+          </option>
 
-  {availableTimes.map((t) => (
-    <option key={t} value={t}>
-      {t}
-    </option>
-  ))}
-</select>
+          {slots.map((iso) => {
+            const d = new Date(iso);
+            const hh = String(d.getUTCHours()).padStart(2, "0");
+            const mm = String(d.getUTCMinutes()).padStart(2, "0");
+            return (
+              <option key={iso} value={iso}>
+                {hh}:{mm}
+              </option>
+            );
+          })}
+        </select>
+      </div>
 
-
-          {availableTimes.length === 0 && !loadingTimes && (
-  <p style={{ marginTop: 8, color: "#b00020" }}>
-    Prova a cambiare data o servizio
-  </p>
-)}
-
-{date && serviceId && !loadingTimes && availableTimes.length === 0 && (
-  <p style={{ marginTop: 8 }}>Nessun orario disponibile per questa data.</p>
-)}
+      {date && serviceId && slots.length === 0 && (
+        <p style={{ marginTop: 8 }}>Nessun orario disponibile per questa data.</p>
+      )}
 
       <div style={{ marginTop: 12 }}>
         <label>Nome</label>
-        <input value={name} onChange={(e) => setName(e.target.value)} style={{ width: "100%", padding: 8 }} />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ width: "100%", padding: 8 }}
+        />
       </div>
 
       <div style={{ marginTop: 12 }}>
         <label>Telefono</label>
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} style={{ width: "100%", padding: 8 }} />
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          style={{ width: "100%", padding: 8 }}
+        />
       </div>
 
       <div style={{ marginTop: 12 }}>
         <label>Conferma via</label>
-        <select value={channel} onChange={(e) => setChannel(e.target.value as any)} style={{ width: "100%", padding: 8 }}>
+        <select
+          value={channel}
+          onChange={(e) => setChannel(e.target.value as any)}
+          style={{ width: "100%", padding: 8 }}
+        >
           <option value="email">Email (consigliato)</option>
           <option value="sms">SMS</option>
           <option value="both">Email + SMS</option>
@@ -250,17 +243,21 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       {(channel === "email" || channel === "both") && (
         <div style={{ marginTop: 12 }}>
           <label>Email</label>
-          <input value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: "100%", padding: 8 }} />
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ width: "100%", padding: 8 }}
+          />
         </div>
       )}
 
       <button
-  onClick={submit}
-  disabled={loading || !time || loadingTimes}
-  style={{ marginTop: 16, width: "100%", padding: 12 }}
->
-  {loading ? "Invio..." : "Conferma prenotazione"}
-</button>
+        onClick={submit}
+        disabled={loading || !slotIso}
+        style={{ marginTop: 16, width: "100%", padding: 12, cursor: "pointer" }}
+      >
+        {loading ? "Invio..." : "Conferma prenotazione"}
+      </button>
 
       {msg && <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{msg}</pre>}
     </div>
