@@ -46,7 +46,7 @@ export async function GET(req: Request) {
 
   const open = new Date(`${date}T${open_time.slice(0, 5)}:00.000Z`);
   const close = new Date(`${date}T${close_time.slice(0, 5)}:00.000Z`);
-  const stepMinutes = 15;
+  const stepMinutes = 30;
 
   const dayStart = new Date(`${date}T00:00:00.000Z`);
   const dayEnd = new Date(`${date}T23:59:59.999Z`);
