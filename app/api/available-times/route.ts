@@ -141,3 +141,101 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ available_times: times });
 }
+import { NextResponse } from "next/server";
+import { supabaseServer } from "@/lib/supabase";
+
+// GET /api/available-times?salon_id=...&service_id=...&date=YYYY-MM-DD
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const salon_id = url.searchParams.get("salon_id") || "";
+  const service_id = url.searchParams.get("service_id") || "";
+  const date = url.searchParams.get("date") || ""; // YYYY-MM-DD
+
+  if (!salon_id || !service_id || !date) {
+    return NextResponse.json({ error: "Missing params" }, { status: 400 });
+  }
+
+  // 1) Leggi durata servizio
+  const { data: service, error: svcErr } = await supabaseServer
+    .from("services")
+    .select("duration_minutes")
+    .eq("id", service_id)
+    .eq("salon_id", salon_id)
+    .single();
+
+  if (svcErr) return NextResponse.json({ error: svcErr.message }, { status: 400 });
+  const duration = service.duration_minutes as number;
+
+  // 2) Calcola weekday: 0=Dom ... 6=Sab
+  // Attenzione: new Date("YYYY-MM-DD") in JS è UTC; per l’Italia va bene per weekday se usiamo T12:00.
+  const d = new Date(`${date}T12:00:00`);
+  const weekday = d.getDay(); // 0..6
+
+  // 3) Leggi orari del salone
+  const { data: hours, error: hErr } = await supabaseServer
+    .from("salon_hours")
+    .select("is_closed, open_time, close_time")
+    .eq("salon_id", salon_id)
+    .eq("weekday", weekday)
+    .maybeSingle();
+
+  if (hErr) return NextResponse.json({ error: hErr.message }, { status: 400 });
+
+  if (!hours || hours.is_closed) {
+    return NextResponse.json({ slots: [] }, { status: 200 });
+  }
+
+  const open_time = hours.open_time as string;   // "09:00:00" o "09:00"
+  const close_time = hours.close_time as string; // "19:00:00" o "19:00"
+  if (!open_time || !close_time) {
+    return NextResponse.json({ slots: [] }, { status: 200 });
+  }
+
+  // 4) Costruisci finestre temporali della giornata (ISO)
+  // NB: usiamo timezone locale del server? Su Vercel è UTC. Per MVP usiamo UTC coerente:
+  // - start/end in ISO
+  // - appointments sono timestamptz -> confronto corretto in DB
+  //
+  // Creiamo open/close come UTC della stessa data.
+  const open = new Date(`${date}T${open_time.slice(0, 5)}:00.000Z`);
+  const close = new Date(`${date}T${close_time.slice(0, 5)}:00.000Z`);
+
+  // Intervallo slot ogni 15 minuti
+  const stepMinutes = 15;
+
+  // 5) Leggi appuntamenti del giorno per il salone (pending/confirmed)
+  const dayStart = new Date(`${date}T00:00:00.000Z`);
+  const dayEnd = new Date(`${date}T23:59:59.999Z`);
+
+  const { data: appts, error: aErr } = await supabaseServer
+    .from("appointments")
+    .select("start_time,end_time,status")
+    .eq("salon_id", salon_id)
+    .in("status", ["pending", "confirmed"])
+    .gte("start_time", dayStart.toISOString())
+    .lte("start_time", dayEnd.toISOString());
+
+  if (aErr) return NextResponse.json({ error: aErr.message }, { status: 400 });
+
+  // 6) Funzione overlap
+  function overlaps(start: Date, end: Date) {
+    return (appts || []).some((a: any) => {
+      const s = new Date(a.start_time);
+      const e = new Date(a.end_time);
+      return start < e && end > s;
+    });
+  }
+
+  // 7) Genera slot
+  const slots: string[] = [];
+  for (let t = new Date(open); t.getTime() + duration * 60000 <= close.getTime(); t = new Date(t.getTime() + stepMinutes * 60000)) {
+    const start = new Date(t);
+    const end = new Date(t.getTime() + duration * 60000);
+
+    if (!overlaps(start, end)) {
+      slots.push(start.toISOString());
+    }
+  }
+
+  return NextResponse.json({ slots }, { status: 200 });
+}
