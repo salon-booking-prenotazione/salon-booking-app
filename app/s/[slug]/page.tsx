@@ -1,5 +1,8 @@
 "use client";
 
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
@@ -171,14 +174,25 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       </select>
 
       <div style={{ marginTop: 12 }}>
-        <label>Data</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          style={{ width: "100%", padding: 8 }}
-        />
-      </div>
+  <label>Data</label>
+
+  <DayPicker
+    mode="single"
+    selected={date ? new Date(`${date}T12:00:00`) : undefined}
+    onSelect={(d) => {
+      if (!d) return;
+      const iso = d.toISOString().slice(0, 10);
+      setDate(iso);
+    }}
+    disabled={(d) => d.getDay() === 1} // 🚫 lunedì disabilitato
+  />
+
+  {date && (
+    <div style={{ marginTop: 8, fontSize: 14 }}>
+      Selezionato: <b>{date}</b>
+    </div>
+  )}
+</div>
 
       <div style={{ marginTop: 12 }}>
         <label>Orario disponibile</label>
@@ -186,22 +200,31 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
           value={slotIso}
           onChange={(e) => setSlotIso(e.target.value)}
           style={{ width: "100%", padding: 8 }}
-          disabled={slots.length === 0}
+          disabled={!date || slots.length === 0}
         >
           <option value="">
             {slots.length ? "Seleziona un orario" : "Nessun orario disponibile"}
           </option>
 
-          {slots.map((iso) => {
-            const d = new Date(iso);
-            const hh = String(d.getUTCHours()).padStart(2, "0");
-            const mm = String(d.getUTCMinutes()).padStart(2, "0");
-            return (
-              <option key={iso} value={iso}>
-                {hh}:{mm}
-              </option>
-            );
-          })}
+{slots.map((iso) => {
+  const d = new Date(iso);
+  const parts = new Intl.DateTimeFormat("it-IT", {
+    timeZone: "Europe/Rome",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(d);
+
+  const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
+  const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
+
+  return (
+    <option key={iso} value={iso}>
+      {hh}:{mm}
+    </option>
+  );
+})}
+
         </select>
       </div>
 
