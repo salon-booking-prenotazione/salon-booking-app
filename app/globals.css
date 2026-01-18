@@ -1,0 +1,8 @@
+/* Lunedì disabilitato – stile evidente */
+.rdp-day_disabled_custom {
+  opacity: 0.35 !important;
+  color: #777 !important;
+  background-color: #f2f2f2 !important;
+  cursor: not-allowed !important;
+  text-decoration: line-through;
+}
