@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { supabaseServer } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseServer = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
