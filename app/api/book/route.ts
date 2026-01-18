@@ -87,7 +87,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: apptErr.message }, { status: 400 });
   }
 
-  return NextResponse.json(
+  const wantsEmail =
+  body.confirmation_channel === "email" ||
+  body.confirmation_channel === "both";
+
+  return NextResponse.json({ ok: true, manage_token });
+
     {
       // ✅ INVIO EMAIL con Resend (se richiesto)
 const wantsEmail =
