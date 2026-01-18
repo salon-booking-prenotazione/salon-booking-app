@@ -185,7 +185,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     setDate(iso);
   }}
   weekStartsOn={1}
-  disabled={{ dayOfWeek: [1] }} // 🚫 lunedì (1) disabilitato
+  disabled={{ dayOfWeek: [1] }} // 🚫 lunedì disabilitato
 />
 
   {date && (
