@@ -91,6 +91,10 @@ export async function POST(req: Request) {
   body.confirmation_channel === "email" ||
   body.confirmation_channel === "both";
 
+if (wantsEmail && email) {
+  // invio email
+}
+
   return NextResponse.json({ ok: true, manage_token });
 
     {
