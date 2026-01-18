@@ -185,7 +185,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     setDate(iso);
   }}
   weekStartsOn={1}
-  disabled={{ dayOfWeek: [1] }} // 🚫 lunedì disabilitato
+  disabled={{ dayOfWeek: [1] }} // lunedì
+  modifiersClassNames={{
+    disabled: "rdp-day_disabled_custom",
+  }}
 />
 
   {date && (
