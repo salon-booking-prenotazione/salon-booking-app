@@ -177,15 +177,16 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   <label>Data</label>
 
   <DayPicker
-    mode="single"
-    selected={date ? new Date(`${date}T12:00:00`) : undefined}
-    onSelect={(d) => {
-      if (!d) return;
-      const iso = d.toISOString().slice(0, 10);
-      setDate(iso);
-    }}
-    disabled={(d) => d.getDay() === 1} // 🚫 lunedì disabilitato
-  />
+  mode="single"
+  selected={date ? new Date(`${date}T12:00:00`) : undefined}
+  onSelect={(d) => {
+    if (!d) return;
+    const iso = d.toISOString().slice(0, 10);
+    setDate(iso);
+  }}
+  weekStartsOn={1}
+  disabled={{ dayOfWeek: [1] }} // 🚫 lunedì (1) disabilitato
+/>
 
   {date && (
     <div style={{ marginTop: 8, fontSize: 14 }}>
