@@ -178,14 +178,14 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
   <DayPicker
   mode="single"
+  weekStartsOn={1} // settimana che parte da lunedì
   selected={date ? new Date(`${date}T12:00:00`) : undefined}
   onSelect={(d) => {
     if (!d) return;
     const iso = d.toISOString().slice(0, 10);
     setDate(iso);
   }}
-  weekStartsOn={1}
-  disabled={{ dayOfWeek: [1] }} // lunedì
+  disabled={{ dayOfWeek: [1] }} // ❌ SOLO lunedì disabilitato
   modifiersClassNames={{
     disabled: "rdp-day_disabled_custom",
   }}
