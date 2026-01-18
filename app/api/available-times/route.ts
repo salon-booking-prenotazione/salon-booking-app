@@ -27,7 +27,8 @@ export async function GET(req: Request) {
   const duration = service.duration_minutes as number;
 
   const d = new Date(`${date}T12:00:00`);
-  const weekday = d.getDay();
+  const jsDay = d.getDay(); // 0=dom, 1=lun, ...
+  const weekday = jsDay === 0 ? 7 : jsDay; // 1=lun ... 7=dom
 
   const { data: hours, error: hErr } = await supabaseServer
     .from("salon_hours")
