@@ -63,13 +63,22 @@ export async function GET(req: Request) {
   const dayEnd = new Date(`${date}T23:59:59.999Z`);
 
   // 5) appuntamenti esistenti
-  const { data: appts, error: aErr } = await supabaseServer
-    .from("appointments")
-    .select("start_time,end_time,status")
-    .eq("salon_id", salon_id)
-    .in("status", ["pending", "confirmed"])
-    .gte("start_time", dayStart.toISOString())
-    .lte("start_time", dayEnd.toISOString());
+ const { data: appt, error } = await supabase
+  .from("appointments")
+  .insert({
+    salon_id: body.salon_id,
+    service_id: body.service_id,
+    start_time: body.start_time,
+    end_time: body.end_time,
+    contact_email: body.email ?? null,
+    contact_phone: body.phone ?? null,
+    confirmation_channel: body.confirmation_channel,
+    manage_token,
+    status: "confirmed",
+    source: "web",
+  })
+  .select()
+  .single();
 
   if (aErr) return NextResponse.json({ error: aErr.message }, { status: 400 });
 
