@@ -10,12 +10,13 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const salon_id = url.searchParams.get("salon_id") || "";
   const service_id = url.searchParams.get("service_id") || "";
-  const date = url.searchParams.get("date") || "";
+  const date = url.searchParams.get("date") || ""; // YYYY-MM-DD
 
   if (!salon_id || !service_id || !date) {
     return NextResponse.json({ error: "Missing params" }, { status: 400 });
   }
 
+  // 1) durata servizio
   const { data: service, error: svcErr } = await supabaseServer
     .from("services")
     .select("duration_minutes")
@@ -24,13 +25,14 @@ export async function GET(req: Request) {
     .single();
 
   if (svcErr) return NextResponse.json({ error: svcErr.message }, { status: 400 });
-  const duration = service.duration_minutes as number;
+  const duration = Number(service.duration_minutes || 30);
 
+  // 2) weekday: JS (0=dom..6=sab) -> DB (1=lun..7=dom)
   const d = new Date(`${date}T12:00:00`);
-  const jsDay = d.getDay(); // 0=dom, 1=lun, ...
-  const weekday = jsDay === 0 ? 7 : jsDay; // 1=lun ... 7=dom
-  .eq("weekday", weekday)
+  const jsDay = d.getDay(); // 0..6
+  const weekday = jsDay === 0 ? 7 : jsDay; // 1..7
 
+  // 3) orari salone
   const { data: hours, error: hErr } = await supabaseServer
     .from("salon_hours")
     .select("is_closed, open_time, close_time")
@@ -44,20 +46,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ slots: [] }, { status: 200 });
   }
 
-  const open_time = hours.open_time as string;
-  const close_time = hours.close_time as string;
+  const open_time = hours.open_time as string | null;
+  const close_time = hours.close_time as string | null;
 
   if (!open_time || !close_time) {
     return NextResponse.json({ slots: [] }, { status: 200 });
   }
 
+  // 4) costruisco finestre in ISO (UTC)
   const open = new Date(`${date}T${open_time.slice(0, 5)}:00.000Z`);
   const close = new Date(`${date}T${close_time.slice(0, 5)}:00.000Z`);
-  const stepMinutes = 30;
+
+  const stepMinutes = 30; // ✅ ogni 30 minuti
 
   const dayStart = new Date(`${date}T00:00:00.000Z`);
   const dayEnd = new Date(`${date}T23:59:59.999Z`);
 
+  // 5) appuntamenti esistenti
   const { data: appts, error: aErr } = await supabaseServer
     .from("appointments")
     .select("start_time,end_time,status")
@@ -68,14 +73,14 @@ export async function GET(req: Request) {
 
   if (aErr) return NextResponse.json({ error: aErr.message }, { status: 400 });
 
-  function overlaps(start: Date, end: Date) {
-    return (appts || []).some((a: any) => {
+  const overlaps = (start: Date, end: Date) =>
+    (appts || []).some((a: any) => {
       const s = new Date(a.start_time);
       const e = new Date(a.end_time);
       return start < e && end > s;
     });
-  }
 
+  // 6) slots
   const slots: string[] = [];
   for (
     let t = new Date(open);
