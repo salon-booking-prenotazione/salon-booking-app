@@ -186,7 +186,6 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 setDate(iso);
 setSlotIso("");
 setSlots([]);
-setMessage("");        // oppure setSuccess(false)
 
   }}
   weekStartsOn={1}
