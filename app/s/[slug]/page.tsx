@@ -181,8 +181,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   selected={date ? new Date(`${date}T12:00:00`) : undefined}
   onSelect={(d) => {
     if (!d) return;
-    const iso = d.toISOString().slice(0, 10);
-    setDate(iso);
+   const iso =
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+setDate(iso);
+
   }}
   weekStartsOn={1}
   disabled={{ dayOfWeek: [1] }} // SOLO lunedì
