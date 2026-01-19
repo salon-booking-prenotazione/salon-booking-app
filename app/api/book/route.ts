@@ -35,22 +35,24 @@ export async function POST(req: Request) {
 
     const manage_token = crypto.randomUUID();
 
-    const { data: appt, error } = await supabase
-      .from("appointments")
-      .insert({
-        salon_id: body.salon_id,
-        service_id: body.service_id,
-        start_time: body.start_time,
-        end_time: body.end_time,
-        name: body.name,
-        phone: body.phone,
-        email: body.email ?? null,
-        confirmation_channel: body.confirmation_channel,
-        manage_token,
-        status: "confirmed",
-      })
-      .select()
-      .single();
+   const { data: appt, error } = await supabase
+  .from("appointments")
+  .insert({
+    salon_id: body.salon_id,
+    service_id: body.service_id,
+    start_time: body.start_time,
+    end_time: body.end_time,
+
+    contact_phone: body.phone,              // ✅
+    contact_email: body.email ?? null,      // ✅
+
+    confirmation_channel: body.confirmation_channel,
+    manage_token,
+    status: "confirmed",
+    source: "web",
+  })
+  .select()
+  .single();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
