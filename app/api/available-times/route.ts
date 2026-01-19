@@ -62,27 +62,17 @@ export async function GET(req: Request) {
   const dayStart = new Date(`${date}T00:00:00.000Z`);
   const dayEnd = new Date(`${date}T23:59:59.999Z`);
 
-  // 5) appuntamenti esistenti
- const { data: appt, error } = await supabase
+  const { data: appts, error: aErr } = await supabaseServer
   .from("appointments")
-  .insert({
-    salon_id: body.salon_id,
-    service_id: body.service_id,
-    start_time: body.start_time,
-    end_time: body.end_time,
-    contact_email: body.email ?? null,
-    contact_phone: body.phone ?? null,
-    confirmation_channel: body.confirmation_channel,
-    manage_token,
-    status: "confirmed",
-    source: "web",
-  })
-  .select()
-  .single();
+  .select("start_time,end_time,status")
+  .eq("salon_id", salon_id)
+  .in("status", ["pending", "confirmed"])
+  .gte("start_time", dayStart.toISOString())
+  .lte("start_time", dayEnd.toISOString());
 
-  if (aErr) return NextResponse.json({ error: aErr.message }, { status: 400 });
+if (aErr) return NextResponse.json({ error: aErr.message }, { status: 400 });
 
-  const overlaps = (start: Date, end: Date) =>
+const overlaps = (start: Date, end: Date) =>
     (appts || []).some((a: any) => {
       const s = new Date(a.start_time);
       const e = new Date(a.end_time);
