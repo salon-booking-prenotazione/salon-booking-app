@@ -53,33 +53,33 @@ export async function GET(req: Request) {
     return NextResponse.json({ slots: [] }, { status: 200 });
   }
 
-  // 4) costruisco finestre in ISO (UTC)
+  // 4) finestre in ISO (UTC)
   const open = new Date(`${date}T${open_time.slice(0, 5)}:00.000Z`);
   const close = new Date(`${date}T${close_time.slice(0, 5)}:00.000Z`);
 
-  const stepMinutes = 30; // ✅ ogni 30 minuti
+  const stepMinutes = 30;
 
   const dayStart = new Date(`${date}T00:00:00.000Z`);
   const dayEnd = new Date(`${date}T23:59:59.999Z`);
 
   const { data: appts, error: aErr } = await supabaseServer
-  .from("appointments")
-  .select("start_time,end_time,status")
-  .eq("salon_id", salon_id)
-  .in("status", ["pending", "confirmed"])
-  .gte("start_time", dayStart.toISOString())
-  .lte("start_time", dayEnd.toISOString());
+    .from("appointments")
+    .select("start_time,end_time,status")
+    .eq("salon_id", salon_id)
+    .in("status", ["pending", "confirmed"])
+    .gte("start_time", dayStart.toISOString())
+    .lte("start_time", dayEnd.toISOString());
 
-if (aErr) return NextResponse.json({ error: aErr.message }, { status: 400 });
+  if (aErr) return NextResponse.json({ error: aErr.message }, { status: 400 });
 
-const overlaps = (start: Date, end: Date) =>
+  const overlaps = (start: Date, end: Date) =>
     (appts || []).some((a: any) => {
       const s = new Date(a.start_time);
       const e = new Date(a.end_time);
       return start < e && end > s;
     });
 
-  // 6) slots
+  // 5) slots
   const slots: string[] = [];
   for (
     let t = new Date(open);
