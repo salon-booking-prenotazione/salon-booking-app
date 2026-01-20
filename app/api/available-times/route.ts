@@ -34,11 +34,11 @@ const weekday = jsDay === 0 ? 7 : jsDay; // DB: 1=lun ... 7=dom
 
   // 3) orari salone
   const { data: hours, error: hErr } = await supabaseServer
-    .from("salon_hours")
-    .select("is_closed, open_time, close_time")
-    .eq("salon_id", salon_id)
-    .eq("weekday", weekday)
-    .maybeSingle();
+  .from("salon_hours")
+  .select("is_closed, open_time, close_time")
+  .eq("salon_id", salon_id)
+  .eq("weekday", weekday)   // ✅ QUI
+  .maybeSingle();
 
   if (hErr) return NextResponse.json({ error: hErr.message }, { status: 400 });
 
