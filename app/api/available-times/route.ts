@@ -69,7 +69,7 @@ export async function GET(req: Request) {
     .from("appointments")
     .select("start_time,end_time,status")
     .eq("salon_id", salon_id)
-    .in("status", ["pending", "confirmed"])
+    .in("status", ["pending", "confirmed", "blocked"])
     .gte("start_time", dayStart.toISOString())
     .lte("start_time", dayEnd.toISOString());
 
