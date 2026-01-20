@@ -27,14 +27,12 @@ export async function GET(req: Request) {
   if (svcErr) return NextResponse.json({ error: svcErr.message }, { status: 400 });
   const duration = Number(service.duration_minutes || 30);
 
-  // 2) weekday: JS (0=dom..6=sab) -> DB (1=lun..7=dom)
-  const d = new Date(`${date}T12:00:00`);
-  const jsDay = d.getDay(); // 0=dom ... 6=sab
-  const weekday = jsDay;   // 1..6 usati, 0 ignorato
-  if (jsDay === 0) {
-  return NextResponse.json({ slots: [] }, { status: 200 });
-}
-
+ // 2) weekday: JS (0=dom..6=sab) -> DB (1=lun..7=dom)
+const d = new Date(`${date}T12:00:00`);
+const jsDay = d.getDay();        // 0..6
+const weekday = jsDay === 0 ? 7 : jsDay;
+.eq("weekday", weekday)
+  
   // 3) orari salone
   const { data: hours, error: hErr } = await supabaseServer
     .from("salon_hours")
