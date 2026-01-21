@@ -42,6 +42,21 @@ export default async function ManagePage({
     minute: "2-digit",
   });
 
+  const startDate = new Date(appt.start_time);
+  const endDate = new Date(appt.end_time);
+
+// Google vuole UTC in formato YYYYMMDDTHHMMSSZ (senza - :)
+const toGoogleUTC = (d: Date) =>
+  d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+const googleUrl =
+  "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+  `&text=${encodeURIComponent("Appuntamento Salon")}` +
+  `&dates=${toGoogleUTC(startDate)}/${toGoogleUTC(endDate)}` +
+  `&details=${encodeURIComponent(
+    `Gestisci/disdici: ${process.env.APP_BASE_URL || ""}/manage/${token}`
+  )}`;
+
   return (
     <div style={{ padding: 24 }}>
       <h1>Gestione prenotazione</h1>
