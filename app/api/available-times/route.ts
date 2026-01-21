@@ -29,8 +29,8 @@ export async function GET(req: Request) {
 
  // 2) weekday: JS (0=dom..6=sab) -> DB (1=lun..7=dom)
 const d = new Date(`${date}T12:00:00`);
-const jsDay = d.getDay();        // 0 = domenica, 1 = lunedì, ...
-const weekday = jsDay === 0 ? 7 : jsDay; // DB: 1=lun ... 7=dom
+const jsDay = d.getDay();        // 0=dom … 6=sab
+const weekday = jsDay === 0 ? 7 : jsDay; // 1=lun … 7=dom
 
   // 3) orari salone
   const { data: hours, error: hErr } = await supabaseServer
