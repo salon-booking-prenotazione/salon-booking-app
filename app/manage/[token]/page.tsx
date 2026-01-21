@@ -75,7 +75,7 @@ const googleUrl =
 
       {!appt.cancelled_at && <CancelButton token={token} />}
 
-      <div style={{ marginTop: 16 }}>
+    <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
   <a
     href={`/api/calendar/appointment?id=${appt.id}`}
     target="_blank"
@@ -88,9 +88,26 @@ const googleUrl =
       textDecoration: "none",
     }}
   >
-    📅 Salva nel calendario
+    📅 Salva nel calendario (ICS)
   </a>
-  <p style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-    Si scarica un file .ics: aprilo e premi “Aggiungi” nel tuo calendario.
-  </p>
+
+  <a
+    href={googleUrl}
+    target="_blank"
+    rel="noreferrer"
+    style={{
+      display: "inline-block",
+      padding: "10px 14px",
+      border: "1px solid #000",
+      borderRadius: 6,
+      textDecoration: "none",
+    }}
+  >
+    🟦 Aggiungi a Google Calendar
+  </a>
 </div>
+
+<p style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
+  Se scarichi un file <strong>.ics</strong>, aprilo e premi “Aggiungi” nel tuo
+  calendario.
+</p>
