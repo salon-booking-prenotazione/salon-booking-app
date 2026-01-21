@@ -57,7 +57,9 @@ export default async function ManagePage({
   details: baseUrl ? `Gestisci/disdici: ${baseUrl}/manage/${token}` : "",
 });
 
-  const googleUrl = `https://calendar.google.com/calendar/render?${googleParams.toString()}`;
+ const googleUrl =
+  "https://calendar.google.com/calendar/render?" +
+  googleParams.toString();
 
   return (
     <div style={{ padding: 24 }}>
