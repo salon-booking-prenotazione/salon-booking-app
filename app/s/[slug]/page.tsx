@@ -260,15 +260,17 @@ setSlots([]);
 
       <div style={{ marginTop: 12 }}>
         <label>Conferma via</label>
-        <select
-          value={channel}
-          onChange={(e) => setChannel(e.target.value as any)}
-          style={{ width: "100%", padding: 8 }}
-        >
-          <option value="email">Email (consigliato)</option>
-          <option value="sms">SMS</option>
-          <option value="both">Email + SMS</option>
-        </select>
+<select
+  value={channel}
+  onChange={(e) => setChannel(e.target.value as any)}
+  style={{ width: "100%", padding: 8 }}
+>
+  <option value="email">Email (consigliato)</option>
+  <option value="sms">SMS</option>
+  <option value="both">Email + SMS</option>
+  <option value="calendar">Calendario (senza SMS / Email)</option>
+</select>
+
       </div>
 
       {(channel === "email" || channel === "both") && (
