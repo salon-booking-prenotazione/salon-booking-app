@@ -46,20 +46,27 @@ export default async function ManagePage({
   const endDate = new Date(appt.end_time);
 
   const toGoogleUTC = (d: Date) =>
-  d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+    d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
   const baseUrl = process.env.APP_BASE_URL || "";
 
   const googleParams = new URLSearchParams({
-  action: "TEMPLATE",
-  text: "Appuntamento Salon",
-  dates: `${toGoogleUTC(startDate)}/${toGoogleUTC(endDate)}`,
-  details: baseUrl ? `Gestisci/disdici: ${baseUrl}/manage/${token}` : "",
-});
+    action: "TEMPLATE",
+    text: "Appuntamento Salon",
+    dates: `${toGoogleUTC(startDate)}/${toGoogleUTC(endDate)}`,
+    details: baseUrl ? `Gestisci/disdici: ${baseUrl}/manage/${token}` : "",
+  });
 
- const googleUrl =
-  "https://calendar.google.com/calendar/render?" +
-  googleParams.toString();
+  const googleUrl =
+    "https://calendar.google.com/calendar/render?" + googleParams.toString();
+
+  const buttonStyle: React.CSSProperties = {
+    display: "inline-block",
+    padding: "10px 14px",
+    border: "1px solid #000",
+    borderRadius: 6,
+    textDecoration: "none",
+  };
 
   return (
     <div style={{ padding: 24 }}>
@@ -79,39 +86,25 @@ export default async function ManagePage({
 
       {!appt.cancelled_at && <CancelButton token={token} />}
 
-    <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
-  <a
-    href={`/api/calendar/appointment?id=${appt.id}`}
-    target="_blank"
-    rel="noreferrer"
-    style={{
-      display: "inline-block",
-      padding: "10px 14px",
-      border: "1px solid #000",
-      borderRadius: 6,
-      textDecoration: "none",
-    }}
-  >
-    📅 Salva nel calendario (ICS)
-  </a>
+      <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
+        <a
+          href={`/api/calendar/appointment?id=${appt.id}`}
+          target="_blank"
+          rel="noreferrer"
+          style={buttonStyle}
+        >
+          📅 Salva nel calendario (ICS)
+        </a>
 
-  <a
-    href={googleUrl}
-    target="_blank"
-    rel="noreferrer"
-    style={{
-      display: "inline-block",
-      padding: "10px 14px",
-      border: "1px solid #000",
-      borderRadius: 6,
-      textDecoration: "none",
-    }}
-  >
-    🟦 Aggiungi a Google Calendar
-  </a>
-</div>
+        <a href={googleUrl} target="_blank" rel="noreferrer" style={buttonStyle}>
+          🟦 Aggiungi a Google Calendar
+        </a>
+      </div>
 
-<p style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-  Se scarichi un file <strong>.ics</strong>, aprilo e premi “Aggiungi” nel tuo
-  calendario.
-</p>
+      <p style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
+        Se scarichi un file <strong>.ics</strong>, aprilo e premi “Aggiungi” nel
+        tuo calendario.
+      </p>
+    </div>
+  );
+}
