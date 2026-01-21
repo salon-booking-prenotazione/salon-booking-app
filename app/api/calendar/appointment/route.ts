@@ -72,7 +72,7 @@ END:VCALENDAR`;
   return new NextResponse(ics, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": "attachment; filename=appuntamento.ics",
+      "Content-Disposition": `attachment; filename=prenotazione.ics`,
       "Cache-Control": "no-store",
     },
   });
