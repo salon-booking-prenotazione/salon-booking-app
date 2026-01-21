@@ -42,33 +42,33 @@ export default async function ManagePage({
     minute: "2-digit",
   });
 
- return (
-  <div style={{ padding: 24 }}>
-    <h1>Gestione prenotazione</h1>
+  return (
+    <div style={{ padding: 24 }}>
+      <h1>Gestione prenotazione</h1>
 
-    <p>
-      <strong>Quando:</strong> {start}
-    </p>
+      <p>
+        <strong>Quando:</strong> {start}
+      </p>
 
-    <p>
-      <strong>Telefono:</strong> {appt.contact_phone || "-"}
-    </p>
+      <p>
+        <strong>Telefono:</strong> {appt.contact_phone || "-"}
+      </p>
 
-    <p>
-      <strong>Stato:</strong>{" "}
-      {appt.cancelled_at ? "Cancellata" : appt.status}
-    </p>
+      <p>
+        <strong>Stato:</strong> {appt.cancelled_at ? "Cancellata" : appt.status}
+      </p>
 
-    <CancelButton token={token} />
+      {!appt.cancelled_at && <CancelButton token={token} />}
 
-    <div style={{ marginTop: 16 }}>
-      <a
-        href={`/api/calendar/appointment?id=${appt.id}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        Aggiungi al calendario
-      </a>
+      <div style={{ marginTop: 16 }}>
+        <a
+          href={`/api/calendar/appointment?id=${appt.id}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Aggiungi al calendario
+        </a>
+      </div>
     </div>
-  </div>
-);
+  );
+}
