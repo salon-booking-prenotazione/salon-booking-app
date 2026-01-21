@@ -28,7 +28,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [channel, setChannel] = useState<"email" | "sms" | "both">("email");
+  const [channel, setChannel] = useState<"email" | "sms" | "both" | "calendar">("email");
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string>("");
