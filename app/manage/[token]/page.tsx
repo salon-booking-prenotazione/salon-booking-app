@@ -84,6 +84,21 @@ export default async function ManagePage({
         <strong>Stato:</strong> {appt.cancelled_at ? "Cancellata" : appt.status}
       </p>
 
+      <hr style={{ margin: "16px 0" }} />
+
+<h3>Conferma via WhatsApp</h3>
+
+<p style={{ fontSize: 12, opacity: 0.8 }}>
+  Puoi copiare questo messaggio e inviarlo su WhatsApp al cliente.
+</p>
+
+<WhatsAppBox
+  phone={appt.contact_phone || ""}
+  startTime={appt.start_time}
+  manageUrl={`${process.env.APP_BASE_URL || ""}/manage/${token}`}
+  calendarUrl={`${process.env.APP_BASE_URL || ""}/api/calendar/appointment?id=${appt.id}`}
+/>
+
       {!appt.cancelled_at && <CancelButton token={token} />}
 
       <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
