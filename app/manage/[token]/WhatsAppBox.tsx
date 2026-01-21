@@ -3,10 +3,9 @@
 import { useMemo } from "react";
 
 export default function WhatsAppBox(props: {
-  phone: string;
   startTime: string;
   manageUrl: string;
-  calendarUrl: string;
+  calendarIcsUrl: string;
 }) {
   const whenText = useMemo(() => {
     try {
@@ -28,16 +27,16 @@ export default function WhatsAppBox(props: {
       `Prenotazione confermata ✅\n` +
       `Quando: ${whenText}\n` +
       `Gestisci/Disdici: ${props.manageUrl}\n` +
-      `Aggiungi al calendario: ${props.calendarUrl}`
+      `Aggiungi al calendario: ${props.calendarIcsUrl}`
     );
-  }, [whenText, props.manageUrl, props.calendarUrl]);
+  }, [whenText, props.manageUrl, props.calendarIcsUrl]);
 
   const waLink = useMemo(() => {
     return `https://wa.me/?text=${encodeURIComponent(message)}`;
   }, [message]);
 
   return (
-    <div style={{ display: "grid", gap: 10, maxWidth: 560 }}>
+    <div style={{ display: "grid", gap: 10, maxWidth: 620 }}>
       <textarea
         readOnly
         value={message}
@@ -72,15 +71,9 @@ export default function WhatsAppBox(props: {
         </a>
       </div>
 
-      {props.phone ? (
-        <p style={{ fontSize: 12, opacity: 0.8 }}>
-          Telefono cliente: <strong>{props.phone}</strong>
-        </p>
-      ) : (
-        <p style={{ fontSize: 12, opacity: 0.8 }}>
-          (Telefono cliente non presente)
-        </p>
-      )}
+      <p style={{ fontSize: 12, opacity: 0.8 }}>
+        (Su PC apre WhatsApp Web, su telefono apre l’app WhatsApp.)
+      </p>
     </div>
   );
 }
