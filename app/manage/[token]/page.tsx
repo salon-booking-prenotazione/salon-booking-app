@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import CancelButton from "./CancelButton";
+import WhatsAppBox from "./WhatsAppBox";
 
 export const dynamic = "force-dynamic";
 
