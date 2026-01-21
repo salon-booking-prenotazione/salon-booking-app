@@ -61,14 +61,21 @@ export default async function ManagePage({
       {!appt.cancelled_at && <CancelButton token={token} />}
 
       <div style={{ marginTop: 16 }}>
-        <a
-          href={`/api/calendar/appointment?id=${appt.id}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Aggiungi al calendario
-        </a>
-      </div>
-    </div>
-  );
-}
+  <a
+    href={`/api/calendar/appointment?id=${appt.id}`}
+    target="_blank"
+    rel="noreferrer"
+    style={{
+      display: "inline-block",
+      padding: "10px 14px",
+      border: "1px solid #000",
+      borderRadius: 6,
+      textDecoration: "none",
+    }}
+  >
+    📅 Salva nel calendario
+  </a>
+  <p style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
+    Si scarica un file .ics: aprilo e premi “Aggiungi” nel tuo calendario.
+  </p>
+</div>
