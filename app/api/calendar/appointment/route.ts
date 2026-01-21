@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const runtime = "nodejs"; // evita edge/runtime strani su Vercel
+export const dynamic = "force-dynamic"; // evita tentativi di staticizzazione
 
 function formatICSDate(date: Date) {
   return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
@@ -15,6 +13,17 @@ export async function GET(req: Request) {
   const id = searchParams.get("id");
 
   if (!id) return new NextResponse("Missing id", { status: 400 });
+
+  // ✅ usa questi nomi (vedi punto 2)
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    return new NextResponse("Server env missing (Supabase)", { status: 500 });
+  }
+
+  const supabase = createClient(supabaseUrl, serviceKey);
 
   const { data, error } = await supabase
     .from("appointments")
