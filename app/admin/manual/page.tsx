@@ -108,13 +108,12 @@ export default function ManualAdminPage() {
         },
         body: JSON.stringify({
           salon_id: salon.id,
-          service_id: serviceId || null,
+          service_id: serviceId,
           start_time: start.toISOString(),
           end_time: end.toISOString(),
           customer_name: name.trim(),
           contact_phone: phone.trim(),
           contact_email: email.trim() || null,
-          note: note.trim() || null,
         }),
       });
 
