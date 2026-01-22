@@ -135,12 +135,15 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      if (json.manage_token) {
-        const manageLink = `${window.location.origin}/manage/${json.manage_token}`;
-        setMsg(`✅ Prenotazione confermata!\nLink gestione/disdetta:\n${manageLink}`);
-      } else {
-        setMsg("✅ Prenotazione confermata!");
-      }
+      const [manageLink, setManageLink] = useState<string | null>(null);
+     if (json.manage_token) {
+     const manageLink = `${window.location.origin}/manage/${json.manage_token}`;
+     setMsg("✅ Prenotazione confermata!");
+     setManageLink(manageLink);
+   } else {
+     setMsg("✅ Prenotazione confermata!");
+}
+
     } finally {
       setLoading(false);
     }
@@ -292,7 +295,22 @@ setSlots([]);
         {loading ? "Invio..." : "Conferma prenotazione"}
       </button>
 
-      {msg && <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>{msg}</pre>}
-    </div>
-  );
-}
+    {msg && (
+  <div style={{ marginTop: 12 }}>
+    <p>{msg}</p>
+
+    {manageLink && (
+      <p>
+        Gestisci o disdici la prenotazione:{" "}
+        <a
+          href={manageLink}
+          target="_blank"
+          rel="noreferrer"
+          style={{ color: "blue", textDecoration: "underline" }}
+        >
+          Apri gestione prenotazione
+        </a>
+      </p>
+    )}
+  </div>
+)}
