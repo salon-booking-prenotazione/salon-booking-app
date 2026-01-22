@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         ok: false,
-        error: `Non puoi disdire nelle ultime ${MIN_HOURS} ore prima dell’appuntamento.`,
+        error: `Non puoi disdire nelle ultime ${MIN_HOURS} ore. Per modifiche urgenti, chiama il salone.`,
       },
       { status: 403 }
     );
