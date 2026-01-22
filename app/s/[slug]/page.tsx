@@ -28,15 +28,21 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [channel, setChannel] = useState<"email" | "sms" | "both" | "calendar">("email");
+  const [channel, setChannel] = useState<"email" | "sms" | "both" | "calendar">(
+    "email"
+  );
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string>("");
+
+  // ✅ NUOVO: link cliccabile (qui è il posto giusto)
+  const [manageLink, setManageLink] = useState<string | null>(null);
 
   // Load salon + services
   useEffect(() => {
     (async () => {
       setMsg("");
+      setManageLink(null);
 
       const { data: salonData, error: sErr } = await supabase
         .from("salons")
@@ -76,6 +82,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     (async () => {
       setSlots([]);
       setSlotIso("");
+      setManageLink(null);
 
       if (!salon || !serviceId || !date) return;
 
@@ -93,7 +100,9 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
   async function submit() {
     if (!salon) return;
+
     setMsg("");
+    setManageLink(null);
 
     if (!serviceId || !date || !name || !phone) {
       setMsg("Compila tutti i campi obbligatori.");
@@ -135,15 +144,16 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      const [manageLink, setManageLink] = useState<string | null>(null);
-     if (json.manage_token) {
-     const manageLink = `${window.location.origin}/manage/${json.manage_token}`;
-     setMsg("✅ Prenotazione confermata!");
-     setManageLink(manageLink);
-   } else {
-     setMsg("✅ Prenotazione confermata!");
-}
+      // ✅ Conferma semplice
+      setMsg("✅ Prenotazione confermata!");
 
+      // ✅ Se arriva il token, creiamo un link vero cliccabile
+      if (json.manage_token) {
+        const link = `${window.location.origin}/manage/${json.manage_token}`;
+        setManageLink(link);
+      } else {
+        setManageLink(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -177,33 +187,35 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       </select>
 
       <div style={{ marginTop: 12 }}>
-  <label>Data</label>
+        <label>Data</label>
 
-<DayPicker
-  mode="single"
-  selected={date ? new Date(`${date}T12:00:00`) : undefined}
-  onSelect={(d) => {
-    if (!d) return;
-   const iso =
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-setDate(iso);
-setSlotIso("");
-setSlots([]);
+        <DayPicker
+          mode="single"
+          selected={date ? new Date(`${date}T12:00:00`) : undefined}
+          onSelect={(d) => {
+            if (!d) return;
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+              2,
+              "0"
+            )}-${String(d.getDate()).padStart(2, "0")}`;
+            setDate(iso);
+            setSlotIso("");
+            setSlots([]);
+            setManageLink(null);
+          }}
+          weekStartsOn={1}
+          disabled={{ dayOfWeek: [1] }} // SOLO lunedì (come avevi tu)
+          modifiersClassNames={{
+            disabled: "rdp-day_disabled_custom",
+          }}
+        />
 
-  }}
-  weekStartsOn={1}
-  disabled={{ dayOfWeek: [1] }} // SOLO lunedì
-  modifiersClassNames={{
-    disabled: "rdp-day_disabled_custom",
-  }}
-/>
-
-  {date && (
-    <div style={{ marginTop: 8, fontSize: 14 }}>
-      Selezionato: <b>{date}</b>
-    </div>
-  )}
-</div>
+        {date && (
+          <div style={{ marginTop: 8, fontSize: 14 }}>
+            Selezionato: <b>{date}</b>
+          </div>
+        )}
+      </div>
 
       <div style={{ marginTop: 12 }}>
         <label>Orario disponibile</label>
@@ -217,25 +229,24 @@ setSlots([]);
             {slots.length ? "Seleziona un orario" : "Nessun orario disponibile"}
           </option>
 
-{slots.map((iso) => {
-  const d = new Date(iso);
-  const parts = new Intl.DateTimeFormat("it-IT", {
-    timeZone: "Europe/Rome",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(d);
+          {slots.map((iso) => {
+            const d = new Date(iso);
+            const parts = new Intl.DateTimeFormat("it-IT", {
+              timeZone: "Europe/Rome",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }).formatToParts(d);
 
-  const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
-  const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
+            const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
+            const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
 
-  return (
-    <option key={iso} value={iso}>
-      {hh}:{mm}
-    </option>
-  );
-})}
-
+            return (
+              <option key={iso} value={iso}>
+                {hh}:{mm}
+              </option>
+            );
+          })}
         </select>
       </div>
 
@@ -263,17 +274,16 @@ setSlots([]);
 
       <div style={{ marginTop: 12 }}>
         <label>Conferma via</label>
-<select
-  value={channel}
-  onChange={(e) => setChannel(e.target.value as any)}
-  style={{ width: "100%", padding: 8 }}
->
-  <option value="email">Email (consigliato)</option>
-  <option value="sms">SMS</option>
-  <option value="both">Email + SMS</option>
-  <option value="calendar">Calendario (senza SMS / Email)</option>
-</select>
-
+        <select
+          value={channel}
+          onChange={(e) => setChannel(e.target.value as any)}
+          style={{ width: "100%", padding: 8 }}
+        >
+          <option value="email">Email (consigliato)</option>
+          <option value="sms">SMS</option>
+          <option value="both">Email + SMS</option>
+          <option value="calendar">Calendario (senza SMS / Email)</option>
+        </select>
       </div>
 
       {(channel === "email" || channel === "both") && (
@@ -295,22 +305,26 @@ setSlots([]);
         {loading ? "Invio..." : "Conferma prenotazione"}
       </button>
 
-    {msg && (
-  <div style={{ marginTop: 12 }}>
-    <p>{msg}</p>
+      {/* ✅ Messaggio conferma + link cliccabile */}
+      {msg && (
+        <div style={{ marginTop: 12 }}>
+          <p>{msg}</p>
 
-    {manageLink && (
-      <p>
-        Gestisci o disdici la prenotazione:{" "}
-        <a
-          href={manageLink}
-          target="_blank"
-          rel="noreferrer"
-          style={{ color: "blue", textDecoration: "underline" }}
-        >
-          Apri gestione prenotazione
-        </a>
-      </p>
-    )}
-  </div>
-)}
+          {manageLink && (
+            <p>
+              Gestisci o disdici la prenotazione:{" "}
+              <a
+                href={manageLink}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "blue", textDecoration: "underline" }}
+              >
+                Apri gestione prenotazione
+              </a>
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
