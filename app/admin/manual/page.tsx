@@ -142,6 +142,7 @@ export default function ManualAdminPage() {
         "https://calendar.google.com/calendar/render?" + googleParams.toString();
 
       setCreatedLinks({ manageUrl, icsUrl, googleUrl });
+      localStorage.setItem("isAdmin", "true");
       setMsg("✅ Appuntamento manuale creato!");
     } finally {
       setLoading(false);
