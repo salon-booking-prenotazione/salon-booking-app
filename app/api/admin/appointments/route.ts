@@ -26,15 +26,16 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({}));
   const {
-    salon_id,
-    service_id,
-    start_time,
-    end_time,
-    contact_phone,
-    contact_email,
-  } = body || {};
+     salon_id,
+     service_id,
+     start_time,
+     end_time,
+     customer_name,
+     contact_phone,
+     contact_email,
+   } = body || {};
 
-  if (!salon_id || !service_id || !start_time || !end_time || !contact_phone) {
+  if (!salon_id || !service_id || !start_time || !end_time || !customer_name || !contact_phone) {
     return NextResponse.json(
       { ok: false, error: "Campi mancanti (salon_id, service_id, start_time, end_time, contact_phone)" },
       { status: 400 }
@@ -85,6 +86,7 @@ export async function POST(req: Request) {
       service_id,
       start_time: start.toISOString(),
       end_time: end.toISOString(),
+      customer_name,
       contact_phone,
       contact_email: contact_email || null,
       confirmation_channel: "manual",
