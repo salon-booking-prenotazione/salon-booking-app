@@ -204,7 +204,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
             background: "white",
             border: "1px solid #eee",
             borderRadius: 20,
-            padding: 18,
+            padding: 24,
             boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
           }}
         >
@@ -225,6 +225,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                   borderRadius: 14,
                   border: "1px solid #ddd",
                   outline: "none",
+                  boxSizing: "border-box",
                 }}
               >
                 <option value="">Seleziona un servizio</option>
@@ -331,7 +332,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
-                gap: 12,
+                gap: 16,
               }}
             >
               <div>
@@ -345,6 +346,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                     borderRadius: 14,
                     border: "1px solid #ddd",
                     outline: "none",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
@@ -362,6 +364,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                     borderRadius: 14,
                     border: "1px solid #ddd",
                     outline: "none",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
@@ -408,6 +411,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                       borderRadius: 14,
                       border: "1px solid #ddd",
                       outline: "none",
+                      boxSizing: "border-box",
                     }}
                   />
                 </div>
@@ -428,6 +432,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                   borderRadius: 14,
                   border: "1px solid #ddd",
                   outline: "none",
+                  boxSizing: "border-box",
                 }}
                 rows={3}
               />
