@@ -126,46 +126,42 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
    const json = await res.json();
 
-if (res.ok && json.manage_token) {
-  setMsg("✅ Prenotazione confermata!");
+const when = new Intl.DateTimeFormat("it-IT", {
+  timeZone: "Europe/Rome",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+}).format(start);
 
-  const link = `${window.location.origin}/manage/${json.manage_token}`;
-  setManageLink(link);
+const salonLine = [
+  salon.name,
+  [salon.address, salon.city].filter(Boolean).join(", "),
+].filter(Boolean).join(" — ");
 
-  // Ora “bella” in Europe/Rome
-  const when = new Intl.DateTimeFormat("it-IT", {
-    timeZone: "Europe/Rome",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(start);
+const manage = `${window.location.origin}/manage/${json.manage_token}`;
 
-  // Link calendario (solo se /api/book restituisce appointment_id)
-  const ics = json.appointment_id
-    ? `${window.location.origin}/api/calendar/appointment?id=${json.appointment_id}`
-    : null;
+// calendario
+const ics = json.appointment_id
+  ? `${window.location.origin}/api/calendar/appointment?id=${json.appointment_id}`
+  : null;
 
-  const text =
-    `Prenotazione confermata ✅\n` +
-    `Quando: ${when}\n` +
-    `Gestisci/Disdici: ${link}\n` +
-    (ics ? `Aggiungi al calendario: ${ics}\n` : "");
+const google = json.appointment_id
+  ? `${window.location.origin}/api/calendar/google?id=${json.appointment_id}`
+  : null; // (se non hai questo endpoint, lo togliamo)
 
-  setWaLink(`https://wa.me/?text=${encodeURIComponent(text)}`);
+const text =
+  `Prenotazione confermata ✅\n` +
+  `${salonLine}\n` +
+  `Quando: ${when}\n\n` +
+  `Gestisci / Disdici:\n${manage}\n` +
+  (ics ? `\nSalva nel calendario (ICS):\n${ics}\n` : "") +
+  (google ? `\nAggiungi a Google Calendar:\n${google}\n` : "");
 
-  // ✅ apre subito la schermata
-  setConfirmOpen(true);
-} else {
-  setMsg(json?.error || "Errore prenotazione.");
-  setManageLink(null);
-  setWaLink(null);
-  setConfirmOpen(false);
-}
-
-setLoading(false);
+setWaLink(`https://wa.me/?text=${encodeURIComponent(text)}`);
+setConfirmOpen(true);
 
   }
 
@@ -533,16 +529,6 @@ setLoading(false);
           >
             Chiudi
           </button>
-        </div>
-
-        {manageLink && (
-          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.7 }}>
-            Vuoi gestire/disdire più tardi?{" "}
-            <a href={manageLink} style={{ fontWeight: 900, color: "#111" }}>
-              Apri gestione
-            </a>
-          </div>
-        )}
       </div>
     </div>
   </div>
