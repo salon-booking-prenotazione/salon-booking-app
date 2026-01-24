@@ -32,6 +32,8 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     "email"
   );
 
+  const [note, setNote] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string>("");
 
@@ -296,6 +298,17 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
           />
         </div>
       )}
+
+      <div style={{ marginTop: 12 }}>
+  <label>Note (opzionale)</label>
+  <textarea
+    value={note}
+    onChange={(e) => setNote(e.target.value)}
+    placeholder="Scrivi qui eventuali richieste o informazioni utili"
+    style={{ width: "100%", padding: 8 }}
+    rows={3}
+  />
+</div>
 
       <button
         onClick={submit}
