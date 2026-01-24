@@ -70,7 +70,8 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       }
 
       setServices(svc || []);
-      if (svc?.[0]?.id) setServiceId(svc[0].id);
+- if (svc?.[0]?.id) setServiceId(svc[0].id);
++ setServiceId(""); // parte vuoto
     })();
   }, [slug]);
 
@@ -177,17 +178,14 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       <p>Prenota in pochi secondi.</p>
 
       <label>Servizio</label>
-      <select
-        value={serviceId}
-        onChange={(e) => setServiceId(e.target.value)}
-        style={{ width: "100%", padding: 8 }}
-      >
-        {services.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.name} ({s.duration_minutes} min)
-          </option>
-        ))}
-      </select>
+     <select value={serviceId} onChange={(e) => setServiceId(e.target.value)} ...>
++  <option value="">Seleziona un servizio</option>
+  {services.map((s) => (
+    <option key={s.id} value={s.id}>
+      {s.name} ({s.duration_minutes} min)
+    </option>
+  ))}
+</select>
 
       <div style={{ marginTop: 12 }}>
         <label>Data</label>
