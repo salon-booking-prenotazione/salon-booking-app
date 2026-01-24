@@ -44,9 +44,10 @@ export async function POST(req: Request) {
     start_time: body.start_time,
     end_time: body.end_time,
 
+   customer_name: body.name,
    contact_email: body.email ?? null,
    contact_phone: body.phone,
-    note: body.note ?? null,
+   note: body.note ?? null,
 
     confirmation_channel: body.confirmation_channel,
     manage_token,
