@@ -69,56 +69,137 @@ export default async function ManagePage({
     textDecoration: "none",
   };
 
-  return (
-    <div style={{ padding: 24 }}>
-      <h1>Gestione prenotazione</h1>
-
-      <p>
-        <strong>Quando:</strong> {start}
-      </p>
-
-      <p>
-        <strong>Telefono:</strong> {appt.contact_phone || "-"}
-      </p>
-
-      <p>
-        <strong>Stato:</strong> {appt.cancelled_at ? "Cancellata" : appt.status}
-      </p>
-
-<hr style={{ margin: "16px 0" }} />
-
-<h3>Conferma via WhatsApp</h3>
-<p style={{ fontSize: 12, opacity: 0.8 }}>
-  Copia e invia questo messaggio al cliente (zero costi).
-</p>
-
-<WhatsAppBox
-  startTime={appt.start_time}
-  manageUrl={`${process.env.APP_BASE_URL || ""}/manage/${token}`}
-  calendarIcsUrl={`${process.env.APP_BASE_URL || ""}/api/calendar/appointment?id=${appt.id}`}
-/>
-
-      {!appt.cancelled_at && <CancelButton token={token} />}
-
-      <div style={{ marginTop: 16, display: "flex", gap: 12, flexWrap: "wrap" }}>
-        <a
-          href={`/api/calendar/appointment?id=${appt.id}`}
-          target="_blank"
-          rel="noreferrer"
-          style={buttonStyle}
+    return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        padding: 24,
+        fontFamily: "system-ui",
+        background:
+          "radial-gradient(1200px 600px at 20% 0%, rgba(248,240,236,1) 0%, rgba(255,255,255,1) 62%), radial-gradient(900px 500px at 85% 10%, rgba(235,246,242,1) 0%, rgba(255,255,255,1) 55%)",
+      }}
+    >
+      <div
+        style={{
+          width: "min(920px, 100%)",
+          background: "rgba(255,255,255,0.82)",
+          border: "1px solid rgba(0,0,0,0.08)",
+          borderRadius: 26,
+          boxShadow: "0 18px 60px rgba(0,0,0,0.12)",
+          overflow: "hidden",
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        {/* TOP: check + titolo */}
+        <div
+          style={{
+            padding: "26px 26px 18px",
+            textAlign: "center",
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
+          }}
         >
-          📅 Salva nel calendario (ICS)
-        </a>
+          <div
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: 999,
+              margin: "0 auto 12px",
+              display: "grid",
+              placeItems: "center",
+              background: appt.cancelled_at
+                ? "rgba(239,68,68,0.10)"
+                : "rgba(22,163,74,0.12)",
+              border: appt.cancelled_at
+                ? "1px solid rgba(239,68,68,0.22)"
+                : "1px solid rgba(22,163,74,0.22)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 30,
+                fontWeight: 900,
+                color: appt.cancelled_at ? "rgb(239,68,68)" : "rgb(22,163,74)",
+              }}
+            >
+              {appt.cancelled_at ? "!" : "✓"}
+            </div>
+          </div>
 
-        <a href={googleUrl} target="_blank" rel="noreferrer" style={buttonStyle}>
-          🟦 Aggiungi a Google Calendar
-        </a>
-      </div>
+          <div style={{ fontSize: 18, fontWeight: 900 }}>
+            {appt.cancelled_at
+              ? "Prenotazione cancellata"
+              : "Perfetto, la tua prenotazione è confermata"}
+          </div>
+          <div style={{ marginTop: 6, fontSize: 14, opacity: 0.75 }}>
+            {appt.cancelled_at
+              ? "Se hai bisogno di riprenotare, contatta il salone."
+              : "Qui trovi tutte le informazioni e i pulsanti utili."}
+          </div>
+        </div>
 
-      <p style={{ fontSize: 12, opacity: 0.8, marginTop: 8 }}>
-        Se scarichi un file <strong>.ics</strong>, aprilo e premi “Aggiungi” nel
-        tuo calendario.
-      </p>
-    </div>
-  );
-}
+        {/* BODY */}
+        <div style={{ padding: 22 }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1.35fr 1fr",
+              gap: 18,
+            }}
+          >
+            {/* Info + WhatsApp */}
+            <div
+              style={{
+                background: "rgba(255,255,255,0.92)",
+                border: "1px solid rgba(0,0,0,0.08)",
+                borderRadius: 20,
+                padding: 18,
+              }}
+            >
+              <div style={{ fontWeight: 900, fontSize: 18, marginBottom: 10 }}>
+                Dettagli appuntamento
+              </div>
+
+              <div style={{ display: "grid", gap: 8, fontSize: 14 }}>
+                <div>
+                  <span style={{ fontWeight: 800 }}>Quando:</span>{" "}
+                  <span style={{ opacity: 0.9 }}>{start}</span>
+                </div>
+                <div>
+                  <span style={{ fontWeight: 800 }}>Telefono:</span>{" "}
+                  <span style={{ opacity: 0.9 }}>
+                    {appt.contact_phone || "-"}
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontWeight: 800 }}>Stato:</span>{" "}
+                  <span style={{ opacity: 0.9 }}>
+                    {appt.cancelled_at ? "Cancellata" : appt.status}
+                  </span>
+                </div>
+              </div>
+
+              {/* WhatsApp */}
+              <div style={{ marginTop: 16 }}>
+                <div style={{ fontWeight: 900, marginBottom: 8 }}>
+                  ✅ Conferma via WhatsApp
+                </div>
+                <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 10 }}>
+                  Copia e invia questo messaggio al cliente (zero costi).
+                </div>
+
+                <div
+                  style={{
+                    border: "1px solid rgba(0,0,0,0.08)",
+                    borderRadius: 18,
+                    padding: 14,
+                    background: "rgba(250,250,250,1)",
+                  }}
+                >
+                  <WhatsAppBox
+                    startTime={appt.start_time}
+                    manageUrl={`${process.env.APP_BASE_URL || ""}/manage/${token}`}
+                    calendarIcsUrl={`${
+                      process.env.APP_BASE_URL || ""
+                    }/api/calendar/appointment?id=${
