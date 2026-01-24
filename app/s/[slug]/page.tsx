@@ -172,8 +172,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         <p>{msg || "Caricamento..."}</p>
       </div>
     );
-  }
-
+  
   return (
     <div
       style={{
