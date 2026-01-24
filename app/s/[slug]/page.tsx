@@ -45,6 +45,8 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   const [msg, setMsg] = useState("");
 
   const [manageLink, setManageLink] = useState<string | null>(null);
+  const [waLink, setWaLink] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -122,15 +124,49 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       }),
     });
 
-    const json = await res.json();
-    if (res.ok && json.manage_token) {
-      setMsg("✅ Prenotazione confermata!");
-      setManageLink(`${window.location.origin}/manage/${json.manage_token}`);
-    } else {
-      setMsg(json?.error || "Errore prenotazione.");
-    }
+   const json = await res.json();
 
-    setLoading(false);
+if (res.ok && json.manage_token) {
+  setMsg("✅ Prenotazione confermata!");
+
+  const link = `${window.location.origin}/manage/${json.manage_token}`;
+  setManageLink(link);
+
+  // Ora “bella” in Europe/Rome
+  const when = new Intl.DateTimeFormat("it-IT", {
+    timeZone: "Europe/Rome",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(start);
+
+  // Link calendario (solo se /api/book restituisce appointment_id)
+  const ics = json.appointment_id
+    ? `${window.location.origin}/api/calendar/appointment?id=${json.appointment_id}`
+    : null;
+
+  const text =
+    `Prenotazione confermata ✅\n` +
+    `Quando: ${when}\n` +
+    `Gestisci/Disdici: ${link}\n` +
+    (ics ? `Aggiungi al calendario: ${ics}\n` : "");
+
+  setWaLink(`https://wa.me/?text=${encodeURIComponent(text)}`);
+
+  // ✅ apre subito la schermata
+  setConfirmOpen(true);
+} else {
+  setMsg(json?.error || "Errore prenotazione.");
+  setManageLink(null);
+  setWaLink(null);
+  setConfirmOpen(false);
+}
+
+setLoading(false);
+
   }
 
   if (!salon) {
@@ -400,6 +436,117 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       <div style={{ marginTop: 14, textAlign: "center", fontSize: 12, opacity: 0.65 }}>
         Prenotazione semplice • Conferma rapida • Un momento per te ✨
       </div>
+      {confirmOpen && (
+  <div
+    style={{
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.35)",
+      display: "grid",
+      placeItems: "center",
+      padding: 18,
+      zIndex: 50,
+    }}
+    onClick={() => setConfirmOpen(false)}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        width: "min(720px, 100%)",
+        background: "rgba(255,255,255,0.92)",
+        borderRadius: 26,
+        border: "1px solid rgba(0,0,0,0.10)",
+        boxShadow: "0 18px 60px rgba(0,0,0,0.20)",
+        overflow: "hidden",
+      }}
+    >
+      <div style={{ padding: 22, textAlign: "center" }}>
+        <div
+          style={{
+            width: 76,
+            height: 76,
+            borderRadius: 999,
+            margin: "0 auto 12px",
+            display: "grid",
+            placeItems: "center",
+            background: "rgba(22,163,74,0.12)",
+            border: "1px solid rgba(22,163,74,0.22)",
+          }}
+        >
+          <div style={{ fontSize: 32, fontWeight: 900, color: "rgb(22,163,74)" }}>
+            ✓
+          </div>
+        </div>
+
+        <div style={{ fontSize: 18, fontWeight: 900 }}>
+          Prenotazione confermata
+        </div>
+
+        <div style={{ marginTop: 6, fontSize: 14, opacity: 0.75 }}>
+          Vuoi inviare il riepilogo su WhatsApp?
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            gap: 10,
+            justifyContent: "center",
+            flexWrap: "wrap",
+            marginTop: 16,
+          }}
+        >
+          {waLink && (
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                padding: "12px 16px",
+                borderRadius: 999,
+                border: "1px solid #25D366",
+                background: "#25D366",
+                color: "white",
+                fontWeight: 900,
+                textDecoration: "none",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              {/* simbolo WhatsApp semplice */}
+              <span style={{ fontSize: 18 }}>🟢</span>
+              Invia su WhatsApp
+            </a>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setConfirmOpen(false)}
+            style={{
+              padding: "12px 16px",
+              borderRadius: 999,
+              border: "1px solid rgba(0,0,0,0.12)",
+              background: "white",
+              fontWeight: 900,
+              cursor: "pointer",
+            }}
+          >
+            Chiudi
+          </button>
+        </div>
+
+        {manageLink && (
+          <div style={{ marginTop: 10, fontSize: 12, opacity: 0.7 }}>
+            Vuoi gestire/disdire più tardi?{" "}
+            <a href={manageLink} style={{ fontWeight: 900, color: "#111" }}>
+              Apri gestione
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
     </div>
   </div>
 );
