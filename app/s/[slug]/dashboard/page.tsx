@@ -66,7 +66,7 @@ export default async function SalonDashboardPage({
 
   const { data: appointments, error } = await supabase
   .from("appointments")
-  .select("id,start_time,end_time,customer_name,note") // ✅ SOLO colonne sicure
+  .select("id,start_time,end_time,customer_name,contact_phone,note") // ✅ SOLO colonne sicure
   .eq("salon_id", salon.id)
   .is("cancelled_at", null)
   .gte("start_time", fromISO)
@@ -128,7 +128,7 @@ if (error) {
                 </div>
 
                 <div style={{ fontSize: 14, marginTop: 4 }}>
-                  Tel: {a.customer_phone ?? "-"}
+                  Tel: {a.contact_phone ?? "-"}
                 </div>
 
                 {a.note && (
