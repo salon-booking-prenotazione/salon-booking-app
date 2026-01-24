@@ -137,6 +137,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
           phone,
           email: email || undefined,
           confirmation_channel: channel,
+          note: note || null,
         }),
       });
 
