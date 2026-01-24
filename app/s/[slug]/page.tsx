@@ -37,7 +37,6 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string>("");
 
-  // ✅ NUOVO: link cliccabile (qui è il posto giusto)
   const [manageLink, setManageLink] = useState<string | null>(null);
 
   // Load salon + services
@@ -70,8 +69,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       }
 
       setServices(svc || []);
-- if (svc?.[0]?.id) setServiceId(svc[0].id);
-+ setServiceId(""); // parte vuoto
+      setServiceId(""); // ✅ parte vuoto (non auto-seleziona)
     })();
   }, [slug]);
 
@@ -90,7 +88,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       if (!salon || !serviceId || !date) return;
 
       const res = await fetch(
-        /api/available-times?salon_id=${salon.id}&service_id=${serviceId}&date=${date}
+        `/api/available-times?salon_id=${salon.id}&service_id=${serviceId}&date=${date}`
       );
       const json = await res.json();
       if (!res.ok) {
@@ -148,12 +146,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      // ✅ Conferma semplice
       setMsg("✅ Prenotazione confermata!");
 
-      // ✅ Se arriva il token, creiamo un link vero cliccabile
       if (json.manage_token) {
-        const link = ${window.location.origin}/manage/${json.manage_token};
+        const link = `${window.location.origin}/manage/${json.manage_token}`;
         setManageLink(link);
       } else {
         setManageLink(null);
@@ -178,27 +174,36 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       <p>Prenota in pochi secondi.</p>
 
       <label>Servizio</label>
-     <select value={serviceId} onChange={(e) => setServiceId(e.target.value)} ...>
-+  <option value="">Seleziona un servizio</option>
-  {services.map((s) => (
-    <option key={s.id} value={s.id}>
-      {s.name} ({s.duration_minutes} min)
-    </option>
-  ))}
-</select>
+      <select
+        value={serviceId}
+        onChange={(e) => {
+          setServiceId(e.target.value);
+          setSlotIso("");
+          setSlots([]);
+          setManageLink(null);
+        }}
+        style={{ width: "100%", padding: 8 }}
+      >
+        <option value="">Seleziona un servizio</option>
+        {services.map((s) => (
+          <option key={s.id} value={s.id}>
+            {s.name} ({s.duration_minutes} min)
+          </option>
+        ))}
+      </select>
 
       <div style={{ marginTop: 12 }}>
         <label>Data</label>
 
         <DayPicker
           mode="single"
-          selected={date ? new Date(${date}T12:00:00) : undefined}
+          selected={date ? new Date(`${date}T12:00:00`) : undefined}
           onSelect={(d) => {
             if (!d) return;
-            const iso = ${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+            const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
               2,
               "0"
-            )}-${String(d.getDate()).padStart(2, "0")};
+            )}-${String(d.getDate()).padStart(2, "0")}`;
             setDate(iso);
             setSlotIso("");
             setSlots([]);
@@ -216,6 +221,10 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
             Selezionato: <b>{date}</b>
           </div>
         )}
+
+        {date && !serviceId && (
+          <p style={{ marginTop: 8 }}>Seleziona prima un servizio.</p>
+        )}
       </div>
 
       <div style={{ marginTop: 12 }}>
@@ -224,7 +233,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
           value={slotIso}
           onChange={(e) => setSlotIso(e.target.value)}
           style={{ width: "100%", padding: 8 }}
-          disabled={!date || slots.length === 0}
+          disabled={!date || !serviceId || slots.length === 0}
         >
           <option value="">
             {slots.length ? "Seleziona un orario" : "Nessun orario disponibile"}
@@ -299,15 +308,15 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       )}
 
       <div style={{ marginTop: 12 }}>
-  <label>Note (opzionale)</label>
-  <textarea
-    value={note}
-    onChange={(e) => setNote(e.target.value)}
-    placeholder="Scrivi qui eventuali richieste o informazioni utili"
-    style={{ width: "100%", padding: 8 }}
-    rows={3}
-  />
-</div>
+        <label>Note (opzionale)</label>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Scrivi qui eventuali richieste o informazioni utili"
+          style={{ width: "100%", padding: 8 }}
+          rows={3}
+        />
+      </div>
 
       <button
         onClick={submit}
@@ -317,7 +326,6 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         {loading ? "Invio..." : "Conferma prenotazione"}
       </button>
 
-      {/* ✅ Messaggio conferma + link cliccabile */}
       {msg && (
         <div style={{ marginTop: 12 }}>
           <p>{msg}</p>
