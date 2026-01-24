@@ -11,7 +11,14 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-type Salon = { id: string; name: string; slug: string; phone: string | null };
+type Salon = {
+  id: string;
+  name: string;
+  slug: string;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+};
 type Service = { id: string; name: string; duration_minutes: number };
 
 export default function BookingPage({ params }: { params: { slug: string } }) {
@@ -47,7 +54,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
       const { data: salonData, error: sErr } = await supabase
         .from("salons")
-        .select("id,name,slug,phone")
+        .select("id,name,slug,phone,address,city")
         .eq("slug", slug)
         .single();
 
@@ -171,7 +178,12 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   return (
     <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 520 }}>
       <h1>{salon.name}</h1>
-      <p>Prenota in pochi secondi.</p>
+
+{(salon.address || salon.city) && (
+  <p style={{ marginTop: 4, opacity: 0.8 }}>
+    {[salon.address, salon.city].filter(Boolean).join(", ")}
+  </p>
+)}
 
       <label>Servizio</label>
       <select
