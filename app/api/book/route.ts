@@ -16,6 +16,7 @@ type Body = {
   phone: string;
   email?: string;
   confirmation_channel: "email" | "sms" | "both";
+  note?: string | null;
 };
 
 export async function POST(req: Request) {
@@ -45,6 +46,7 @@ export async function POST(req: Request) {
 
    contact_email: body.email ?? null,
    contact_phone: body.phone,
+    note: body.note ?? null,
 
     confirmation_channel: body.confirmation_channel,
     manage_token,
