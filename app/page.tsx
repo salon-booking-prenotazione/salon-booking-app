@@ -11,7 +11,7 @@ useEffect(() => {
   }
 }, []);
 
-  const slug = "salon-demo"; // per ora fisso
+  const slug = "lorena-salon"; // per ora fisso
 
   return (
     <div>
