@@ -226,6 +226,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                   border: "1px solid #ddd",
                   outline: "none",
                   boxSizing: "border-box",
+                  transition: "border-color .15s ease, box-shadow .15s ease",
                 }}
               >
                 <option value="">Seleziona un servizio</option>
@@ -337,36 +338,54 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
             >
               <div>
                 <div style={{ fontWeight: 700, marginBottom: 8 }}>4) Nome</div>
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: 12,
-                    borderRadius: 14,
-                    border: "1px solid #ddd",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                />
+               <input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  onFocus={(e) => {
+    e.currentTarget.style.borderColor = "#111";
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(17,17,17,0.08)";
+  }}
+  onBlur={(e) => {
+    e.currentTarget.style.borderColor = "#ddd";
+    e.currentTarget.style.boxShadow = "none";
+  }}
+  style={{
+    width: "100%",
+    padding: 12,
+    borderRadius: 14,
+    border: "1px solid #ddd",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color .15s ease, box-shadow .15s ease",
+  }}
+/>
               </div>
 
               <div>
                 <div style={{ fontWeight: 700, marginBottom: 8 }}>
                   5) Telefono
                 </div>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: 12,
-                    borderRadius: 14,
-                    border: "1px solid #ddd",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
-                />
+               <input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  onFocus={(e) => {
+    e.currentTarget.style.borderColor = "#111";
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(17,17,17,0.08)";
+  }}
+  onBlur={(e) => {
+    e.currentTarget.style.borderColor = "#ddd";
+    e.currentTarget.style.boxShadow = "none";
+  }}
+  style={{
+    width: "100%",
+    padding: 12,
+    borderRadius: 14,
+    border: "1px solid #ddd",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color .15s ease, box-shadow .15s ease",
+  }}
+/>
               </div>
             </div>
 
@@ -402,18 +421,27 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               {(channel === "email" || channel === "both") && (
                 <div>
                   <div style={{ fontWeight: 700, marginBottom: 8 }}>Email</div>
-                  <input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: 12,
-                      borderRadius: 14,
-                      border: "1px solid #ddd",
-                      outline: "none",
-                      boxSizing: "border-box",
-                    }}
-                  />
+                 <input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  onFocus={(e) => {
+    e.currentTarget.style.borderColor = "#111";
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(17,17,17,0.08)";
+  }}
+  onBlur={(e) => {
+    e.currentTarget.style.borderColor = "#ddd";
+    e.currentTarget.style.boxShadow = "none";
+  }}
+  style={{
+    width: "100%",
+    padding: 12,
+    borderRadius: 14,
+    border: "1px solid #ddd",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color .15s ease, box-shadow .15s ease",
+  }}
+/>
                 </div>
               )}
             </div>
@@ -421,21 +449,27 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
             <div>
               <div style={{ fontWeight: 700, marginBottom: 8 }}>
                 Note (opzionale)
-              </div>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Richieste particolari, preferenze, allergie…"
-                style={{
-                  width: "100%",
-                  padding: 12,
-                  borderRadius: 14,
-                  border: "1px solid #ddd",
-                  outline: "none",
-                  boxSizing: "border-box",
-                }}
-                rows={3}
-              />
+              <input
+  value={name}
+  onChange={(e) => setName(e.target.value)}
+  onFocus={(e) => {
+    e.currentTarget.style.borderColor = "#111";
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(17,17,17,0.08)";
+  }}
+  onBlur={(e) => {
+    e.currentTarget.style.borderColor = "#ddd";
+    e.currentTarget.style.boxShadow = "none";
+  }}
+  style={{
+    width: "100%",
+    padding: 12,
+    borderRadius: 14,
+    border: "1px solid #ddd",
+    outline: "none",
+    boxSizing: "border-box",
+    transition: "border-color .15s ease, box-shadow .15s ease",
+  }}
+/>
             </div>
 
             <button
