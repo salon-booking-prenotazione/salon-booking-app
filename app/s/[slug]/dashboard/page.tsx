@@ -65,23 +65,23 @@ export default async function SalonDashboardPage({
   const fromISO = startOfTodayRomeISO();
 
   const { data: appointments, error } = await supabase
-    .from("appointments")
-    .select(`
-      id,
-      start_time,
-      end_time,
-      customer_name,
-      customer_phone,
-      note
-    `)
-    .eq("salon_id", salon.id)
-    .is("cancelled_at", null)
-    .gte("start_time", fromISO)
-    .order("start_time", { ascending: true });
+  .from("appointments")
+  .select("id,start_time,end_time,customer_name,note") // ✅ SOLO colonne sicure
+  .eq("salon_id", salon.id)
+  .is("cancelled_at", null)
+  .gte("start_time", fromISO)
+  .order("start_time", { ascending: true });
 
-  if (error) {
-    return <div style={{ padding: 24 }}>Errore caricamento appuntamenti.</div>;
-  }
+if (error) {
+  return (
+    <div style={{ padding: 24, fontFamily: "system-ui" }}>
+      <div>Errore caricamento appuntamenti.</div>
+      <pre style={{ marginTop: 12, whiteSpace: "pre-wrap" }}>
+        {error.message}
+      </pre>
+    </div>
+  );
+}
 
   return (
     <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
