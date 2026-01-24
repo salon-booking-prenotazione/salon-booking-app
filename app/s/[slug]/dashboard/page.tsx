@@ -53,7 +53,7 @@ export default async function SalonDashboardPage({
   // 1️⃣ recupero salone
   const { data: salon, error: salonErr } = await supabase
     .from("salons")
-    .select("id,name,slug")
+    .select("id,name,slug,address,city")
     .eq("slug", slug)
     .single();
 
