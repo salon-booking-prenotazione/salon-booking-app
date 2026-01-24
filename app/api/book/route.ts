@@ -15,7 +15,7 @@ type Body = {
   name: string;
   phone: string;
   email?: string;
-  confirmation_channel: "email" | "sms" | "both";
+  confirmation_channel: "email" | "sms" | "both" | "calendar";
   note?: string | null;
 };
 
