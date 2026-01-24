@@ -63,11 +63,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ slots: [] }, { status: 200 });
   }
 
-  /* ---------------------------------------------------
-     4) Finestre orarie del giorno
-  --------------------------------------------------- */
   function romeOffsetMinutesForDate(y: number, m: number, d: number) {
-  // usa mezzogiorno per evitare problemi DST
   const probe = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "Europe/Rome",
@@ -84,7 +80,6 @@ export async function GET(req: Request) {
 }
 
 function romeLocalToUtcDate(dateStr: string, hhmm: string) {
-  // dateStr = "YYYY-MM-DD", hhmm = "HH:mm" (ora locale ROMA)
   const [Y, M, D] = dateStr.split("-").map(Number);
   const [hh, mm] = hhmm.split(":").map(Number);
 
@@ -94,14 +89,17 @@ function romeLocalToUtcDate(dateStr: string, hhmm: string) {
   return new Date(utcMs);
 }
 
-  const open = romeLocalToUtcDate(date, hours.open_time.slice(0, 5));
+/* ---------------------------------------------------
+   4) Finestre orarie del giorno
+--------------------------------------------------- */
+const open = romeLocalToUtcDate(date, hours.open_time.slice(0, 5));
 const close = romeLocalToUtcDate(date, hours.close_time.slice(0, 5));
 
 const stepMinutes = 30;
 
-// giorno "locale Roma" convertito in UTC, per prendere gli appuntamenti giusti
 const dayStart = romeLocalToUtcDate(date, "00:00");
 const dayEnd = new Date(romeLocalToUtcDate(date, "23:59").getTime() + 59_999);
+
 
   /* ---------------------------------------------------
      5) Appuntamenti esistenti (incl. blocchi)
