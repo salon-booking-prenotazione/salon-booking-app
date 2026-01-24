@@ -68,6 +68,7 @@ export default async function ManagePage({
     borderRadius: 6,
     textDecoration: "none",
   };
+  
   return (
     <div
       style={{
