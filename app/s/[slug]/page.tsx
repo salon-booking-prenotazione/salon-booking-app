@@ -1,144 +1,340 @@
+"use client";
+
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 
-// ❗ Server-side: niente "use client"
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Calcola inizio giornata di OGGI in Europe/Rome → UTC ISO
-function startOfTodayRomeISO(): string {
-  const now = new Date();
+type Salon = { id: string; name: string; slug: string; phone: string | null };
+type Service = { id: string; name: string; duration_minutes: number };
 
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/Rome",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-
-  const y = Number(parts.find((p) => p.type === "year")?.value);
-  const m = Number(parts.find((p) => p.type === "month")?.value);
-  const d = Number(parts.find((p) => p.type === "day")?.value);
-
-  // Usato mezzogiorno per calcolare correttamente l'offset (DST safe)
-  const probe = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
-
-  const tzParts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Europe/Rome",
-    timeZoneName: "shortOffset",
-  }).formatToParts(probe);
-
-  const tz = tzParts.find((p) => p.type === "timeZoneName")?.value ?? "GMT+0";
-  const match = tz.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/);
-
-  const offsetH = match ? Number(match[1]) : 0;
-  const offsetM = match && match[2] ? Number(match[2]) : 0;
-  const offsetTotalMin =
-    offsetH * 60 + (offsetH >= 0 ? offsetM : -offsetM);
-
-  const utcMs =
-    Date.UTC(y, m - 1, d, 0, 0, 0) - offsetTotalMin * 60_000;
-
-  return new Date(utcMs).toISOString();
-}
-
-export default async function SalonDashboardPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default function BookingPage({ params }: { params: { slug: string } }) {
   const slug = params.slug;
 
-  // 1️⃣ recupero salone
-  const { data: salon, error: salonErr } = await supabase
-    .from("salons")
-    .select("id,name,slug")
-    .eq("slug", slug)
-    .single();
+  const [salon, setSalon] = useState<Salon | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [serviceId, setServiceId] = useState<string>("");
 
-  if (salonErr || !salon) {
-    return <div style={{ padding: 24 }}>Salone non trovato.</div>;
+  const [date, setDate] = useState<string>(""); // YYYY-MM-DD
+  const [slots, setSlots] = useState<string[]>([]);
+  const [slotIso, setSlotIso] = useState<string>("");
+
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [channel, setChannel] = useState<"email" | "sms" | "both" | "calendar">(
+    "email"
+  );
+
+  const [note, setNote] = useState("");
+
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<string>("");
+
+  // ✅ NUOVO: link cliccabile (qui è il posto giusto)
+  const [manageLink, setManageLink] = useState<string | null>(null);
+
+  // Load salon + services
+  useEffect(() => {
+    (async () => {
+      setMsg("");
+      setManageLink(null);
+
+      const { data: salonData, error: sErr } = await supabase
+        .from("salons")
+        .select("id,name,slug,phone")
+        .eq("slug", slug)
+        .single();
+
+      if (sErr) {
+        setMsg("Salone non trovato.");
+        return;
+      }
+      setSalon(salonData);
+
+      const { data: svc, error: svcErr } = await supabase
+        .from("services")
+        .select("id,name,duration_minutes")
+        .eq("salon_id", salonData.id)
+        .order("name", { ascending: true });
+
+      if (svcErr) {
+        setMsg("Errore caricamento servizi.");
+        return;
+      }
+
+      setServices(svc || []);
+- if (svc?.[0]?.id) setServiceId(svc[0].id);
++ setServiceId(""); // parte vuoto
+    })();
+  }, [slug]);
+
+  const selectedService = useMemo(
+    () => services.find((s) => s.id === serviceId) || null,
+    [services, serviceId]
+  );
+
+  // Load slots when date/service changes
+  useEffect(() => {
+    (async () => {
+      setSlots([]);
+      setSlotIso("");
+      setManageLink(null);
+
+      if (!salon || !serviceId || !date) return;
+
+      const res = await fetch(
+        /api/available-times?salon_id=${salon.id}&service_id=${serviceId}&date=${date}
+      );
+      const json = await res.json();
+      if (!res.ok) {
+        setMsg(json?.error || "Errore caricamento orari.");
+        return;
+      }
+      setSlots(json.slots || []);
+    })();
+  }, [salon, serviceId, date]);
+
+  async function submit() {
+    if (!salon) return;
+
+    setMsg("");
+    setManageLink(null);
+
+    if (!serviceId || !date || !name || !phone) {
+      setMsg("Compila tutti i campi obbligatori.");
+      return;
+    }
+    if (channel === "email" && !email) {
+      setMsg("Se scegli Email, l’email è obbligatoria.");
+      return;
+    }
+    if (!slotIso) {
+      setMsg("Seleziona un orario disponibile.");
+      return;
+    }
+
+    const start = new Date(slotIso);
+    const duration = selectedService?.duration_minutes ?? 30;
+    const end = new Date(start.getTime() + duration * 60 * 1000);
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/book", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          salon_id: salon.id,
+          service_id: serviceId,
+          start_time: start.toISOString(),
+          end_time: end.toISOString(),
+          name,
+          phone,
+          email: email || undefined,
+          confirmation_channel: channel,
+          note: note || null,
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        setMsg(json?.error || "Errore durante la prenotazione.");
+        return;
+      }
+
+      // ✅ Conferma semplice
+      setMsg("✅ Prenotazione confermata!");
+
+      // ✅ Se arriva il token, creiamo un link vero cliccabile
+      if (json.manage_token) {
+        const link = ${window.location.origin}/manage/${json.manage_token};
+        setManageLink(link);
+      } else {
+        setManageLink(null);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
-  // 2️⃣ query appuntamenti (OGGI + FUTURI)
-  const fromISO = startOfTodayRomeISO();
-
-  const { data: appointments, error } = await supabase
-    .from("appointments")
-    .select(`
-      id,
-      start_time,
-      end_time,
-      customer_name,
-      customer_phone,
-      note
-    `)
-    .eq("salon_id", salon.id)
-    .is("cancelled_at", null)
-    .gte("start_time", fromISO)
-    .order("start_time", { ascending: true });
-
-  if (error) {
-    return <div style={{ padding: 24 }}>Errore caricamento appuntamenti.</div>;
+  if (!salon) {
+    return (
+      <div style={{ padding: 24, fontFamily: "system-ui" }}>
+        <h1>Prenotazione</h1>
+        <p>{msg || "Caricamento..."}</p>
+      </div>
+    );
   }
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
-      <h1 style={{ fontSize: 22, marginBottom: 12 }}>
-        Dashboard — {salon.name}
-      </h1>
+    <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 520 }}>
+      <h1>{salon.name}</h1>
+      <p>Prenota in pochi secondi.</p>
 
-      {!appointments || appointments.length === 0 ? (
-        <p>Nessun appuntamento da oggi in poi.</p>
-      ) : (
-        <div style={{ display: "grid", gap: 12 }}>
-          {appointments.map((a) => {
-            const start = new Date(a.start_time);
-            const end = new Date(a.end_time);
+      <label>Servizio</label>
+     <select value={serviceId} onChange={(e) => setServiceId(e.target.value)} ...>
++  <option value="">Seleziona un servizio</option>
+  {services.map((s) => (
+    <option key={s.id} value={s.id}>
+      {s.name} ({s.duration_minutes} min)
+    </option>
+  ))}
+</select>
 
-            const startStr = new Intl.DateTimeFormat("it-IT", {
+      <div style={{ marginTop: 12 }}>
+        <label>Data</label>
+
+        <DayPicker
+          mode="single"
+          selected={date ? new Date(${date}T12:00:00) : undefined}
+          onSelect={(d) => {
+            if (!d) return;
+            const iso = ${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+              2,
+              "0"
+            )}-${String(d.getDate()).padStart(2, "0")};
+            setDate(iso);
+            setSlotIso("");
+            setSlots([]);
+            setManageLink(null);
+          }}
+          weekStartsOn={1}
+          disabled={{ dayOfWeek: [1] }} // SOLO lunedì (come avevi tu)
+          modifiersClassNames={{
+            disabled: "rdp-day_disabled_custom",
+          }}
+        />
+
+        {date && (
+          <div style={{ marginTop: 8, fontSize: 14 }}>
+            Selezionato: <b>{date}</b>
+          </div>
+        )}
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <label>Orario disponibile</label>
+        <select
+          value={slotIso}
+          onChange={(e) => setSlotIso(e.target.value)}
+          style={{ width: "100%", padding: 8 }}
+          disabled={!date || slots.length === 0}
+        >
+          <option value="">
+            {slots.length ? "Seleziona un orario" : "Nessun orario disponibile"}
+          </option>
+
+          {slots.map((iso) => {
+            const d = new Date(iso);
+            const parts = new Intl.DateTimeFormat("it-IT", {
               timeZone: "Europe/Rome",
-              weekday: "short",
-              day: "2-digit",
-              month: "2-digit",
               hour: "2-digit",
               minute: "2-digit",
               hour12: false,
-            }).format(start);
+            }).formatToParts(d);
 
-            const endStr = new Intl.DateTimeFormat("it-IT", {
-              timeZone: "Europe/Rome",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }).format(end);
+            const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
+            const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
 
             return (
-              <div
-                key={a.id}
-                style={{
-                  border: "1px solid #e5e5e5",
-                  borderRadius: 16,
-                  padding: 14,
-                }}
-              >
-                <div style={{ fontWeight: 600 }}>
-                  {a.customer_name ?? "Cliente"} — {startStr} → {endStr}
-                </div>
-
-                <div style={{ fontSize: 14, marginTop: 4 }}>
-                  Tel: {a.customer_phone ?? "-"}
-                </div>
-
-                {a.note && (
-                  <div style={{ marginTop: 8, fontSize: 14 }}>
-                    📝 {a.note}
-                  </div>
-                )}
-              </div>
+              <option key={iso} value={iso}>
+                {hh}:{mm}
+              </option>
             );
           })}
+        </select>
+      </div>
+
+      {date && serviceId && slots.length === 0 && (
+        <p style={{ marginTop: 8 }}>Nessun orario disponibile per questa data.</p>
+      )}
+
+      <div style={{ marginTop: 12 }}>
+        <label>Nome</label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ width: "100%", padding: 8 }}
+        />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <label>Telefono</label>
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          style={{ width: "100%", padding: 8 }}
+        />
+      </div>
+
+      <div style={{ marginTop: 12 }}>
+        <label>Conferma via</label>
+        <select
+          value={channel}
+          onChange={(e) => setChannel(e.target.value as any)}
+          style={{ width: "100%", padding: 8 }}
+        >
+          <option value="email">Email (consigliato)</option>
+          <option value="sms">SMS</option>
+          <option value="both">Email + SMS</option>
+          <option value="calendar">Calendario (senza SMS / Email)</option>
+        </select>
+      </div>
+
+      {(channel === "email" || channel === "both") && (
+        <div style={{ marginTop: 12 }}>
+          <label>Email</label>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ width: "100%", padding: 8 }}
+          />
+        </div>
+      )}
+
+      <div style={{ marginTop: 12 }}>
+  <label>Note (opzionale)</label>
+  <textarea
+    value={note}
+    onChange={(e) => setNote(e.target.value)}
+    placeholder="Scrivi qui eventuali richieste o informazioni utili"
+    style={{ width: "100%", padding: 8 }}
+    rows={3}
+  />
+</div>
+
+      <button
+        onClick={submit}
+        disabled={loading || !slotIso}
+        style={{ marginTop: 16, width: "100%", padding: 12, cursor: "pointer" }}
+      >
+        {loading ? "Invio..." : "Conferma prenotazione"}
+      </button>
+
+      {/* ✅ Messaggio conferma + link cliccabile */}
+      {msg && (
+        <div style={{ marginTop: 12 }}>
+          <p>{msg}</p>
+
+          {manageLink && (
+            <p>
+              Gestisci o disdici la prenotazione:{" "}
+              <a
+                href={manageLink}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "blue", textDecoration: "underline" }}
+              >
+                Apri gestione prenotazione
+              </a>
+            </p>
+          )}
         </div>
       )}
     </div>
