@@ -138,59 +138,269 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
   }
 
   return (
-    <div style={{ padding: 24, maxWidth: 520, margin: "0 auto" }}>
-      <h1>{salon.name}</h1>
-      <p>
-        {[salon.address, salon.city].filter(Boolean).join(", ")}
-      </p>
+  <div
+    style={{
+      minHeight: "100vh",
+      padding: 24,
+      background:
+        "radial-gradient(1200px 600px at 10% 0%, rgba(248,240,236,1) 0%, rgba(255,255,255,1) 60%), radial-gradient(900px 500px at 90% 10%, rgba(240,246,248,1) 0%, rgba(255,255,255,1) 55%)",
+      fontFamily: "system-ui",
+    }}
+  >
+    <div style={{ maxWidth: 740, margin: "0 auto" }}>
+      <div style={{ marginBottom: 16 }}>
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "8px 12px",
+            borderRadius: 999,
+            border: "1px solid rgba(0,0,0,0.08)",
+            background: "rgba(255,255,255,0.7)",
+            backdropFilter: "blur(6px)",
+            fontSize: 12,
+            letterSpacing: 2,
+            textTransform: "uppercase",
+            opacity: 0.85,
+          }}
+        >
+          ✨ Prenotazione
+        </div>
 
-      <select value={serviceId} onChange={(e) => setServiceId(e.target.value)}>
-        <option value="">Seleziona un servizio</option>
-        {services.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.name} ({s.duration_minutes} min)
-          </option>
-        ))}
-      </select>
+        <h1
+          style={{
+            fontSize: 38,
+            lineHeight: 1.05,
+            margin: "12px 0 8px",
+            fontWeight: 900,
+            letterSpacing: -0.8,
+          }}
+        >
+          {salon.name}
+        </h1>
 
-      <DayPicker
-        mode="single"
-        selected={date ? new Date(`${date}T12:00:00`) : undefined}
-        onSelect={(d) =>
-          d &&
-          setDate(
-            `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-              2,
-              "0"
-            )}-${String(d.getDate()).padStart(2, "0")}`
-          )
-        }
-        weekStartsOn={1}
-      />
+        <div style={{ opacity: 0.8 }}>
+          {[salon.address, salon.city].filter(Boolean).join(", ")}
+        </div>
 
-      <select value={slotIso} onChange={(e) => setSlotIso(e.target.value)}>
-        <option value="">Seleziona orario</option>
-        {slots.map((s) => (
-          <option key={s} value={s}>
-            {new Date(s).toLocaleTimeString("it-IT", {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </option>
-        ))}
-      </select>
+        <p style={{ marginTop: 10, opacity: 0.8 }}>
+          Scegli il servizio, la data e il tuo orario. Un momento tutto per te.
+        </p>
+      </div>
 
-      <input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} />
-      <input placeholder="Telefono" value={phone} onChange={(e) => setPhone(e.target.value)} />
-      <input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <textarea placeholder="Note" value={note} onChange={(e) => setNote(e.target.value)} />
+      <div
+        style={{
+          background: "rgba(255,255,255,0.78)",
+          border: "1px solid rgba(0,0,0,0.08)",
+          borderRadius: 22,
+          padding: 24,
+          boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
+          backdropFilter: "blur(10px)",
+        }}
+      >
+        <div style={{ display: "grid", gap: 16 }}>
+          <div>
+            <div style={{ fontWeight: 900, marginBottom: 8 }}>1) Servizio</div>
+            <select
+              value={serviceId}
+              onChange={(e) => setServiceId(e.target.value)}
+              style={{
+                width: "100%",
+                padding: 12,
+                borderRadius: 14,
+                border: "1px solid rgba(0,0,0,0.12)",
+                background: "rgba(255,255,255,0.9)",
+                boxSizing: "border-box",
+              }}
+            >
+              <option value="">Seleziona un servizio</option>
+              {services.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.duration_minutes} min)
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <button onClick={submit} disabled={loading}>
-        Conferma prenotazione
-      </button>
+          <div>
+            <div style={{ fontWeight: 900, marginBottom: 8 }}>2) Data</div>
+            <div
+              style={{
+                border: "1px solid rgba(0,0,0,0.08)",
+                borderRadius: 16,
+                padding: 12,
+                background: "rgba(255,255,255,0.9)",
+              }}
+            >
+              <DayPicker
+                mode="single"
+                selected={date ? new Date(`${date}T12:00:00`) : undefined}
+                onSelect={(d) =>
+                  d &&
+                  setDate(
+                    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+                      2,
+                      "0"
+                    )}-${String(d.getDate()).padStart(2, "0")}`
+                  )
+                }
+                weekStartsOn={1}
+              />
+            </div>
+          </div>
 
-      {msg && <p>{msg}</p>}
-      {manageLink && <a href={manageLink}>Gestisci prenotazione</a>}
+          <div>
+            <div style={{ fontWeight: 900, marginBottom: 8 }}>3) Orario</div>
+            <select
+              value={slotIso}
+              onChange={(e) => setSlotIso(e.target.value)}
+              style={{
+                width: "100%",
+                padding: 12,
+                borderRadius: 14,
+                border: "1px solid rgba(0,0,0,0.12)",
+                background: "rgba(255,255,255,0.9)",
+                boxSizing: "border-box",
+              }}
+            >
+              <option value="">Seleziona orario</option>
+              {slots.map((s) => (
+                <option key={s} value={s}>
+                  {new Intl.DateTimeFormat("it-IT", {
+                    timeZone: "Europe/Rome",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  }).format(new Date(s))}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div>
+              <div style={{ fontWeight: 900, marginBottom: 8 }}>4) Nome</div>
+              <input
+                placeholder="Nome"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 14,
+                  border: "1px solid rgba(0,0,0,0.12)",
+                  background: "rgba(255,255,255,0.9)",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 900, marginBottom: 8 }}>5) Telefono</div>
+              <input
+                placeholder="Telefono"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: 12,
+                  borderRadius: 14,
+                  border: "1px solid rgba(0,0,0,0.12)",
+                  background: "rgba(255,255,255,0.9)",
+                  boxSizing: "border-box",
+                }}
+              />
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 900, marginBottom: 8 }}>Email (opzionale)</div>
+            <input
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              style={{
+                width: "100%",
+                padding: 12,
+                borderRadius: 14,
+                border: "1px solid rgba(0,0,0,0.12)",
+                background: "rgba(255,255,255,0.9)",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+
+          <div>
+            <div style={{ fontWeight: 900, marginBottom: 8 }}>Note (opzionale)</div>
+            <textarea
+              placeholder="Richieste particolari, preferenze, allergie…"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={3}
+              style={{
+                width: "100%",
+                padding: 12,
+                borderRadius: 14,
+                border: "1px solid rgba(0,0,0,0.12)",
+                background: "rgba(255,255,255,0.9)",
+                boxSizing: "border-box",
+              }}
+            />
+          </div>
+
+          <button
+            onClick={submit}
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: 14,
+              borderRadius: 16,
+              border: "1px solid rgba(17,17,17,0.9)",
+              background: loading ? "#f2f2f2" : "rgba(17,17,17,0.92)",
+              color: loading ? "#777" : "#fff",
+              cursor: loading ? "not-allowed" : "pointer",
+              fontWeight: 900,
+              letterSpacing: 0.2,
+              boxShadow: "0 10px 22px rgba(0,0,0,0.12)",
+            }}
+          >
+            {loading ? "Invio..." : "Conferma prenotazione"}
+          </button>
+
+          {msg && (
+            <div
+              style={{
+                padding: 12,
+                borderRadius: 14,
+                border: "1px solid rgba(0,0,0,0.08)",
+                background: "rgba(255,255,255,0.85)",
+              }}
+            >
+              <div style={{ fontWeight: 900 }}>{msg}</div>
+              {manageLink && (
+                <div style={{ marginTop: 8 }}>
+                  <a
+                    href={manageLink}
+                    style={{
+                      color: "#111",
+                      textDecoration: "underline",
+                      fontWeight: 800,
+                    }}
+                  >
+                    Apri gestione prenotazione
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ marginTop: 14, textAlign: "center", fontSize: 12, opacity: 0.65 }}>
+        Prenotazione semplice • Conferma rapida • Un momento per te ✨
+      </div>
     </div>
-  );
+  </div>
+);
 }
