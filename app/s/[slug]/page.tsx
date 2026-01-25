@@ -211,8 +211,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     } finally {
       setLoading(false);
     }
-  }
-
+  
   if (!salon) {
     return (
       <div style={{ padding: 24, fontFamily: "system-ui" }}>
