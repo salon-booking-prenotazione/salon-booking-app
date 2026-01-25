@@ -116,11 +116,11 @@ export default function HomePage() {
 
           <h1
             style={{
-              fontSize: 56,
-              lineHeight: 1.02,
-              margin: "14px 0 10px",
-              fontWeight: 800, // se vuoi ancora meno: 700
-              letterSpacing: -1.2,
+              fontSize: 38,
+              lineHeight: 1.1,
+              margin: "14px 0 8px",
+              fontWeight: 600,
+              letterSpacing: -0.4,
             }}
           >
             Il tuo momento di relax
