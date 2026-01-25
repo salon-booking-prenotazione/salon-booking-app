@@ -407,22 +407,32 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                   Nessun orario disponibile.
                 </div>
               ) : (
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  {slots.map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setSlotIso(s)}
-                      style={slotIso === s ? chipActive : chip}
-                    >
-                      {fmtHHMM(s)}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+                <div
+  style={{
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    maxHeight: 130,
+    overflowY: "auto",
+    paddingRight: 6,
+  }}
+>
+  {slots.map((s) => (
+    <button
+      key={s}
+      type="button"
+      onClick={() => setSlotIso(s)}
+      style={slotIso === s ? chipActive : chip}
+    >
+      {fmtHHMM(s)}
+    </button>
+  ))}
+</div>
 
-            {/* Name + Phone */}
+<div style={{ marginTop: 8, fontSize: 12, opacity: 0.6 }}>
+  {slots.length} orari disponibili
+</div>
+      {/* Name + Phone */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <div style={label}>Nome</div>
