@@ -165,8 +165,10 @@ setConfirmOpen(true);
   }
 
   if (!salon) {
-    return <div style={{ padding: 24 }}>{msg || "Caricamento..."}</div>;
-    return (
+  return <div style={{ padding: 24 }}>{msg || "Caricamento..."}</div>;
+}
+
+return (
   <div
     style={{
       minHeight: "100vh",
@@ -176,6 +178,10 @@ setConfirmOpen(true);
       fontFamily: "system-ui",
     }}
   >
+    {/* tutto il tuo JSX */}
+  </div>
+);
+
     <div style={{ maxWidth: 740, margin: "0 auto" }}>
       <div style={{ marginBottom: 16 }}>
         <div
