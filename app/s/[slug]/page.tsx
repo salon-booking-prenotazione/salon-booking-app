@@ -213,22 +213,23 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     }
   
   if (!salon) {
-    return (
-      <div style={{ padding: 24, fontFamily: "system-ui" }}>
-        {msg || "Caricamento..."}
-      </div>
-    );
-  }
-   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        padding: 24,
-        background:
-          "radial-gradient(1200px 600px at 10% 0%, rgba(248,240,236,1) 0%, rgba(255,255,255,1) 60%), radial-gradient(900px 500px at 90% 10%, rgba(240,246,248,1) 0%, rgba(255,255,255,1) 55%)",
-        fontFamily: "system-ui",
-      }}
-    >
+  return (
+    <div style={{ padding: 24, fontFamily: "system-ui" }}>
+      {msg || "Caricamento..."}
+    </div>
+  );
+}
+
+return (
+  <div
+    style={{
+      minHeight: "100vh",
+      padding: 24,
+      background:
+        "radial-gradient(1200px 600px at 10% 0%, rgba(248,240,236,1) 0%, rgba(255,255,255,1) 60%), radial-gradient(900px 500px at 90% 10%, rgba(240,246,248,1) 0%, rgba(255,255,255,1) 55%)",
+      fontFamily: "system-ui",
+    }}
+  >
       <div style={{ maxWidth: 740, margin: "0 auto" }}>
         {/* Header */}
         <div style={{ marginBottom: 16 }}>
