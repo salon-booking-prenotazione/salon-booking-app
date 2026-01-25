@@ -166,9 +166,8 @@ setConfirmOpen(true);
 
   if (!salon) {
     return <div style={{ padding: 24 }}>{msg || "Caricamento..."}</div>;
-  }
-
-  return (
+   
+    return (
   <div
     style={{
       minHeight: "100vh",
