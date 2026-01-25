@@ -202,7 +202,7 @@ setConfirmOpen(true);
   </div>
 );
 
-     <h1
+  <h1
   style={{
     fontSize: 38,
     lineHeight: 1.05,
@@ -217,8 +217,7 @@ setConfirmOpen(true);
 <div style={{ opacity: 0.8 }}>
   {[salon.address, salon.city].filter(Boolean).join(", ")}
 </div>
-
-        <p style={{ marginTop: 10, opacity: 0.8 }}>
+    <p style={{ marginTop: 10, opacity: 0.8 }}>
           Scegli il servizio, la data e il tuo orario. Un momento tutto per te.
         </p>
       </div>
