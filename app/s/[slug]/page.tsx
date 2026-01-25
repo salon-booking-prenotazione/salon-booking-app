@@ -219,8 +219,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
       </div>
     );
   }
-
-  return (
+   return (
     <div
       style={{
         minHeight: "100vh",
