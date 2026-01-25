@@ -166,7 +166,6 @@ setConfirmOpen(true);
 
   if (!salon) {
     return <div style={{ padding: 24 }}>{msg || "Caricamento..."}</div>;
-   
     return (
   <div
     style={{
