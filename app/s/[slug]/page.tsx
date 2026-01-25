@@ -296,7 +296,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     color: "white",
     border: "1px solid rgba(17,17,17,0.92)",
     boxShadow: "0 10px 22px rgba(0,0,0,0.14)",
-  
+  };
   return (
     <div style={bg}>
       <div style={{ width: "min(820px, 100%)", margin: "0 auto" }}>
