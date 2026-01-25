@@ -186,8 +186,8 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         return;
       }
 
-      // WhatsApp + Calendar
       const manageUrl = `${window.location.origin}/manage/${json.manage_token}`;
+
       const ics =
         json.appointment_id
           ? `${window.location.origin}/api/calendar/appointment?id=${json.appointment_id}`
@@ -210,7 +210,6 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         (ics ? `\nSalva nel calendario:\n${ics}\n` : "");
 
       setWaLink(`https://wa.me/?text=${encodeURIComponent(text)}`);
-
       setConfirmOpen(true);
     } finally {
       setLoading(false);
@@ -225,6 +224,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     );
   }
 
+  // ---------------- STILI ----------------
   const bg: React.CSSProperties = {
     minHeight: "100vh",
     padding: 24,
@@ -275,7 +275,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     background: loading ? "#f1f1f1" : "rgba(17,17,17,0.92)",
     color: loading ? "#777" : "white",
     cursor: loading ? "not-allowed" : "pointer",
-    fontWeight: 650,
+    fontWeight: 600,
     letterSpacing: 0.2,
     boxShadow: "0 10px 22px rgba(0,0,0,0.12)",
   };
@@ -297,7 +297,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
     border: "1px solid rgba(17,17,17,0.92)",
     boxShadow: "0 10px 22px rgba(0,0,0,0.14)",
   };
-  
+
   return (
     <div style={bg}>
       <div style={{ width: "min(820px, 100%)", margin: "0 auto" }}>
@@ -327,8 +327,8 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               fontSize: 38,
               lineHeight: 1.06,
               margin: "12px 0 8px",
-              fontWeight: 700,
-              letterSpacing: -0.6,
+              fontWeight: 650,
+              letterSpacing: -0.5,
             }}
           >
             {salon.name || "Salone"}
@@ -407,32 +407,37 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                   Nessun orario disponibile.
                 </div>
               ) : (
-                <div
-  style={{
-    display: "flex",
-    gap: 10,
-    flexWrap: "wrap",
-    maxHeight: 130,
-    overflowY: "auto",
-    paddingRight: 6,
-  }}
->
-  {slots.map((s) => (
-    <button
-      key={s}
-      type="button"
-      onClick={() => setSlotIso(s)}
-      style={slotIso === s ? chipActive : chip}
-    >
-      {fmtHHMM(s)}
-    </button>
-  ))}
-</div>
+                <>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      flexWrap: "wrap",
+                      maxHeight: 130,
+                      overflowY: "auto",
+                      paddingRight: 6,
+                    }}
+                  >
+                    {slots.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setSlotIso(s)}
+                        style={slotIso === s ? chipActive : chip}
+                      >
+                        {fmtHHMM(s)}
+                      </button>
+                    ))}
+                  </div>
 
-<div style={{ marginTop: 8, fontSize: 12, opacity: 0.6 }}>
-  {slots.length} orari disponibili
-</div>
-      {/* Name + Phone */}
+                  <div style={{ marginTop: 8, fontSize: 12, opacity: 0.6 }}>
+                    {slots.length} orari disponibili
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Name + Phone */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <div>
                 <div style={label}>Nome</div>
@@ -455,7 +460,6 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               </div>
             </div>
 
-            {/* Channel + Email */}
             <div>
               <div style={label}>Conferma via</div>
               <select
@@ -482,7 +486,6 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               </div>
             )}
 
-            {/* Note */}
             <div>
               <div style={label}>Note (opzionale)</div>
               <textarea
@@ -526,7 +529,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
         </div>
       </div>
 
-      {/* ✅ Modale conferma elegante */}
+      {/* Modale conferma */}
       {confirmOpen && (
         <div
           style={{
