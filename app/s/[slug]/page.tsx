@@ -489,45 +489,65 @@ setConfirmOpen(true);
             flexWrap: "wrap",
             marginTop: 16,
           }}
-        >
-          {waLink && (
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                padding: "12px 16px",
-                borderRadius: 999,
-                border: "1px solid #25D366",
-                background: "#25D366",
-                color: "white",
-                fontWeight: 900,
-                textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              {/* simbolo WhatsApp semplice */}
-              <span style={{ fontSize: 18 }}>🟢</span>
-              Invia su WhatsApp
-            </a>
-          )}
+        >{waLink && (
+  <a
+    href={waLink}
+    target="_blank"
+    rel="noreferrer"
+    style={{
+      padding: "12px 16px",
+      borderRadius: 999,
+      border: "1px solid #25D366",
+      background: "#25D366",
+      color: "white",
+      fontWeight: 700,
+      textDecoration: "none",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 10,
+    }}
+  >
+    🟢 Invia su WhatsApp
+  </a>
+)}
 
-          <button
-            type="button"
-            onClick={() => setConfirmOpen(false)}
-            style={{
-              padding: "12px 16px",
-              borderRadius: 999,
-              border: "1px solid rgba(0,0,0,0.12)",
-              background: "white",
-              fontWeight: 900,
-              cursor: "pointer",
-            }}
-          >
-            Chiudi
-          </button>
+{icsLink && (
+  <a
+    href={icsLink}
+    target="_blank"
+    rel="noreferrer"
+    style={{
+      padding: "12px 16px",
+      borderRadius: 999,
+      border: "1px solid rgba(0,0,0,0.12)",
+      background: "white",
+      color: "#111",
+      fontWeight: 600,
+      textDecoration: "none",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 10,
+    }}
+  >
+    📅 Salva calendario
+  </a>
+)}
+
+<button
+  type="button"
+  onClick={() => setConfirmOpen(false)}
+  style={{
+    padding: "12px 16px",
+    borderRadius: 999,
+    border: "1px solid rgba(0,0,0,0.12)",
+    background: "white",
+    fontWeight: 600,
+    cursor: "pointer",
+  }}
+>
+  Chiudi
+</button>
+
       </div>
     </div>
   </div>
