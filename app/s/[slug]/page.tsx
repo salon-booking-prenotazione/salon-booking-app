@@ -258,7 +258,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               fontSize: 38,
               lineHeight: 1.05,
               margin: "12px 0 8px",
-              fontWeight: 800,
+              fontWeight: 700,
               letterSpacing: -0.4,
             }}
           >
@@ -288,7 +288,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
           <div style={{ display: "grid", gap: 16 }}>
             {/* Service */}
             <div>
-              <div style={{ fontWeight: 800, marginBottom: 8 }}>Servizio</div>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>Servizio</div>
               <select
                 value={serviceId}
                 onChange={(e) => setServiceId(e.target.value)}
@@ -312,7 +312,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
             {/* Date */}
             <div>
-              <div style={{ fontWeight: 800, marginBottom: 8 }}>Data</div>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>Data</div>
               <div
                 style={{
                   border: "1px solid rgba(0,0,0,0.08)",
@@ -339,7 +339,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
             {/* Time */}
             <div>
-              <div style={{ fontWeight: 800, marginBottom: 8 }}>Orario</div>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>Orario</div>
               <select
                 value={slotIso}
                 onChange={(e) => setSlotIso(e.target.value)}
@@ -372,7 +372,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
             {/* Contact */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
               <div>
-                <div style={{ fontWeight: 800, marginBottom: 8 }}>Nome</div>
+                <div style={{ fontWeight: 700, marginBottom: 8 }}>Nome</div>
                 <input
                   placeholder="Nome"
                   value={name}
@@ -389,7 +389,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               </div>
 
               <div>
-                <div style={{ fontWeight: 800, marginBottom: 8 }}>Telefono</div>
+                <div style={{ fontWeight: 700, marginBottom: 8 }}>Telefono</div>
                 <input
                   placeholder="Telefono"
                   value={phone}
@@ -407,7 +407,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
             </div>
 
             <div>
-              <div style={{ fontWeight: 800, marginBottom: 8 }}>Conferma via</div>
+              <div style={{ fontWeight: 600, marginBottom: 8 }}>Conferma via</div>
               <select
                 value={channel}
                 onChange={(e) => setChannel(e.target.value as any)}
@@ -429,7 +429,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
 
             {(channel === "email" || channel === "both") && (
               <div>
-                <div style={{ fontWeight: 800, marginBottom: 8 }}>Email</div>
+                <div style={{ fontWeight: 700, marginBottom: 8 }}>Email</div>
                 <input
                   placeholder="Email"
                   value={email}
@@ -447,7 +447,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
             )}
 
             <div>
-              <div style={{ fontWeight: 800, marginBottom: 8 }}>Note (opzionale)</div>
+              <div style={{ fontWeight: 700, marginBottom: 8 }}>Note (opzionale)</div>
               <textarea
                 placeholder="Richieste particolari, preferenze, allergie…"
                 value={note}
@@ -475,7 +475,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                 background: loading ? "#f2f2f2" : "rgba(17,17,17,0.92)",
                 color: loading ? "#777" : "#fff",
                 cursor: loading ? "not-allowed" : "pointer",
-                fontWeight: 800,
+                fontWeight: 700,
                 letterSpacing: 0.2,
                 boxShadow: "0 10px 22px rgba(0,0,0,0.12)",
               }}
