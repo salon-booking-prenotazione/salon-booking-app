@@ -156,9 +156,8 @@ const text =
   `Prenotazione confermata ✅\n` +
   `${salonLine}\n` +
   `Quando: ${when}\n\n` +
-  `Gestisci / Disdici:\n${manage}\n` +
-  (ics ? `\nSalva nel calendario (ICS):\n${ics}\n` : "") +
-  (google ? `\nAggiungi a Google Calendar:\n${google}\n` : "");
+  `Gestisci o disdici:\n${link}\n` +
+  (ics ? `\nSalva nel calendario:\n${ics}\n` : "");
 
 setWaLink(`https://wa.me/?text=${encodeURIComponent(text)}`);
 setConfirmOpen(true);
