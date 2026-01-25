@@ -492,7 +492,7 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
                   background: "rgba(255,255,255,0.85)",
                 }}
               >
-                <div style={{ fontWeight: 700 }}>{msg}</div>
+                <div style={{ fontWeight: 600 }}>{msg}</div>
               </div>
             )}
           </div>
@@ -557,56 +557,56 @@ export default function BookingPage({ params }: { params: { slug: string } }) {
               <div
                 style={{
                   display: "flex",
-                  gap: 10,
+                  gap: 12,
                   justifyContent: "center",
                   flexWrap: "wrap",
                   marginTop: 16,
                 }}
               >
-                {waLink && (
-                  <a
-                    href={waLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      padding: "12px 16px",
-                      borderRadius: 999,
-                      border: "1px solid #25D366",
-                      background: "#25D366",
-                      color: "white",
-                      fontWeight: 700,
-                      textDecoration: "none",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 10,
-                    }}
-                  >
-                    🟢 Invia su WhatsApp
-                  </a>
-                )}
+   {waLink && (
+    <a
+      href={waLink}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        padding: "12px 18px",
+        borderRadius: 999,
+        border: "1px solid rgba(37,211,102,0.25)",
+        background: "#25D366",
+        color: "white",
+        fontWeight: 600,
+        textDecoration: "none",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      🟢 Invia su WhatsApp
+    </a>
+  )}
 
-                {icsLink && (
-                  <a
-                    href={icsLink}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      padding: "12px 16px",
-                      borderRadius: 999,
-                      border: "1px solid rgba(0,0,0,0.12)",
-                      background: "white",
-                      color: "#111",
-                      fontWeight: 600,
-                      textDecoration: "none",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 10,
-                    }}
-                  >
-                    📅 Salva calendario
-                  </a>
-                )}
-
+  {icsLink && (
+    <a
+      href={icsLink}
+      target="_blank"
+      rel="noreferrer"
+      style={{
+        padding: "12px 18px",
+        borderRadius: 999,
+        border: "1px solid rgba(0,0,0,0.12)",
+        background: "white",
+        color: "#111",
+        fontWeight: 500,
+        textDecoration: "none",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      📅 Salva nel calendario
+    </a>
+  )}
+</div>
                 <button
                   type="button"
                   onClick={() => setConfirmOpen(false)}
