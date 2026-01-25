@@ -164,11 +164,7 @@ setConfirmOpen(true);
 
   }
 
-  if (!salon) {
-  return <div style={{ padding: 24 }}>{msg || "Caricamento..."}</div>;
-}
-
-return (
+ return (
   <div
     style={{
       minHeight: "100vh",
@@ -178,10 +174,7 @@ return (
       fontFamily: "system-ui",
     }}
   >
-    {/* tutto il tuo JSX */}
-  </div>
-);
-
+    {/* 👇 QUESTO DIV DEVE STARE QUI DENTRO */}
     <div style={{ maxWidth: 740, margin: "0 auto" }}>
       <div style={{ marginBottom: 16 }}>
         <div
@@ -202,6 +195,12 @@ return (
         >
           ✨ Prenotazione
         </div>
+
+        {/* tutto il resto del contenuto */}
+      </div>
+    </div>
+  </div>
+);
 
         <h1
           style={{
