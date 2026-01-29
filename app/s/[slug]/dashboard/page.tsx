@@ -49,10 +49,12 @@ export default async function SalonDashboardPage({
   searchParams: { staff_key?: string };
 }) {
   const slug = params.slug;
+
+  // ✅ staff_key dal link (trim per evitare spazi invisibili)
   const staffKey = (searchParams.staff_key ?? "").trim();
 
-  // 1) Recupero salone + secret
-  const secret = (salon.staff_secret ?? "").trim();
+  // 1) Recupero salone + secret (dal DB)
+  const { data: salon, error: salonErr } = await supabase
     .from("salons")
     .select("id,name,slug,staff_secret")
     .eq("slug", slug)
@@ -62,13 +64,21 @@ export default async function SalonDashboardPage({
     return <div style={{ padding: 24 }}>Salone non trovato.</div>;
   }
 
+  // ✅ secret dal DB (trim per evitare spazi invisibili)
+  const secret = (salon.staff_secret ?? "").trim();
+
   // 2) Check staff_key
-  if (!salon.staff_secret || !staffKey || staffKey !== salon.staff_secret) {
+  if (!secret || !staffKey || staffKey !== secret) {
     return (
       <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
         <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
         <p style={{ opacity: 0.8, marginTop: 10 }}>
           Apri la dashboard usando il link staff salvato nei preferiti.
+        </p>
+
+        {/* DEBUG (opzionale) → se vuoi puoi cancellarlo dopo */}
+        <p style={{ fontSize: 12, opacity: 0.6, marginTop: 8 }}>
+          staff_key: {staffKey.slice(0, 12)}… • secret: {secret.slice(0, 12)}…
         </p>
       </div>
     );
@@ -93,13 +103,22 @@ export default async function SalonDashboardPage({
 
   return (
     <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 920 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+        }}
+      >
         <h1 style={{ fontSize: 22, margin: 0 }}>Dashboard — {salon.name}</h1>
 
         {/* link pratici (manteniamo staff_key sempre) */}
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <a
-            href={`/admin/manual?staff_key=${encodeURIComponent(staffKey)}&slug=${encodeURIComponent(slug)}`}
+            href={`/admin/manual?staff_key=${encodeURIComponent(
+              staffKey
+            )}&slug=${encodeURIComponent(slug)}`}
             style={{
               padding: "10px 14px",
               borderRadius: 12,
@@ -114,7 +133,7 @@ export default async function SalonDashboardPage({
           </a>
 
           <a
-            href={`/s/${slug}?staff_key=${encodeURIComponent(staffKey)}`}
+            href={`/s/${slug}`}
             style={{
               padding: "10px 14px",
               borderRadius: 12,
@@ -136,7 +155,14 @@ export default async function SalonDashboardPage({
 
       <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
         {!appointments || appointments.length === 0 ? (
-          <div style={{ padding: 14, border: "1px solid #eee", borderRadius: 14 }}>
+          <div
+            style={{
+              padding: 14,
+              border: "1px solid #eee",
+              borderRadius: 14,
+              background: "white",
+            }}
+          >
             Nessun appuntamento da oggi in poi.
           </div>
         ) : (
