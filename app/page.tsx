@@ -1,234 +1,126 @@
-"use client";
-
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-type Salon = {
-  id: string;
-  name: string | null;
-  slug: string;
-  phone: string | null;
-  address?: string | null;
-  city?: string | null;
-};
-
-function hasStaffCookie(): boolean {
-  // cookie semplice: staff=1 (come nel middleware)
-  if (typeof document === "undefined") return false;
-  return document.cookie.split(";").some((c) => c.trim() === "staff=1");
-}
-
 export default function HomePage() {
-  const [salons, setSalons] = useState<Salon[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isStaff, setIsStaff] = useState(false);
-
-  useEffect(() => {
-    setIsStaff(hasStaffCookie());
-
-    (async () => {
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from("salons")
-        .select("id,name,slug,phone,address,city")
-        .order("name", { ascending: true });
-
-      if (!error) setSalons(data || []);
-      setLoading(false);
-    })();
-  }, []);
-
-  const bgStyle: React.CSSProperties = useMemo(
-    () => ({
-      minHeight: "100vh",
-      padding: 24,
-      fontFamily: "system-ui",
-      background:
-        "radial-gradient(1200px 600px at 10% 0%, rgba(248,240,236,1) 0%, rgba(255,255,255,1) 60%), radial-gradient(900px 500px at 90% 10%, rgba(240,246,248,1) 0%, rgba(255,255,255,1) 55%)",
-    }),
-    []
-  );
-
-  const pillStyle: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "8px 12px",
-    borderRadius: 999,
-    border: "1px solid rgba(0,0,0,0.08)",
-    background: "rgba(255,255,255,0.70)",
-    backdropFilter: "blur(8px)",
-    fontSize: 12,
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    opacity: 0.85,
-  };
-
-  const cardStyle: React.CSSProperties = {
-    background: "rgba(255,255,255,0.78)",
-    border: "1px solid rgba(0,0,0,0.08)",
-    borderRadius: 22,
-    padding: 22,
-    boxShadow: "0 14px 40px rgba(0,0,0,0.06)",
-    backdropFilter: "blur(10px)",
-  };
-
-  const btnPrimary: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "12px 18px",
-    borderRadius: 999,
-    border: "1px solid rgba(17,17,17,0.9)",
-    background: "rgba(17,17,17,0.92)",
-    color: "white",
-    textDecoration: "none",
-    fontWeight: 600, // ✅ più chic
-    boxShadow: "0 10px 22px rgba(0,0,0,0.12)",
-    whiteSpace: "nowrap",
-  };
-
-  const btnGhost: React.CSSProperties = {
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "12px 18px",
-    borderRadius: 999,
-    border: "1px solid rgba(0,0,0,0.12)",
-    background: "rgba(255,255,255,0.85)",
-    color: "#111",
-    textDecoration: "none",
-    fontWeight: 500, // ✅ più chic
-    whiteSpace: "nowrap",
-  };
+  // TODO: sostituisci con i dati reali da Supabase
+  const salons = [
+    {
+      name: "Jolanda Salon",
+      address: "Via Aldo Fedeli, Verona",
+      phone: "+393476221824",
+      slug: "jolanda-salon",
+    },
+    {
+      name: "Lorena Salon",
+      address: "Via Belluzzo 29, Verona",
+      phone: "+393397940573",
+      slug: "lorena-salon",
+    },
+  ];
 
   return (
-    <div style={bgStyle}>
-      <div style={{ maxWidth: 980, margin: "0 auto" }}>
-        <div style={{ marginBottom: 18 }}>
-          <div style={pillStyle}>✨ Salon Booking</div>
+    <div className="min-h-screen bg-[#FFF7F6]">
+      {/* Background morbido */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-[#F6C6CF]/35 blur-3xl" />
+        <div className="absolute top-40 -right-24 h-72 w-72 rounded-full bg-[#BFD7C1]/35 blur-3xl" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-white/40 blur-3xl" />
+      </div>
 
-          <h1
-            style={{
-              fontSize: 38,
-              lineHeight: 1.1,
-              margin: "14px 0 8px",
-              fontWeight: 600,
-              letterSpacing: -0.4,
-            }}
-          >
-            Il tuo momento di relax
+      <div className="relative mx-auto max-w-5xl px-5 py-10 md:py-16">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#F1E6E6] bg-white/70 px-4 py-2 text-sm text-[#6F6464] shadow-sm">
+            <span className="text-base">✨</span>
+            <span className="tracking-wide">SALON BOOKING</span>
+          </div>
+
+          <div className="hidden md:flex items-center gap-2 text-xs text-[#6F6464]">
+            <span className="rounded-full bg-white/70 px-3 py-1 border border-[#F1E6E6]">
+              WhatsApp
+            </span>
+            <span className="rounded-full bg-white/70 px-3 py-1 border border-[#F1E6E6]">
+              Semplice
+            </span>
+            <span className="rounded-full bg-white/70 px-3 py-1 border border-[#F1E6E6]">
+              No app
+            </span>
+          </div>
+        </div>
+
+        {/* Hero */}
+        <div className="mt-10 md:mt-14 grid gap-6">
+          <h1 className="text-4xl md:text-6xl font-semibold leading-[1.05] text-[#1F1B1B]">
+            Il tuo momento <br className="hidden md:block" />
+            di relax
           </h1>
-
-          {/* ✅ testino corto e chic */}
-          <p
-            style={{
-              margin: 0,
-              fontSize: 18,
-              fontWeight: 400,
-              opacity: 0.78,
-              maxWidth: 720,
-            }}
-          >
-            Prenotare dev’essere semplice. E bello.
+          <p className="max-w-2xl text-base md:text-lg text-[#6F6464]">
+            Prenotare dev’essere semplice. E bello. Scegli il tuo salone e conferma su WhatsApp in pochi secondi.
           </p>
         </div>
 
         {/* Lista saloni */}
-        <div style={{ display: "grid", gap: 16, marginTop: 18 }}>
-          {loading ? (
-            <div style={cardStyle}>Caricamento…</div>
-          ) : salons.length === 0 ? (
-            <div style={cardStyle}>Nessun salone disponibile.</div>
-          ) : (
-            salons.map((s) => (
-              <div key={s.id} style={cardStyle}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 16,
-                    flexWrap: "wrap",
-                  }}
-                >
+        <div className="mt-10 grid gap-4">
+          {salons.map((s) => (
+            <div
+              key={s.slug}
+              className="group flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-3xl border border-[#F1E6E6] bg-white/80 p-6 shadow-sm backdrop-blur"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-2xl bg-[#F6C6CF]/45 border border-[#F1E6E6]" />
                   <div>
-                    <div style={{ fontSize: 24, fontWeight: 800 }}>
-                      {s.name || "Salone"}
-                    </div>
-
-                    <div style={{ opacity: 0.75, marginTop: 6 }}>
-                      {[s.address, s.city].filter(Boolean).join(", ")}
-                    </div>
-
-                    {s.phone && (
-                      <div style={{ opacity: 0.75, marginTop: 6 }}>
-                        Tel: {s.phone}
-                      </div>
-                    )}
-
-                    <div style={{ opacity: 0.45, marginTop: 8 }}>
-                      /s/{s.slug}
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                    <a href={`/s/${s.slug}`} style={btnPrimary}>
-                      Prenota
-                    </a>
-
-                    {/* ✅ Dashboard solo staff */}
-                    {isStaff && (
-                      <a href={`/s/${s.slug}/dashboard`} style={btnGhost}>
-                        Dashboard
-                      </a>
-                    )}
+                    <h2 className="text-xl md:text-2xl font-semibold text-[#1F1B1B]">
+                      {s.name}
+                    </h2>
+                    <p className="mt-1 text-sm text-[#6F6464]">{s.address}</p>
                   </div>
                 </div>
+
+                <div className="mt-4 flex flex-wrap gap-2 text-xs text-[#6F6464]">
+                  <span className="rounded-full border border-[#F1E6E6] bg-white px-3 py-1">
+                    Tel: {s.phone}
+                  </span>
+                  <span className="rounded-full border border-[#F1E6E6] bg-white px-3 py-1">
+                    Prenota online
+                  </span>
+                </div>
               </div>
-            ))
-          )}
+
+              <a
+                href={`/s/${s.slug}`}
+                className="inline-flex items-center justify-center rounded-full bg-[#1F1B1B] px-6 py-3 text-white font-semibold shadow-md transition group-hover:translate-y-[-1px] group-hover:shadow-lg"
+              >
+                Prenota
+              </a>
+            </div>
+          ))}
         </div>
 
-        {/* Area staff (discreta) */}
-        <div
-          style={{
-            marginTop: 34,
-            paddingTop: 18,
-            borderTop: "1px solid rgba(0,0,0,0.10)",
-            opacity: 0.85,
-          }}
-        >
-          <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 10 }}>
-            Area staff
-          </div>
+        {/* Area staff (più discreta) */}
+        <div className="mt-12 rounded-3xl border border-[#F1E6E6] bg-white/60 p-6 backdrop-blur">
+          <h3 className="text-lg font-semibold text-[#1F1B1B]">Area staff</h3>
+          <p className="mt-1 text-sm text-[#6F6464]">
+            Accesso rapido per gestione prenotazioni e inserimento manuale.
+          </p>
 
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <a href="/staff/login" style={btnGhost}>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <a
+              href="/staff/login"
+              className="rounded-full border border-[#F1E6E6] bg-white px-5 py-2 font-semibold text-[#1F1B1B] shadow-sm hover:shadow"
+            >
               Login staff
             </a>
-            <a href="/admin/manual" style={btnGhost}>
+
+            <a
+              href="/admin/manual"
+              className="rounded-full border border-[#F1E6E6] bg-white px-5 py-2 font-semibold text-[#1F1B1B] shadow-sm hover:shadow"
+            >
               Prenotazioni manuali
             </a>
           </div>
         </div>
 
-        {/* Footer minimal */}
-        <div
-          style={{
-            marginTop: 22,
-            fontSize: 12,
-            opacity: 0.55,
-          }}
-        >
-          © 2026 — Prenota con eleganza.
-        </div>
+        <p className="mt-10 text-center text-xs text-[#6F6464]">
+          © {new Date().getFullYear()} Salon Booking — semplice e veloce
+        </p>
       </div>
     </div>
   );
