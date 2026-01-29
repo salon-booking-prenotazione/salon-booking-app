@@ -203,8 +203,8 @@ if (!dbSecret || urlKey !== dbSecret) {
   }
 
   return (
-    <>
-      <ClientGate />
+     <>
+       <ClientGate />
       
       <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
       <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
