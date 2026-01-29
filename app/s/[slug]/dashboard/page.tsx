@@ -172,9 +172,53 @@ if (!dbSecret || urlKey !== dbSecret) {
   return `${base}?text=${encodeURIComponent(text)}`;
 }
 
-  function DayBlock({ title, items, dayLabel }: { title: string; items: any[]; dayLabel: string }) {
-    <DayBlock title="Oggi" dayLabel="oggi" items={todayAppts || []} />
-    <DayBlock title="Domani" dayLabel="domani" items={tomorrowAppts || []} />
+  function DayBlock({
+  title,
+  items,
+  dayLabel,
+}: {
+  title: string;
+  items: any[];
+  dayLabel: string;
+}) {
+  return (
+    <div style={{ marginTop: 20 }}>
+      <h2 style={{ marginBottom: 10 }}>{title}</h2>
+
+      {!items || items.length === 0 ? (
+        <div style={{ padding: 14, border: "1px solid #eee", borderRadius: 14 }}>
+          Nessun appuntamento.
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: 10 }}>
+          {items.map((a) => (
+            <div
+              key={a.id}
+              style={{
+                border: "1px solid #e9e9e9",
+                borderRadius: 16,
+                padding: 14,
+                background: "white",
+              }}
+            >
+              <div style={{ fontWeight: 700 }}>
+                {formatTimeRange(a)} — {a.customer_name || "Cliente"}
+              </div>
+
+              <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
+                Tel: {a.contact_phone || "-"}
+              </div>
+
+              {/* bottoni WhatsApp qui */}
+
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
     return (
       <div style={{ marginTop: 20 }}>
@@ -281,18 +325,3 @@ if (!dbSecret || urlKey !== dbSecret) {
     </a>
   </div>
 )}
-
-  return (
-    <>
-      <ClientGate />
-
-      <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
-        <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
-        <p style={{ opacity: 0.7 }}>Appuntamenti di oggi e domani</p>
-
-        <DayBlock title="Oggi" items={todayAppts || []} />
-        <DayBlock title="Domani" items={tomorrowAppts || []} />
-      </div>
-    </>
-  );
-}
