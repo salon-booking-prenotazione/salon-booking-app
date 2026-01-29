@@ -7,10 +7,37 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Calcola inizio giornata di OGGI in Europe/Rome → UTC ISO
-function startOfTodayRomeISO(): string {
-  const now = new Date();
+/* ===========================
+   TIMEZONE UTILS (ROME SAFE)
+=========================== */
+function romeOffsetMinutesForDate(y: number, m: number, d: number) {
+  const probe = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Rome",
+    timeZoneName: "shortOffset",
+  }).formatToParts(probe);
 
+  const tz = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT+0";
+  const match = tz.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/);
+
+  const offsetH = match ? Number(match[1]) : 0;
+  const offsetM = match && match[2] ? Number(match[2]) : 0;
+
+  return offsetH * 60 + (offsetH >= 0 ? offsetM : -offsetM);
+}
+
+function romeLocalToUtcDate(dateStr: string, hhmm: string) {
+  const [Y, M, D] = dateStr.split("-").map(Number);
+  const [hh, mm] = hhmm.split(":").map(Number);
+
+  const offsetMin = romeOffsetMinutesForDate(Y, M, D);
+  const utcMs = Date.UTC(Y, M - 1, D, hh, mm, 0) - offsetMin * 60_000;
+
+  return new Date(utcMs);
+}
+
+function romeTodayDateStr() {
+  const now = new Date();
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Europe/Rome",
     year: "numeric",
@@ -18,29 +45,39 @@ function startOfTodayRomeISO(): string {
     day: "2-digit",
   }).formatToParts(now);
 
-  const y = Number(parts.find((p) => p.type === "year")?.value);
-  const m = Number(parts.find((p) => p.type === "month")?.value);
-  const d = Number(parts.find((p) => p.type === "day")?.value);
+  const y = parts.find((p) => p.type === "year")!.value;
+  const m = parts.find((p) => p.type === "month")!.value;
+  const d = parts.find((p) => p.type === "day")!.value;
 
-  // mezzogiorno DST-safe
-  const probe = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
-
-  const tzParts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Europe/Rome",
-    timeZoneName: "shortOffset",
-  }).formatToParts(probe);
-
-  const tz = tzParts.find((p) => p.type === "timeZoneName")?.value ?? "GMT+0";
-  const match = tz.match(/GMT([+-]\d{1,2})(?::(\d{2}))?/);
-
-  const offsetH = match ? Number(match[1]) : 0;
-  const offsetM = match && match[2] ? Number(match[2]) : 0;
-  const offsetTotalMin = offsetH * 60 + (offsetH >= 0 ? offsetM : -offsetM);
-
-  const utcMs = Date.UTC(y, m - 1, d, 0, 0, 0) - offsetTotalMin * 60_000;
-  return new Date(utcMs).toISOString();
+  return `${y}-${m}-${d}`;
 }
 
+function romeTomorrowDateStr() {
+  const base = new Date(`${romeTodayDateStr()}T12:00:00`);
+  base.setDate(base.getDate() + 1);
+
+  const y = base.getFullYear();
+  const m = String(base.getMonth() + 1).padStart(2, "0");
+  const d = String(base.getDate()).padStart(2, "0");
+
+  return `${y}-${m}-${d}`;
+}
+
+function romeDayRangeUtc(dateStr: string) {
+  const start = romeLocalToUtcDate(dateStr, "00:00");
+  const end = new Date(
+    romeLocalToUtcDate(dateStr, "23:59").getTime() + 59_999
+  );
+
+  return {
+    startISO: start.toISOString(),
+    endISO: end.toISOString(),
+  };
+}
+
+/* ===========================
+   PAGE
+=========================== */
 export default async function SalonDashboardPage({
   params,
   searchParams,
@@ -49,11 +86,9 @@ export default async function SalonDashboardPage({
   searchParams: { staff_key?: string };
 }) {
   const slug = params.slug;
+  const staffKey = searchParams.staff_key ?? "";
 
-  // ✅ staff_key dal link (trim per evitare spazi invisibili)
-  const staffKey = (searchParams.staff_key ?? "").trim();
-
-  // 1) Recupero salone + secret (dal DB)
+  /* 1) Salone + staff_secret */
   const { data: salon, error: salonErr } = await supabase
     .from("salons")
     .select("id,name,slug,staff_secret")
@@ -64,130 +99,75 @@ export default async function SalonDashboardPage({
     return <div style={{ padding: 24 }}>Salone non trovato.</div>;
   }
 
-  // ✅ secret dal DB (trim per evitare spazi invisibili)
-  const secret = (salon.staff_secret ?? "").trim();
-
-  // 2) Check staff_key
-  if (!secret || !staffKey || staffKey !== secret) {
+  /* 2) Check staff_key */
+  if (!salon.staff_secret || staffKey !== salon.staff_secret) {
     return (
       <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
         <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
         <p style={{ opacity: 0.8, marginTop: 10 }}>
           Apri la dashboard usando il link staff salvato nei preferiti.
         </p>
-
-        {/* DEBUG (opzionale) → se vuoi puoi cancellarlo dopo */}
-        <p style={{ fontSize: 12, opacity: 0.6, marginTop: 8 }}>
-          staff_key: {staffKey.slice(0, 12)}… • secret: {secret.slice(0, 12)}…
-        </p>
       </div>
     );
   }
 
-  // 3) Appuntamenti da oggi in poi
-  const fromISO = startOfTodayRomeISO();
+  /* 3) Date ranges */
+  const today = romeTodayDateStr();
+  const tomorrow = romeTomorrowDateStr();
 
-  const { data: appointments, error } = await supabase
+  const todayRange = romeDayRangeUtc(today);
+  const tomorrowRange = romeDayRangeUtc(tomorrow);
+
+  /* 4) Appuntamenti */
+  const baseSelect =
+    "id,start_time,end_time,customer_name,contact_phone,note,status,cancelled_at";
+
+  const { data: todayAppts } = await supabase
     .from("appointments")
-    .select(
-      "id,start_time,end_time,customer_name,contact_phone,note,status,cancelled_at"
-    )
+    .select(baseSelect)
     .eq("salon_id", salon.id)
     .is("cancelled_at", null)
-    .gte("start_time", fromISO)
+    .gte("start_time", todayRange.startISO)
+    .lte("start_time", todayRange.endISO)
     .order("start_time", { ascending: true });
 
-  if (error) {
-    return <div style={{ padding: 24 }}>Errore caricamento appuntamenti.</div>;
+  const { data: tomorrowAppts } = await supabase
+    .from("appointments")
+    .select(baseSelect)
+    .eq("salon_id", salon.id)
+    .is("cancelled_at", null)
+    .gte("start_time", tomorrowRange.startISO)
+    .lte("start_time", tomorrowRange.endISO)
+    .order("start_time", { ascending: true });
+
+  /* 5) UI */
+  function formatTimeRange(a: any) {
+    const start = new Date(a.start_time);
+    const end = new Date(a.end_time);
+
+    const fmt = (d: Date) =>
+      new Intl.DateTimeFormat("it-IT", {
+        timeZone: "Europe/Rome",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).format(d);
+
+    return `${fmt(start)} → ${fmt(end)}`;
   }
 
-  return (
-    <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 920 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 12,
-          flexWrap: "wrap",
-        }}
-      >
-        <h1 style={{ fontSize: 22, margin: 0 }}>Dashboard — {salon.name}</h1>
+  function DayBlock({ title, items }: { title: string; items: any[] }) {
+    return (
+      <div style={{ marginTop: 20 }}>
+        <h2 style={{ marginBottom: 10 }}>{title}</h2>
 
-        {/* link pratici (manteniamo staff_key sempre) */}
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-          <a
-            href={`/admin/manual?staff_key=${encodeURIComponent(
-              staffKey
-            )}&slug=${encodeURIComponent(slug)}`}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 12,
-              border: "1px solid rgba(0,0,0,0.15)",
-              textDecoration: "none",
-              color: "#111",
-              background: "white",
-              fontWeight: 600,
-            }}
-          >
-            + Prenotazione manuale
-          </a>
-
-          <a
-            href={`/s/${slug}`}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 12,
-              border: "1px solid rgba(0,0,0,0.15)",
-              textDecoration: "none",
-              color: "#111",
-              background: "white",
-              fontWeight: 600,
-            }}
-          >
-            Apri pagina prenotazione
-          </a>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 14, opacity: 0.7, fontSize: 13 }}>
-        Mostra appuntamenti di oggi e futuri (ordine cronologico).
-      </div>
-
-      <div style={{ marginTop: 18, display: "grid", gap: 12 }}>
-        {!appointments || appointments.length === 0 ? (
-          <div
-            style={{
-              padding: 14,
-              border: "1px solid #eee",
-              borderRadius: 14,
-              background: "white",
-            }}
-          >
-            Nessun appuntamento da oggi in poi.
+        {!items || items.length === 0 ? (
+          <div style={{ padding: 14, border: "1px solid #eee", borderRadius: 14 }}>
+            Nessun appuntamento.
           </div>
         ) : (
-          appointments.map((a: any) => {
-            const start = new Date(a.start_time);
-            const end = new Date(a.end_time);
-
-            const startStr = new Intl.DateTimeFormat("it-IT", {
-              timeZone: "Europe/Rome",
-              weekday: "short",
-              day: "2-digit",
-              month: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }).format(start);
-
-            const endStr = new Intl.DateTimeFormat("it-IT", {
-              timeZone: "Europe/Rome",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }).format(end);
-
-            return (
+          <div style={{ display: "grid", gap: 10 }}>
+            {items.map((a) => (
               <div
                 key={a.id}
                 style={{
@@ -198,23 +178,31 @@ export default async function SalonDashboardPage({
                 }}
               >
                 <div style={{ fontWeight: 700 }}>
-                  {a.customer_name ?? "Cliente"} — {startStr} → {endStr}
+                  {formatTimeRange(a)} — {a.customer_name || "Cliente"}
                 </div>
-
                 <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
-                  Tel: {a.contact_phone ?? "-"}
+                  Tel: {a.contact_phone || "-"}
                 </div>
-
                 {a.note && (
-                  <div style={{ marginTop: 8, fontSize: 14, opacity: 0.9 }}>
+                  <div style={{ marginTop: 8, fontSize: 14 }}>
                     📝 {a.note}
                   </div>
                 )}
               </div>
-            );
-          })
+            ))}
+          </div>
         )}
       </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
+      <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
+      <p style={{ opacity: 0.7 }}>Appuntamenti di oggi e domani</p>
+
+      <DayBlock title="Oggi" items={todayAppts || []} />
+      <DayBlock title="Domani" items={tomorrowAppts || []} />
     </div>
   );
 }
