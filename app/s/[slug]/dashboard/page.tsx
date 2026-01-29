@@ -204,8 +204,7 @@ if (!dbSecret || urlKey !== dbSecret) {
 
   return (
      <>
-       <ClientGate />
-      
+       <ClientGate /> 
       <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
       <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
       <p style={{ opacity: 0.7 }}>Appuntamenti di oggi e domani</p>
