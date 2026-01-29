@@ -8,13 +8,14 @@ export default function ClientGate() {
   const sp = useSearchParams();
 
   useEffect(() => {
+    // se già c’è staff_key nell’URL non fare nulla
     if (sp.get("staff_key")) return;
 
-    const key = localStorage.getItem("staff_key");
-    if (!key) return;
+    const saved = localStorage.getItem("staff_key");
+    if (!saved) return;
 
     window.location.replace(
-      `/s/${params.slug}/dashboard?staff_key=${encodeURIComponent(key)}`
+      `/s/${params.slug}/dashboard?staff_key=${encodeURIComponent(saved)}`
     );
   }, [params.slug, sp]);
 
