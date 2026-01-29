@@ -9,7 +9,7 @@ body {
   margin: 0;
 }
 
-/* Test: se Tailwind è attivo, il body diventa morbido */
+/* Test: se questo CSS entra, lo sfondo diventa verde */
 body {
-  background-color: #e6efea;
+  background: #c7f9cc !important;
 }
