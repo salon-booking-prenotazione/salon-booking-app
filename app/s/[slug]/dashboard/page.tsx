@@ -83,10 +83,10 @@ export default async function SalonDashboardPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { staff_key?: string };
+  searchParams: { staff_key?: string; key?: string };
 }) {
   const slug = params.slug;
-  const staffKey =(searchParams.staff_key ?? (searchParams as any).key ?? "") as string;
+  const staffKey = searchParams.staff_key ?? searchParams.key ?? "";
 
   /* 1) Salone + staff_secret */
   const { data: salon, error: salonErr } = await supabase
@@ -99,8 +99,8 @@ export default async function SalonDashboardPage({
     return <div style={{ padding: 24 }}>Salone non trovato.</div>;
   }
 
-  /* 2) Check staff_key */
-  if (!salon.staff_key || staffKey !== salon.staff_key) {
+ /* 2) Check staff_secret */
+if (!salon.staff_secret || staffKey !== salon.staff_secret) {
     return (
       <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
         <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
