@@ -22,10 +22,10 @@ export default function StaffLogin() {
 
     // vai alla pagina staff manuale (o quella che vuoi)
     // salva la key per questo browser
-localStorage.setItem("staff_key", key);
+localStorage.setItem("staff_key", key.trim());
 
-// vai alla dashboard (slug fisso o scelto)
-window.location.href = "/s/lorena-salon/dashboard";
+window.location.href =
+  "/s/lorena-salon/dashboard?staff_key=" + encodeURIComponent(key.trim());
 
   }
 
