@@ -49,10 +49,10 @@ export default async function SalonDashboardPage({
   searchParams: { staff_key?: string };
 }) {
   const slug = params.slug;
-  const staffKey = searchParams.staff_key ?? "";
+  const staffKey = (searchParams.staff_key ?? "").trim();
 
   // 1) Recupero salone + secret
-  const { data: salon, error: salonErr } = await supabase
+  const secret = (salon.staff_secret ?? "").trim();
     .from("salons")
     .select("id,name,slug,staff_secret")
     .eq("slug", slug)
