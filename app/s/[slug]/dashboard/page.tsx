@@ -86,7 +86,7 @@ export default async function SalonDashboardPage({
   searchParams: { staff_key?: string };
 }) {
   const slug = params.slug;
-  const staffKey = searchParams.staff_key ?? "";
+  const staffKey =(searchParams.staff_key ?? (searchParams as any).key ?? "") as string;
 
   /* 1) Salone + staff_secret */
   const { data: salon, error: salonErr } = await supabase
