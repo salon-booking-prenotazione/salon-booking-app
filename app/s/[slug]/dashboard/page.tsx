@@ -100,7 +100,7 @@ export default async function SalonDashboardPage({
   }
 
   /* 2) Check staff_key */
-  if (!salon.staff_secret || staffKey !== salon.staff_secret) {
+  if (!salon.staff_key || staffKey !== salon.staff_key) {
     return (
       <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
         <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
