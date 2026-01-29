@@ -200,9 +200,8 @@ if (!dbSecret || urlKey !== dbSecret) {
         )}
       </div>
     );
-  }
 
- return (
+return (
   <>
     <ClientGate />
 
@@ -215,3 +214,4 @@ if (!dbSecret || urlKey !== dbSecret) {
     </div>
   </>
 );
+}
