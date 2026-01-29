@@ -131,7 +131,87 @@ export default async function SalonDashboardPage({
 
   const todayRange = romeDayRangeUtc(today);
   const tomorrowRange = romeDayRangeUtc(tomorrow);
+function getBaseUrl() {
+  // su Vercel c’è VERCEL_URL, in locale no
+  const vercel = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+  const publicUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  return publicUrl || vercel || "";
+}
 
+function romeDateStrFromUtc(iso: string) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date(iso));
+}
+
+function romeHHMMFromUtc(iso: string) {
+  return new Intl.DateTimeFormat("it-IT", {
+    timeZone: "Europe/Rome",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date(iso));
+}
+
+async function fetchAvailableSlots(slug: string, date: string, durationMin: number) {
+  try {
+    const base = getBaseUrl();
+    const url = `${base}/api/available-time?slug=${encodeURIComponent(
+      slug
+    )}&date=${encodeURIComponent(date)}&duration=${encodeURIComponent(String(durationMin))}`;
+
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) return [];
+
+    const json = await res.json().catch(() => null);
+
+    // supporta: ["09:00"] oppure { slots: ["09:00"] }
+    if (Array.isArray(json)) return json.filter((x) => typeof x === "string");
+    if (json && Array.isArray(json.slots)) return json.slots.filter((x: any) => typeof x === "string");
+
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+function pickNextTwo(slots: string[], currentHHMM: string) {
+  // prende i primi 2 slot dopo l'orario attuale
+  const idx = slots.findIndex((s) => s === currentHHMM);
+  const start = idx >= 0 ? idx + 1 : 0;
+
+  const out: string[] = [];
+  for (let i = start; i < slots.length && out.length < 2; i++) {
+    if (slots[i] !== currentHHMM) out.push(slots[i]);
+  }
+  return out;
+}
+
+async function attachAlternatives(items: any[], slug: string) {
+  return Promise.all(
+    (items || []).map(async (a) => {
+      const startIso = a.start_time;
+      const endIso = a.end_time;
+
+      const dateStr = romeDateStrFromUtc(startIso);
+      const currentHHMM = romeHHMMFromUtc(startIso);
+
+      const durationMin = Math.max(
+        5,
+        Math.round((new Date(endIso).getTime() - new Date(startIso).getTime()) / 60000)
+      );
+
+      const slots = await fetchAvailableSlots(slug, dateStr, durationMin);
+      const alternatives = pickNextTwo(slots, currentHHMM);
+
+      return { ...a, _alt: alternatives };
+    })
+  );
+}
+  
   /* 4) Appuntamenti */
   const baseSelect =
     "id,start_time,end_time,customer_name,contact_phone,note,status,cancelled_at";
@@ -153,6 +233,9 @@ export default async function SalonDashboardPage({
     .gte("start_time", tomorrowRange.startISO)
     .lte("start_time", tomorrowRange.endISO)
     .order("start_time", { ascending: true });
+
+  const todayApptsEnriched = await attachAlternatives(todayAppts || [], slug);
+  const tomorrowApptsEnriched = await attachAlternatives(tomorrowAppts || [], slug);
 
   /* 5) UI */
   function formatTimeRange(a: any) {
@@ -253,23 +336,29 @@ export default async function SalonDashboardPage({
                         ✅ Conferma
                       </a>
 
-                      <a
-                        href={waLink(
-                          a.contact_phone,
-                          `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, quali orari preferisci? (es: ${dayLabel} pomeriggio / ${dayLabel} mattina) 🔁`
-                        )!}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{
-                          padding: "10px 12px",
-                          borderRadius: 12,
-                          border: "1px solid #e9e9e9",
-                          textDecoration: "none",
-                          fontWeight: 700,
-                        }}
-                      >
-                        🔁 Sposta
-                      </a>
+                     <a
+                       href={waLink(
+                       a.contact_phone,
+                       (() => {
+                         const alts: string[] = Array.isArray(a._alt) ? a._alt : [];
+                         if (alts.length >= 2) {
+                           return `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, vanno bene ${alts[0]} oppure ${alts[1]}? 🔁`;
+      }
+      return `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, quali orari preferisci? 🔁`;
+    })()
+  )!}
+  target="_blank"
+  rel="noreferrer"
+  style={{
+    padding: "10px 12px",
+    borderRadius: 12,
+    border: "1px solid #e9e9e9",
+    textDecoration: "none",
+    fontWeight: 700,
+  }}
+>
+  🔁 Sposta
+</a>
 
                       <a
                         href={waLink(
