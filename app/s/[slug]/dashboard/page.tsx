@@ -146,7 +146,7 @@ if (!dbSecret || urlKey !== dbSecret) {
     .lte("start_time", tomorrowRange.endISO)
     .order("start_time", { ascending: true });
 
-  /* 5) UI */
+    /* 5) UI */
   function formatTimeRange(a: any) {
     const start = new Date(a.start_time);
     const end = new Date(a.end_time);
@@ -186,13 +186,13 @@ if (!dbSecret || urlKey !== dbSecret) {
                 <div style={{ fontWeight: 700 }}>
                   {formatTimeRange(a)} — {a.customer_name || "Cliente"}
                 </div>
+
                 <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
                   Tel: {a.contact_phone || "-"}
                 </div>
+
                 {a.note && (
-                  <div style={{ marginTop: 8, fontSize: 14 }}>
-                    📝 {a.note}
-                  </div>
+                  <div style={{ marginTop: 8, fontSize: 14 }}>📝 {a.note}</div>
                 )}
               </div>
             ))}
@@ -200,18 +200,19 @@ if (!dbSecret || urlKey !== dbSecret) {
         )}
       </div>
     );
+  }
 
-return (
-  <>
-    <ClientGate />
+  return (
+    <>
+      <ClientGate />
 
-    <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
-      <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
-      <p style={{ opacity: 0.7 }}>Appuntamenti di oggi e domani</p>
+      <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
+        <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
+        <p style={{ opacity: 0.7 }}>Appuntamenti di oggi e domani</p>
 
-      <DayBlock title="Oggi" items={todayAppts || []} />
-      <DayBlock title="Domani" items={tomorrowAppts || []} />
-    </div>
-  </>
-);
+        <DayBlock title="Oggi" items={todayAppts || []} />
+        <DayBlock title="Domani" items={tomorrowAppts || []} />
+      </div>
+    </>
+  );
 }
