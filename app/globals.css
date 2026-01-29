@@ -2,12 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* SOLO giorni disabilitati */
-.rdp_day_disabled_custom {
-  opacity: 0.35 !important;
-  color: #777 !important;
-  background-color: #f2f2f2 !important;
+/* Base reset */
+html,
+body {
+  padding: 0;
+  margin: 0;
 }
-.rdp_day_disabled_custom button {
-  cursor: not-allowed !important;
+
+/* Test: se Tailwind è attivo, il body diventa morbido */
+body {
+  background-color: #e6efea;
 }
