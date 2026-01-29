@@ -162,6 +162,16 @@ if (!dbSecret || urlKey !== dbSecret) {
     return `${fmt(start)} → ${fmt(end)}`;
   }
 
+  function waLink(phone: string, text?: string) {
+  const digits = String(phone || "").replace(/[^\d]/g, "");
+  if (!digits) return null;
+
+  const base = `https://wa.me/${digits}`;
+  if (!text) return base;
+
+  return `${base}?text=${encodeURIComponent(text)}`;
+}
+
   function DayBlock({ title, items }: { title: string; items: any[] }) {
     return (
       <div style={{ marginTop: 20 }}>
@@ -172,31 +182,70 @@ if (!dbSecret || urlKey !== dbSecret) {
             Nessun appuntamento.
           </div>
         ) : (
-          <div style={{ display: "grid", gap: 10 }}>
-            {items.map((a) => (
-              <div
-                key={a.id}
-                style={{
-                  border: "1px solid #e9e9e9",
-                  borderRadius: 16,
-                  padding: 14,
-                  background: "white",
-                }}
-              >
-                <div style={{ fontWeight: 700 }}>
-                  {formatTimeRange(a)} — {a.customer_name || "Cliente"}
-                </div>
+        <div style={{ display: "grid", gap: 10 }}>
+  {items.map((a) => (
+    <div
+      key={a.id}
+      style={{
+        border: "1px solid #e9e9e9",
+        borderRadius: 16,
+        padding: 14,
+        background: "white",
+      }}
+    >
+      <div style={{ fontWeight: 700 }}>
+        {formatTimeRange(a)} — {a.customer_name || "Cliente"}
+      </div>
 
-                <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
-                  Tel: {a.contact_phone || "-"}
-                </div>
+      <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
+        Tel: {a.contact_phone || "-"}
+      </div>
 
-                {a.note && (
-                  <div style={{ marginTop: 8, fontSize: 14 }}>📝 {a.note}</div>
-                )}
-              </div>
-            ))}
-          </div>
+      {/* ✅ BOTTONI WHATSAPP */}
+      {a.contact_phone && (
+        <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+          <a
+            href={waLink(a.contact_phone)!}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              padding: "10px 12px",
+              borderRadius: 12,
+              border: "1px solid #e9e9e9",
+              textDecoration: "none",
+              fontWeight: 700,
+            }}
+          >
+            💬 Chat
+          </a>
+
+          <a
+            href={waLink(
+              a.contact_phone,
+              `Ciao ${a.customer_name || ""}! Confermo il tuo appuntamento da ${salon.name} alle ${
+                formatTimeRange(a).split(" → ")[0]
+              } ✅`
+            )!}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              padding: "10px 12px",
+              borderRadius: 12,
+              border: "1px solid #e9e9e9",
+              textDecoration: "none",
+              fontWeight: 700,
+            }}
+          >
+            ✅ Conferma
+          </a>
+        </div>
+      )}
+
+      {a.note && <div style={{ marginTop: 8, fontSize: 14 }}>📝 {a.note}</div>}
+    </div>
+  ))}
+</div>
+ 
         )}
       </div>
     );
