@@ -21,7 +21,12 @@ export default function StaffLogin() {
     }
 
     // vai alla pagina staff manuale (o quella che vuoi)
-    window.location.href = "/admin/manual"; // oppure "/staff/manual" se preferisci
+    // salva la key per questo browser
+localStorage.setItem("staff_key", key);
+
+// vai alla dashboard (slug fisso o scelto)
+window.location.href = "/s/lorena-salon/dashboard";
+
   }
 
   return (
