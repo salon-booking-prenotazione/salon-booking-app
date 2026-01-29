@@ -1,6 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
-
 import ClientGate from "./ClientGate";
+import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -67,9 +66,7 @@ function romeTomorrowDateStr() {
 
 function romeDayRangeUtc(dateStr: string) {
   const start = romeLocalToUtcDate(dateStr, "00:00");
-  const end = new Date(
-    romeLocalToUtcDate(dateStr, "23:59").getTime() + 59_999
-  );
+  const end = new Date(romeLocalToUtcDate(dateStr, "23:59").getTime() + 59_999);
 
   return {
     startISO: start.toISOString(),
@@ -85,11 +82,21 @@ export default async function SalonDashboardPage({
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { staff_key?: string; key?: string };
+  searchParams: { staff_key?: string | string[]; key?: string | string[] };
 }) {
   const slug = params.slug;
+
+  // ✅ staffKey robusto (string/array + trim)
   const raw = (searchParams as any).staff_key ?? (searchParams as any).key ?? "";
   const staffKey = (Array.isArray(raw) ? raw[0] : raw).trim();
+
+  // ✅ helper WhatsApp
+  function waLink(phone: string, text?: string) {
+    const digits = String(phone || "").replace(/[^\d]/g, "");
+    if (!digits) return null;
+    const base = `https://wa.me/${digits}`;
+    return text ? `${base}?text=${encodeURIComponent(text)}` : base;
+  }
 
   /* 1) Salone + staff_secret */
   const { data: salon, error: salonErr } = await supabase
@@ -102,20 +109,21 @@ export default async function SalonDashboardPage({
     return <div style={{ padding: 24 }}>Salone non trovato.</div>;
   }
 
-/* 2) Check staff_secret */
-const dbSecret = String(salon.staff_secret ?? "").trim();
-const urlKey = String(staffKey ?? "").trim();
+  /* 2) Check staff_secret (robusto) */
+  const dbSecret = String(salon.staff_secret ?? "").trim();
+  const urlKey = String(staffKey ?? "").trim();
 
-if (!dbSecret || urlKey !== dbSecret) {
-  return (
-    <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
-      <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
-      <p style={{ opacity: 0.8, marginTop: 10 }}>
-        Apri la dashboard usando il link staff salvato nei preferiti.
-      </p>
-    </div>
-  );
-}
+  if (!dbSecret || urlKey !== dbSecret) {
+    return (
+      <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
+        <ClientGate />
+        <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
+        <p style={{ opacity: 0.8, marginTop: 10 }}>
+          Apri la dashboard usando il link staff oppure fai login staff.
+        </p>
+      </div>
+    );
+  }
 
   /* 3) Date ranges */
   const today = romeTodayDateStr();
@@ -146,7 +154,7 @@ if (!dbSecret || urlKey !== dbSecret) {
     .lte("start_time", tomorrowRange.endISO)
     .order("start_time", { ascending: true });
 
-    /* 5) UI */
+  /* 5) UI */
   function formatTimeRange(a: any) {
     const start = new Date(a.start_time);
     const end = new Date(a.end_time);
@@ -162,64 +170,15 @@ if (!dbSecret || urlKey !== dbSecret) {
     return `${fmt(start)} → ${fmt(end)}`;
   }
 
-  function waLink(phone: string, text?: string) {
-  const digits = String(phone || "").replace(/[^\d]/g, "");
-  if (!digits) return null;
-
-  const base = `https://wa.me/${digits}`;
-  if (!text) return base;
-
-  return `${base}?text=${encodeURIComponent(text)}`;
-}
-
   function DayBlock({
-  title,
-  items,
-  dayLabel,
-}: {
-  title: string;
-  items: any[];
-  dayLabel: string;
-}) {
-  return (
-    <div style={{ marginTop: 20 }}>
-      <h2 style={{ marginBottom: 10 }}>{title}</h2>
-
-      {!items || items.length === 0 ? (
-        <div style={{ padding: 14, border: "1px solid #eee", borderRadius: 14 }}>
-          Nessun appuntamento.
-        </div>
-      ) : (
-        <div style={{ display: "grid", gap: 10 }}>
-          {items.map((a) => (
-            <div
-              key={a.id}
-              style={{
-                border: "1px solid #e9e9e9",
-                borderRadius: 16,
-                padding: 14,
-                background: "white",
-              }}
-            >
-              <div style={{ fontWeight: 700 }}>
-                {formatTimeRange(a)} — {a.customer_name || "Cliente"}
-              </div>
-
-              <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
-                Tel: {a.contact_phone || "-"}
-              </div>
-
-              {/* bottoni WhatsApp qui */}
-
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-
+    title,
+    items,
+    dayLabel,
+  }: {
+    title: string;
+    items: any[];
+    dayLabel: string;
+  }) {
     return (
       <div style={{ marginTop: 20 }}>
         <h2 style={{ marginBottom: 10 }}>{title}</h2>
@@ -229,99 +188,132 @@ if (!dbSecret || urlKey !== dbSecret) {
             Nessun appuntamento.
           </div>
         ) : (
-        <div style={{ display: "grid", gap: 10 }}>
-  {items.map((a) => (
-    <div
-      key={a.id}
-      style={{
-        border: "1px solid #e9e9e9",
-        borderRadius: 16,
-        padding: 14,
-        background: "white",
-      }}
-    >
-      <div style={{ fontWeight: 700 }}>
-        {formatTimeRange(a)} — {a.customer_name || "Cliente"}
+          <div style={{ display: "grid", gap: 10 }}>
+            {items.map((a) => {
+              const startHour = formatTimeRange(a).split(" → ")[0];
+
+              return (
+                <div
+                  key={a.id}
+                  style={{
+                    border: "1px solid #e9e9e9",
+                    borderRadius: 16,
+                    padding: 14,
+                    background: "white",
+                  }}
+                >
+                  <div style={{ fontWeight: 700 }}>
+                    {formatTimeRange(a)} — {a.customer_name || "Cliente"}
+                  </div>
+
+                  <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
+                    Tel: {a.contact_phone || "-"}
+                  </div>
+
+                  {/* ✅ BOTTONI WHATSAPP */}
+                  {a.contact_phone && (
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 10,
+                        marginTop: 10,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <a
+                        href={waLink(a.contact_phone)!}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 12,
+                          border: "1px solid #e9e9e9",
+                          textDecoration: "none",
+                          fontWeight: 700,
+                        }}
+                      >
+                        💬 Chat
+                      </a>
+
+                      <a
+                        href={waLink(
+                          a.contact_phone,
+                          `Ciao ${a.customer_name || ""}! Confermo il tuo appuntamento da ${salon.name} ${dayLabel} alle ${startHour} ✅`
+                        )!}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 12,
+                          border: "1px solid #e9e9e9",
+                          textDecoration: "none",
+                          fontWeight: 700,
+                        }}
+                      >
+                        ✅ Conferma
+                      </a>
+
+                      <a
+                        href={waLink(
+                          a.contact_phone,
+                          `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, quali orari preferisci? (es: ${dayLabel} pomeriggio / ${dayLabel} mattina) 🔁`
+                        )!}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 12,
+                          border: "1px solid #e9e9e9",
+                          textDecoration: "none",
+                          fontWeight: 700,
+                        }}
+                      >
+                        🔁 Sposta
+                      </a>
+
+                      <a
+                        href={waLink(
+                          a.contact_phone,
+                          `Ciao ${a.customer_name || ""}! Purtroppo devo annullare l’appuntamento ${dayLabel} alle ${startHour}. Vuoi riprenotare? ❌`
+                        )!}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 12,
+                          border: "1px solid #e9e9e9",
+                          textDecoration: "none",
+                          fontWeight: 700,
+                        }}
+                      >
+                        ❌ Annulla
+                      </a>
+                    </div>
+                  )}
+
+                  {a.note && (
+                    <div style={{ marginTop: 8, fontSize: 14 }}>📝 {a.note}</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+    );
+  }
 
-      <div style={{ fontSize: 14, marginTop: 6, opacity: 0.85 }}>
-        Tel: {a.contact_phone || "-"}
+  return (
+    <>
+      <ClientGate />
+
+      <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 900 }}>
+        <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
+        <p style={{ opacity: 0.7 }}>Appuntamenti di oggi e domani</p>
+
+        <DayBlock title="Oggi" dayLabel="oggi" items={todayAppts || []} />
+        <DayBlock title="Domani" dayLabel="domani" items={tomorrowAppts || []} />
       </div>
-
-      {/* ✅ BOTTONI WHATSAPP */}
-    {a.contact_phone && (
-  <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
-    <a
-      href={waLink(a.contact_phone)!}
-      target="_blank"
-      rel="noreferrer"
-      style={{
-        padding: "10px 12px",
-        borderRadius: 12,
-        border: "1px solid #e9e9e9",
-        textDecoration: "none",
-        fontWeight: 700,
-      }}
-    >
-      💬 Chat
-    </a>
-
-    <a
-      href={waLink(
-        a.contact_phone,
-        `Ciao ${a.customer_name || ""}! Confermo il tuo appuntamento da ${salon.name} ${dayLabel} alle ${
-          formatTimeRange(a).split(" → ")[0]
-        } ✅`
-      )!}
-      target="_blank"
-      rel="noreferrer"
-      style={{
-        padding: "10px 12px",
-        borderRadius: 12,
-        border: "1px solid #e9e9e9",
-        textDecoration: "none",
-        fontWeight: 700,
-      }}
-    >
-      ✅ Conferma
-    </a>
-
-    <a
-      href={waLink(
-        a.contact_phone,
-        `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, quali orari preferisci? (es: ${dayLabel} pomeriggio / domani mattina) 🔁`
-      )!}
-      target="_blank"
-      rel="noreferrer"
-      style={{
-        padding: "10px 12px",
-        borderRadius: 12,
-        border: "1px solid #e9e9e9",
-        textDecoration: "none",
-        fontWeight: 700,
-      }}
-    >
-      🔁 Sposta
-    </a>
-
-    <a
-      href={waLink(
-        a.contact_phone,
-        `Ciao ${a.customer_name || ""}! Purtroppo devo annullare l’appuntamento ${dayLabel} alle ${
-          formatTimeRange(a).split(" → ")[0]
-        }. Vuoi riprenotare? ❌`
-      )!}
-      target="_blank"
-      rel="noreferrer"
-      style={{
-        padding: "10px 12px",
-        borderRadius: 12,
-        border: "1px solid #e9e9e9",
-        textDecoration: "none",
-        fontWeight: 700,
-      }}
-    >
-      ❌ Annulla
-    </a>
-  </div>
-)}
+    </>
+  );
+}
