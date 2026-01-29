@@ -86,7 +86,8 @@ export default async function SalonDashboardPage({
   searchParams: { staff_key?: string; key?: string };
 }) {
   const slug = params.slug;
-  const staffKey = searchParams.staff_key ?? searchParams.key ?? "";
+  const raw = (searchParams as any).staff_key ?? (searchParams as any).key ?? "";
+  const staffKey = (Array.isArray(raw) ? raw[0] : raw).trim();
 
   /* 1) Salone + staff_secret */
   const { data: salon, error: salonErr } = await supabase
@@ -99,17 +100,20 @@ export default async function SalonDashboardPage({
     return <div style={{ padding: 24 }}>Salone non trovato.</div>;
   }
 
- /* 2) Check staff_secret */
-if (!salon.staff_secret || staffKey !== salon.staff_secret) {
-    return (
-      <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
-        <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
-        <p style={{ opacity: 0.8, marginTop: 10 }}>
-          Apri la dashboard usando il link staff salvato nei preferiti.
-        </p>
-      </div>
-    );
-  }
+/* 2) Check staff_secret */
+const dbSecret = String(salon.staff_secret ?? "").trim();
+const urlKey = String(staffKey ?? "").trim();
+
+if (!dbSecret || urlKey !== dbSecret) {
+  return (
+    <div style={{ padding: 24, fontFamily: "system-ui", maxWidth: 720 }}>
+      <h1 style={{ margin: 0 }}>Accesso non autorizzato</h1>
+      <p style={{ opacity: 0.8, marginTop: 10 }}>
+        Apri la dashboard usando il link staff salvato nei preferiti.
+      </p>
+    </div>
+  );
+}
 
   /* 3) Date ranges */
   const today = romeTodayDateStr();
