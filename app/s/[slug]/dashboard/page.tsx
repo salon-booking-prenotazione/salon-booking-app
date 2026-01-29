@@ -98,6 +98,80 @@ export default async function SalonDashboardPage({
     return text ? `${base}?text=${encodeURIComponent(text)}` : base;
   }
 
+  // ✅ base url per chiamare route interne lato server
+  function getBaseUrl() {
+    const publicUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+    const vercel = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
+    return publicUrl || vercel || "";
+  }
+
+  // ✅ formattazioni Rome
+  function romeDateStrFromUtc(iso: string) {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Europe/Rome",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(iso));
+  }
+
+  function romeHHMMFromUtc(iso: string) {
+    return new Intl.DateTimeFormat("it-IT", {
+      timeZone: "Europe/Rome",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date(iso));
+  }
+
+  // ✅ chiama /api/available-times con salon_id + service_id + date
+  async function fetchAvailableTimes(salonId: string, serviceId: string, date: string) {
+    try {
+      const base = getBaseUrl();
+      const url = `${base}/api/available-times?salon_id=${encodeURIComponent(
+        salonId
+      )}&service_id=${encodeURIComponent(serviceId)}&date=${encodeURIComponent(date)}`;
+
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) return [];
+
+      const json = await res.json().catch(() => null);
+
+      // supporta: ["09:00"] oppure { times: [...] } oppure { slots: [...] }
+      if (Array.isArray(json)) return json.filter((x) => typeof x === "string");
+      if (json?.times && Array.isArray(json.times))
+        return json.times.filter((x: any) => typeof x === "string");
+      if (json?.slots && Array.isArray(json.slots))
+        return json.slots.filter((x: any) => typeof x === "string");
+
+      return [];
+    } catch {
+      return [];
+    }
+  }
+
+  function pickNextTwo(slots: string[], currentHHMM: string) {
+    const idx = slots.findIndex((s) => s === currentHHMM);
+    const start = idx >= 0 ? idx + 1 : 0;
+    return slots.slice(start).filter((s) => s !== currentHHMM).slice(0, 2);
+  }
+
+  async function attachAlternatives(items: any[], salonId: string) {
+    return Promise.all(
+      (items || []).map(async (a) => {
+        if (!a.service_id) return { ...a, _alt: [] };
+
+        const dateStr = romeDateStrFromUtc(a.start_time);
+        const currentHHMM = romeHHMMFromUtc(a.start_time);
+
+        const slots = await fetchAvailableTimes(salonId, a.service_id, dateStr);
+        const alternatives = pickNextTwo(slots, currentHHMM);
+
+        return { ...a, _alt: alternatives };
+      })
+    );
+  }
+
   /* 1) Salone + staff_secret */
   const { data: salon, error: salonErr } = await supabase
     .from("salons")
@@ -109,7 +183,7 @@ export default async function SalonDashboardPage({
     return <div style={{ padding: 24 }}>Salone non trovato.</div>;
   }
 
-  /* 2) Check staff_secret (robusto) */
+  /* 2) Check staff_secret */
   const dbSecret = String(salon.staff_secret ?? "").trim();
   const urlKey = String(staffKey ?? "").trim();
 
@@ -131,90 +205,10 @@ export default async function SalonDashboardPage({
 
   const todayRange = romeDayRangeUtc(today);
   const tomorrowRange = romeDayRangeUtc(tomorrow);
-function getBaseUrl() {
-  // su Vercel c’è VERCEL_URL, in locale no
-  const vercel = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "";
-  const publicUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-  return publicUrl || vercel || "";
-}
 
-function romeDateStrFromUtc(iso: string) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/Rome",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(iso));
-}
-
-function romeHHMMFromUtc(iso: string) {
-  return new Intl.DateTimeFormat("it-IT", {
-    timeZone: "Europe/Rome",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).format(new Date(iso));
-}
-
-async function fetchAvailableSlots(slug: string, date: string, durationMin: number) {
-  try {
-    const base = getBaseUrl();
-    const url = `${base}/api/available-time?slug=${encodeURIComponent(
-      slug
-    )}&date=${encodeURIComponent(date)}&duration=${encodeURIComponent(String(durationMin))}`;
-
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return [];
-
-    const json = await res.json().catch(() => null);
-
-    // supporta: ["09:00"] oppure { slots: ["09:00"] }
-    if (Array.isArray(json)) return json.filter((x) => typeof x === "string");
-    if (json && Array.isArray(json.slots)) return json.slots.filter((x: any) => typeof x === "string");
-
-    return [];
-  } catch {
-    return [];
-  }
-}
-
-function pickNextTwo(slots: string[], currentHHMM: string) {
-  // prende i primi 2 slot dopo l'orario attuale
-  const idx = slots.findIndex((s) => s === currentHHMM);
-  const start = idx >= 0 ? idx + 1 : 0;
-
-  const out: string[] = [];
-  for (let i = start; i < slots.length && out.length < 2; i++) {
-    if (slots[i] !== currentHHMM) out.push(slots[i]);
-  }
-  return out;
-}
-
-async function attachAlternatives(items: any[], slug: string) {
-  return Promise.all(
-    (items || []).map(async (a) => {
-      const startIso = a.start_time;
-      const endIso = a.end_time;
-
-      const dateStr = romeDateStrFromUtc(startIso);
-      const currentHHMM = romeHHMMFromUtc(startIso);
-
-      const durationMin = Math.max(
-        5,
-        Math.round((new Date(endIso).getTime() - new Date(startIso).getTime()) / 60000)
-      );
-
-      const slots = await fetchAvailableSlots(slug, dateStr, durationMin);
-      const alternatives = pickNextTwo(slots, currentHHMM);
-
-      return { ...a, _alt: alternatives };
-    })
-  );
-}
-  
-  /* 4) Appuntamenti */
+  /* 4) Appuntamenti (✅ include service_id) */
   const baseSelect =
-    "id,start_time,end_time,customer_name,contact_phone,note,status,cancelled_at";
+    "id,start_time,end_time,service_id,customer_name,contact_phone,note,status,cancelled_at";
 
   const { data: todayAppts } = await supabase
     .from("appointments")
@@ -234,8 +228,9 @@ async function attachAlternatives(items: any[], slug: string) {
     .lte("start_time", tomorrowRange.endISO)
     .order("start_time", { ascending: true });
 
-  const todayApptsEnriched = await attachAlternatives(todayAppts || [], slug);
-  const tomorrowApptsEnriched = await attachAlternatives(tomorrowAppts || [], slug);
+  // ✅ aggiunge alternative reali per “Sposta”
+  const todayApptsEnriched = await attachAlternatives(todayAppts || [], salon.id);
+  const tomorrowApptsEnriched = await attachAlternatives(tomorrowAppts || [], salon.id);
 
   /* 5) UI */
   function formatTimeRange(a: any) {
@@ -274,6 +269,12 @@ async function attachAlternatives(items: any[], slug: string) {
           <div style={{ display: "grid", gap: 10 }}>
             {items.map((a) => {
               const startHour = formatTimeRange(a).split(" → ")[0];
+              const alts: string[] = Array.isArray(a._alt) ? a._alt : [];
+
+              const spostaText =
+                alts.length >= 2
+                  ? `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, vanno bene ${alts[0]} oppure ${alts[1]}? 🔁`
+                  : `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, quali orari preferisci? 🔁`;
 
               return (
                 <div
@@ -295,14 +296,7 @@ async function attachAlternatives(items: any[], slug: string) {
 
                   {/* ✅ BOTTONI WHATSAPP */}
                   {a.contact_phone && (
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 10,
-                        marginTop: 10,
-                        flexWrap: "wrap",
-                      }}
-                    >
+                    <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
                       <a
                         href={waLink(a.contact_phone)!}
                         target="_blank"
@@ -336,29 +330,20 @@ async function attachAlternatives(items: any[], slug: string) {
                         ✅ Conferma
                       </a>
 
-                     <a
-                       href={waLink(
-                       a.contact_phone,
-                       (() => {
-                         const alts: string[] = Array.isArray(a._alt) ? a._alt : [];
-                         if (alts.length >= 2) {
-                           return `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, vanno bene ${alts[0]} oppure ${alts[1]}? 🔁`;
-      }
-      return `Ciao ${a.customer_name || ""}! Per spostare l’appuntamento, quali orari preferisci? 🔁`;
-    })()
-  )!}
-  target="_blank"
-  rel="noreferrer"
-  style={{
-    padding: "10px 12px",
-    borderRadius: 12,
-    border: "1px solid #e9e9e9",
-    textDecoration: "none",
-    fontWeight: 700,
-  }}
->
-  🔁 Sposta
-</a>
+                      <a
+                        href={waLink(a.contact_phone, spostaText)!}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 12,
+                          border: "1px solid #e9e9e9",
+                          textDecoration: "none",
+                          fontWeight: 700,
+                        }}
+                      >
+                        🔁 Sposta
+                      </a>
 
                       <a
                         href={waLink(
@@ -380,9 +365,7 @@ async function attachAlternatives(items: any[], slug: string) {
                     </div>
                   )}
 
-                  {a.note && (
-                    <div style={{ marginTop: 8, fontSize: 14 }}>📝 {a.note}</div>
-                  )}
+                  {a.note && <div style={{ marginTop: 8, fontSize: 14 }}>📝 {a.note}</div>}
                 </div>
               );
             })}
@@ -400,8 +383,8 @@ async function attachAlternatives(items: any[], slug: string) {
         <h1 style={{ marginBottom: 6 }}>Dashboard — {salon.name}</h1>
         <p style={{ opacity: 0.7 }}>Appuntamenti di oggi e domani</p>
 
-        <DayBlock title="Oggi" dayLabel="oggi" items={todayAppts || []} />
-        <DayBlock title="Domani" dayLabel="domani" items={tomorrowAppts || []} />
+        <DayBlock title="Oggi" dayLabel="oggi" items={todayApptsEnriched || []} />
+        <DayBlock title="Domani" dayLabel="domani" items={tomorrowApptsEnriched || []} />
       </div>
     </>
   );
