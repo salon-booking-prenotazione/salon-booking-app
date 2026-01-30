@@ -1,15 +1,17 @@
 export default function Home() {
   return (
-    <div
-      style={{
-        background: "red",
-        color: "white",
-        minHeight: "100vh",
-        padding: 40,
-        fontSize: 28,
-      }}
-    >
-      ✅ TEST ROSSO: se vedi questo, stai vedendo app/page.tsx
+    <div style={{ 
+      minHeight: "100vh", 
+      background: "#E6EFEA", 
+      padding: 40 
+    }}>
+      <h1 style={{ fontSize: 48 }}>
+        FUNZIONA 🎉
+      </h1>
+
+      <p>
+        Se vedi questo con sfondo verde → siamo nel file giusto.
+      </p>
     </div>
   );
 }
