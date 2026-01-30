@@ -16,6 +16,10 @@ export default function Home() {
   ];
 
   return (
+    <div style={{ background: "yellow", padding: 20, fontSize: 24 }}>
+  SONO LA HOME NUOVA (TEST)
+</div>
+    
     <div className="min-h-screen bg-[#E6EFEA] text-[#262626]">
       {/* Background soft blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
