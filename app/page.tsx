@@ -15,7 +15,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#E6EFEA] text-[#262626]">
+    <div className="min-h-screen bg-[#EEF4F0] text-[#1F1F1F]">
       {/* blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-[#E8B7C8]/40 blur-3xl" />
@@ -26,7 +26,7 @@ export default function Home() {
       <div className="relative mx-auto max-w-5xl px-5 py-14">
         {/* header */}
         <div className="flex items-center justify-between">
-          <div className="rounded-full bg-white/70 px-4 py-2 text-xs tracking-widest">
+          <div className="bg-white/70 backdrop-blur-md rounded-3xl ring-1 ring-black/5"
             ✦ SALON BOOKING
           </div>
           <div className="text-sm opacity-70">WhatsApp • Semplice • Veloce</div>
@@ -49,7 +49,7 @@ export default function Home() {
             <div className="mt-8 flex gap-4">
               <a
                 href="#salons"
-                className="rounded-full bg-[#E8B7C8] px-6 py-3 font-semibold hover:bg-[#DFA9BC]"
+                className="rounded-full bg-[#E6B8C6] px-6 py-3 text-sm font-semibold text-[#1F1F1F] shadow-sm hover:bg-[#DDB0BF]"
               >
                 Scegli il salone
               </a>
