@@ -39,7 +39,7 @@ export default function Home() {
         {/* HERO */}
         <div className="mt-10 grid gap-10 md:grid-cols-2 md:items-start">
           <div>
-            <h1 className="text-4xl font-semibold leading-[1.05] tracking-[-0.02em] md:text-6xl">
+            <h1 className="font-serif text-4xl font-semibold leading-[1.05] md:text-6xl">
               Il tuo momento
               <br />
               di bellezza.
@@ -53,7 +53,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#salons"
-                className="inline-flex items-center justify-center rounded-full bg-[#E8B7C8] px-6 py-3 text-sm font-semibold text-[#1f1f1f] shadow-sm ring-1 ring-black/5 transition hover:-translate-y-[1px] hover:bg-[#DFA9BC]"
+                className="inline-flex items-center justify-center rounded-full bg-[#E7B6C7] px-6 py-3 text-sm font-semibold text-[#1f1f1f] shadow-sm transition hover:translate-y-[-1px] hover:bg-[#DDA9BD] active:translate-y-0"
               >
                 Scegli il salone
               </a>
