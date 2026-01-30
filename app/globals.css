@@ -2,14 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base reset */
+/* reset minimo */
 html,
 body {
   padding: 0;
   margin: 0;
-}
-
-/* Test: se questo CSS entra, lo sfondo diventa verde */
-body {
-  background: #c7f9cc !important;
 }
