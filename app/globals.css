@@ -2,14 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Reset base */
-html,
-body {
+/* reset base */
+html, body {
   padding: 0;
   margin: 0;
 }
 
-/* Font */
+/* colori base luxury */
 body {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  background-color: #EEF4F0; /* verde latte */
+  color: #1F1F1F;
+  font-family: var(--font-sans);
 }
