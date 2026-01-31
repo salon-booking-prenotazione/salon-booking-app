@@ -107,6 +107,10 @@ export default function Home() {
           </div>
         </div>
 
+      <footer className="mt-16 text-center text-xs text-[#2A2A2A]/60">
+  © {new Date().getFullYear()} Salon Booking — semplice, elegante, senza app.
+</footer>
+
         {/* footer */}
         <div id="staff" className="mt-16 text-sm opacity-70">
           © {new Date().getFullYear()} Salon Booking — semplice & chic
