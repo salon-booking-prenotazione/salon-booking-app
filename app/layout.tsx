@@ -1,6 +1,18 @@
-<body style={{ background: "hotpink", padding: 20 }}>
-  <div style={{ fontSize: 32, fontWeight: 800 }}>
-    TEST HOTPINK — SE MI VEDI, STAI USANDO QUESTO LAYOUT
-  </div>
-  {children}
-</body>
+import "./globals.css";
+import { Inter, Playfair_Display } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
+
+export const metadata = {
+  title: "Salon Booking",
+  description: "Agenda semplice per saloni",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="it" className={`${inter.variable} ${playfair.variable}`}>
+      <body className="font-sans">{children}</body>
+    </html>
+  );
+}
