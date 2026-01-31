@@ -59,6 +59,10 @@ export default function Home() {
               >
                 Area staff
               </a>
+          {/* Footer */}
+          <footer className="mt-16 text-center text-xs text-[#2A2A2A]/60">
+            © {new Date().getFullYear()} Salon Booking — Designed for modern salons ✦
+          </footer>
             </div>
           </div>
 
@@ -107,13 +111,12 @@ export default function Home() {
           </div>
         </div>
 
-      <footer className="mt-16 text-center text-xs text-[#2A2A2A]/60">
-  © {new Date().getFullYear()} Salon Booking — semplice, elegante, senza app.
-</footer>
-
         {/* footer */}
-        <div id="staff" className="mt-16 text-sm opacity-70">
-          © {new Date().getFullYear()} Salon Booking — semplice & chic
+       <footer className="mt-20 text-center text-xs tracking-wide text-[#2A2A2A]/50">
+  © {new Date().getFullYear()} Salon Booking  
+  <span className="mx-2">•</span>
+  Designed for modern salons ✦
+</footer>
         </div>
       </div>
     </div>
