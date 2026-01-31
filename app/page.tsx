@@ -15,145 +15,199 @@ export default function Home() {
   ];
 
   return (
-    <div className="relative min-h-screen text-[#1F1F1F] overflow-hidden">
-      {/* SFONDO IMMAGINE */}
-      <div className="fixed inset-0 -z-10">
-        <img
-          src="/home-hero.jpg"
-          alt="Luxury salon"
-          className="h-full w-full object-cover"
+    <div className="min-h-screen text-[#1D1D1D]">
+      {/* HERO con immagine reale + overlay */}
+      <section className="relative overflow-hidden">
+        {/* immagine di sfondo */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url(/home-hero.jpg)" }}
         />
-        {/* velo chiaro sopra immagine */}
-        <div className="absolute inset-0 bg-[#EEF4F0]/85" />
-      </div>
 
-      {/* BLOBS DECORATIVI */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-24 -left-24 h-80 w-80 rounded-full bg-[#E8B7C8]/45 blur-3xl" />
-        <div className="absolute top-10 -right-24 h-80 w-80 rounded-full bg-white/60 blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 h-96 w-96 rounded-full bg-[#CFE2D9]/70 blur-3xl" />
-      </div>
+        {/* overlay elegante (verde/rosa) */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0F2A22]/70 via-[#17352C]/55 to-[#8C5A68]/40" />
 
-      {/* CONTENUTO */}
-      <div className="relative z-10 mx-auto max-w-5xl px-5 py-16">
-        {/* HEADER */}
-        <div className="flex items-center justify-between">
-          <div className="rounded-full bg-white/70 px-4 py-2 text-xs tracking-widest">
-            ✦ SALON BOOKING
-          </div>
-          <div className="text-sm opacity-70">
-            WhatsApp • Semplice • Veloce
-          </div>
+        {/* grana/soft */}
+        <div className="absolute inset-0 opacity-30 mix-blend-overlay">
+          <div className="h-full w-full bg-[radial-gradient(circle_at_20%_10%,rgba(255,255,255,0.35),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.20),transparent_50%),radial-gradient(circle_at_40%_90%,rgba(255,255,255,0.18),transparent_55%)]" />
         </div>
 
-        {/* HERO */}
-        <div className="mt-14 grid gap-12 md:grid-cols-2">
-          <div>
-            <h1 className="text-5xl md:text-6xl font-serif leading-tight">
-              Il tuo momento
-              <br />
-              di bellezza.
-            </h1>
+        {/* contenuto */}
+        <div className="relative mx-auto max-w-6xl px-5 py-14 md:py-20">
+          {/* top bar */}
+          <div className="flex items-center justify-between gap-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-xs tracking-[0.22em] uppercase text-white/90 ring-1 ring-white/15 backdrop-blur">
+              <span className="text-[#F2C4D3]">✦</span>
+              <span>Salon Booking</span>
+            </div>
 
-            <p className="mt-6 text-lg opacity-80">
-              Prenotare dev’essere semplice e bello.
-              Conferma su WhatsApp in pochi secondi.
-            </p>
-
-            <div className="mt-8 flex gap-4">
-              <a
-                href="#salons"
-                className="rounded-full bg-[#E8B7C8] px-6 py-3 text-sm font-semibold hover:bg-[#DFA9BC]"
-              >
-                Scegli il salone
-              </a>
-              <a
-                href="#staff"
-                className="rounded-full bg-white/80 px-6 py-3 text-sm font-semibold"
-              >
-                Area staff
-              </a>
+            <div className="hidden text-sm text-white/80 md:block">
+              WhatsApp • Semplice • Veloce
             </div>
           </div>
 
-          {/* CARD PRENOTAZIONE */}
-          <div className="rounded-3xl bg-white/80 p-8 shadow-sm">
-            <div className="text-xs tracking-widest opacity-60">
-              PRENOTA ONLINE
+          {/* hero grid */}
+          <div className="mt-12 grid items-start gap-10 md:grid-cols-2 md:gap-14">
+            {/* left */}
+            <div>
+              <h1 className="text-4xl font-semibold leading-[1.05] text-white md:text-6xl">
+                Il tuo momento
+                <br />
+                di bellezza.
+              </h1>
+
+              <p className="mt-5 max-w-prose text-base leading-relaxed text-white/85 md:text-lg">
+                Prenotare dev’essere semplice e bello. Scegli il tuo salone e
+                conferma su WhatsApp in pochi secondi.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <a
+                  href="#salons"
+                  className="inline-flex items-center justify-center rounded-full bg-[#F2C4D3] px-6 py-3 text-sm font-semibold text-[#1D1D1D] shadow-sm transition hover:translate-y-[-1px] hover:bg-[#EFB2C7]"
+                >
+                  Scegli il salone
+                </a>
+
+                <a
+                  href="#staff"
+                  className="inline-flex items-center justify-center rounded-full bg-white/15 px-6 py-3 text-sm font-semibold text-white ring-1 ring-white/20 backdrop-blur transition hover:bg-white/20"
+                >
+                  Area staff
+                </a>
+              </div>
+
+              <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-white/75">
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[#F2C4D3]" />
+                  Conferma su WhatsApp
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-[#BFE6D6]" />
+                  Nessuna app da installare
+                </div>
+              </div>
             </div>
 
-            <h3 className="mt-3 text-2xl font-serif">
-              Un’esperienza
-              <br />
-              morbida & chic
-            </h3>
+            {/* right card */}
+            <div className="rounded-3xl bg-white/12 p-6 ring-1 ring-white/20 backdrop-blur-md md:p-8">
+              <div className="text-xs uppercase tracking-[0.18em] text-white/70">
+                Prenota online
+              </div>
 
-            <div className="mt-6 space-y-4">
-              <div className="rounded-xl bg-white p-4">
-                ✦ Scegli servizio
+              <div className="mt-3 text-2xl font-semibold leading-tight text-white md:text-3xl">
+                Un’esperienza
+                <br />
+                morbida &amp; chic
               </div>
-              <div className="rounded-xl bg-white p-4">
-                ✦ Seleziona orario
-              </div>
-              <div className="rounded-xl bg-white p-4">
-                ✦ Conferma su WhatsApp
+
+              <div className="mt-6 space-y-3">
+                <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <span className="text-[#BFE6D6]">✦</span> Scegli servizio
+                  </div>
+                  <div className="mt-1 text-sm text-white/70">
+                    Taglio, colore, piega…
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <span className="text-[#F2C4D3]">✿</span> Seleziona orario
+                  </div>
+                  <div className="mt-1 text-sm text-white/70">
+                    Solo slot disponibili
+                  </div>
+                </div>
+
+                <div className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                    <span className="text-white/90">❖</span> Conferma su WhatsApp
+                  </div>
+                  <div className="mt-1 text-sm text-white/70">
+                    Messaggio pronto, un click
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+
+          {/* separatore soft */}
+          <div className="mt-14 h-px w-full bg-white/15" />
         </div>
+      </section>
 
-        {/* SALONI */}
-        <div id="salons" className="mt-20">
-          <h2 className="text-3xl font-semibold mb-6">
-            Scegli il tuo salone
-          </h2>
+      {/* SEZIONE LISTA SALONI (sfondo chiaro elegante) */}
+      <section className="bg-gradient-to-b from-[#F3F7F5] to-[#EEF4F0]">
+        <div className="mx-auto max-w-6xl px-5 py-14">
+          <div id="salons" className="flex items-end justify-between gap-6">
+            <h2 className="text-2xl font-semibold md:text-3xl">
+              Scegli il tuo salone
+            </h2>
+            <div className="hidden text-sm text-black/55 md:block">
+              Prenotazione in pochi secondi
+            </div>
+          </div>
 
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="mt-7 grid gap-6 md:grid-cols-2">
             {salons.map((s) => (
               <div
                 key={s.slug}
-                className="rounded-3xl bg-white/80 p-6 shadow-sm"
+                className="rounded-3xl bg-white/70 p-6 ring-1 ring-black/5 shadow-sm backdrop-blur-md transition hover:translate-y-[-2px] hover:bg-white"
               >
                 <div className="text-xl font-semibold">{s.name}</div>
-                <div className="mt-2 text-sm opacity-70">{s.address}</div>
-                <div className="mt-1 text-sm">{s.phone}</div>
 
-                <a
-                  href={`/s/${s.slug}`}
-                  className="mt-4 inline-block rounded-full bg-[#E8B7C8] px-5 py-2 text-sm font-semibold"
-                >
-                  Prenota
-                </a>
+                <div className="mt-3 space-y-1 text-sm text-black/65">
+                  <div>{s.address}</div>
+                  <div>Tel: {s.phone}</div>
+                </div>
+
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="text-xs text-black/45">/{`s/${s.slug}`}</div>
+
+                  <a
+                    href={`/s/${s.slug}`}
+                    className="inline-flex items-center justify-center rounded-full bg-[#1E6A57] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#175345]"
+                  >
+                    Prenota
+                  </a>
+                </div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* STAFF */}
-        <div
-          id="staff"
-          className="mt-16 rounded-3xl bg-white/70 p-6"
-        >
-          <div className="font-semibold">Area staff</div>
-          <div className="mt-1 text-sm opacity-70">
-            Gestione prenotazioni e inserimento manuale.
+          {/* STAFF */}
+          <div
+            id="staff"
+            className="mt-12 rounded-3xl bg-white/55 p-6 ring-1 ring-black/5 shadow-sm backdrop-blur-md"
+          >
+            <div className="text-sm font-semibold">Area staff</div>
+            <div className="mt-1 text-sm text-black/65">
+              Accesso rapido per gestione prenotazioni e inserimento manuale.
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a
+                href="/staff/login"
+                className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black ring-1 ring-black/5 transition hover:bg-[#F7FBF9]"
+              >
+                Login staff
+              </a>
+              <a
+                href="/admin/manual"
+                className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black ring-1 ring-black/5 transition hover:bg-[#F7FBF9]"
+              >
+                Prenotazioni manuali
+              </a>
+            </div>
           </div>
 
-          <div className="mt-4 flex gap-3">
-            <a className="rounded-full bg-white px-4 py-2 text-sm">
-              Login staff
-            </a>
-            <a className="rounded-full bg-white px-4 py-2 text-sm">
-              Prenotazioni manuali
-            </a>
-          </div>
+          {/* FOOTER */}
+          <footer className="mt-12 text-center text-xs text-black/50">
+            © {new Date().getFullYear()} Salon Booking • Designed for modern salons ✦
+          </footer>
         </div>
-
-        {/* FOOTER */}
-        <footer className="mt-20 text-center text-xs opacity-60">
-          © {new Date().getFullYear()} Salon Booking • Designed for modern salons ✦
-        </footer>
-      </div>
+      </section>
     </div>
   );
 }
