@@ -3,23 +3,24 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <div className="relative">
-      {/* SEZIONE HERO (sopra il video) */}
-      <section className="h-screen flex items-center justify-center">
-        <div className="lux-card p-10 max-w-4xl text-center">
-          <div className="lux-badge mb-6">
+      {/* SEZIONE HERO */}
+      <section className="h-screen flex items-center justify-end pr-10 md:pr-20">
+        <div className="lux-card p-10 max-w-[720px] text-center -mt-16">
+          
+          <div className="lux-badge mb-6 mx-auto w-fit">
             Stile luxury • Verde/Rosa più visibili • UI coerente
           </div>
 
-          <h1 className="lux-title text-4xl md:text-6xl">
-            Prenota in{" "}
-            <span style={{ color: "var(--sage-btn)" }}>pochi secondi</span>, con
-            un look{" "}
-            <span style={{ color: "var(--plum)" }}>premium</span>.
+          <h1 className="lux-title text-4xl md:text-5xl">
+            Il tuo momento di bellezza,
+            <br />
+            <span style={{ color: "var(--plum)" }}>prenotato con eleganza</span>.
           </h1>
 
           <p className="lux-subtitle mt-6">
-            Una home chiara e una pagina prenotazione coerente: stessi bordi,
-            stesso background, stessa esperienza.
+            Scegli servizio e orario. Conferma su WhatsApp.
+            <br />
+            Nessuna app, nessuna registrazione.
           </p>
 
           <div className="mt-8 flex justify-center gap-4 flex-wrap">
