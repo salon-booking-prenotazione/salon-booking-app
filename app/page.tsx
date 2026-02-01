@@ -6,7 +6,7 @@ export default function HomePage() {
       {/* HERO sopra il video */}
      <section className="h-screen w-full flex items-center justify-end px-4 md:px-10 lg:px-20">
         {/* questa è la “spinta” a destra */}
-         <div className="w-full max-w-[620px] translate-x-6 md:translate-x-12">
+         <div className="w-full max-w-[560px] translate-x-10 md:translate-x-20 lg:translate-x-28">
           <div className="lux-card p-8 md:p-10 text-center">
             <div className="lux-badge mb-6">
               Stile luxury • Verde/Rosa più visibili • UI coerente
