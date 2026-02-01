@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <video autoPlay muted loop playsInline className="lux-video">
             <source src="/images/videos/lotus.mp4" type="video/mp4" />
           </video>
+          <div className="lux-scrim" />
 
           {/* Contenuto sopra al video */}
           <div className="relative z-10 min-h-screen">
