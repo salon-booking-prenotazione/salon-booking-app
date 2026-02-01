@@ -61,24 +61,27 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               </div>
 
               {/* ✅ 1) Vuoto di default */}
-              <select
-                className="lux-input"
-                value={servizio}
-                onChange={(e) => setServizio(e.target.value)}
-              >
-                <option value="" disabled>
-                  Seleziona un servizio…
-                </option>
-                {servizi.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
+             <div className="mt-4">
+  <select
+    className="lux-input"
+    value={servizio}
+    onChange={(e) => setServizio(e.target.value)}
+  >
+    <option value="" disabled>
+      Seleziona un servizio…
+    </option>
 
-              <div className="mt-2" style={{ color: "var(--muted)", fontSize: 13 }}>
-                Seleziona il servizio, poi scegli data e orario.
-              </div>
+    {servizi.map((s) => (
+      <option key={s} value={s}>
+        {s}
+      </option>
+    ))}
+  </select>
+</div>
+
+<div className="mt-2" style={{ color: "var(--muted)", fontSize: 13 }}>
+  Seleziona il servizio, poi scegli data e orario.
+</div>
             </div>
           </div>
 
