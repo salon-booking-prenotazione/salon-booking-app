@@ -3,105 +3,110 @@
 @tailwind utilities;
 
 :root{
-  --cream:#f6f3ee;
-  --ink:#1b1b1f;
-  --sage:#7f8f86;
-  --sage-2:#94a39b;
-  --rose:#b06a7f;
-  --rose-2:#d7a9b6;
-  --line: rgba(27,27,31,0.14);
+  --bg0:#07060a;
+  --bg1:#0b0a12;
+  --ink: rgba(255,255,255,0.92);
+
+  /* Sage + Rose (più visibili ma eleganti) */
+  --sage: 140 170 158; /* soft sage */
+  --rose: 232 140 170; /* dusty rose */
+  --gold: 245 197 121; /* warm highlight */
+
+  --line: rgba(255,255,255,0.12);
+  --card: rgba(255,255,255,0.06);
 }
 
-html,body{height:100%;}
+html, body { height:100%; }
 body{
-  font-family: var(--font-body), ui-sans-serif, system-ui;
-  background: #e9ece7;
   color: var(--ink);
+  background: var(--bg0);
+  font-family: var(--font-body), ui-sans-serif, system-ui;
 }
 
 .lux-bg{
   min-height:100vh;
   background:
-    radial-gradient(900px 600px at 20% 10%, rgba(176,106,127,0.18), transparent 55%),
-    radial-gradient(900px 600px at 85% 15%, rgba(127,143,134,0.22), transparent 55%),
-    linear-gradient(180deg, #e7ebe7, #e3e8e4);
+    radial-gradient(1100px 700px at 18% 12%, rgba(var(--sage),0.18), transparent 60%),
+    radial-gradient(900px 600px at 85% 18%, rgba(var(--rose),0.16), transparent 55%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(var(--gold),0.08), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
 }
 
 @layer components{
-  /* card “cream” con bordo sottile come immagine */
   .lux-card{
-    @apply rounded-none;
-    background: var(--cream);
-    border: 1px solid var(--line);
-    box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+    @apply rounded-2xl border backdrop-blur-md;
+    border-color: var(--line);
+    background: var(--card);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.05) inset,
+      0 18px 60px rgba(0,0,0,0.45);
   }
 
-  .lux-frame{
-    border: 6px solid rgba(176,106,127,0.35); /* cornice rosata */
-  }
-
-  .lux-h1{
+  .lux-title{
     font-family: var(--font-display), ui-serif, Georgia;
-    @apply text-4xl md:text-5xl font-medium tracking-tight;
-    color: #5b2940; /* prugna come titolo in immagine */
+    @apply text-3xl md:text-5xl font-medium tracking-tight;
+  }
+  .lux-subtitle{
+    @apply text-white/65 text-base md:text-lg;
   }
 
-  .lux-muted{ @apply text-sm md:text-base; color: rgba(27,27,31,0.65); }
-
-  .lux-label{ @apply text-xs tracking-wide uppercase; color: rgba(27,27,31,0.55); }
-
-  .lux-select, .lux-input{
-    @apply w-full px-4 py-3;
-    background: rgba(255,255,255,0.65);
-    border: 1px solid var(--line);
-    outline: none;
-  }
-  .lux-select:focus, .lux-input:focus{
-    border-color: rgba(176,106,127,0.55);
-    box-shadow: 0 0 0 3px rgba(176,106,127,0.18);
+  .lux-pill{
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm border;
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.78);
   }
 
   .lux-btn{
-    @apply px-6 py-3 text-sm font-medium;
-    border: 1px solid var(--line);
-    background: #fff;
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium border transition;
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.08);
   }
-  .lux-btn-sage{
-    background: var(--sage);
-    color: #fff;
-    border-color: rgba(127,143,134,0.35);
-  }
-  .lux-btn-sage:hover{ filter: brightness(1.03); }
+  .lux-btn:hover{ background: rgba(255,255,255,0.12); }
 
-  .lux-btn-ghost{
-    background: transparent;
+  /* CTA luxury: sage -> rose */
+  .lux-btn-primary{
+    border-color: rgba(255,255,255,0.18);
+    background: linear-gradient(135deg,
+      rgba(var(--sage),0.95),
+      rgba(var(--rose),0.85)
+    );
+    color: rgba(255,255,255,0.95);
+    box-shadow:
+      0 10px 30px rgba(var(--sage),0.18),
+      0 8px 26px rgba(var(--rose),0.14);
+  }
+  .lux-btn-primary:hover{ filter: brightness(1.03); }
+
+  .lux-input{
+    @apply w-full rounded-xl border px-4 py-3 outline-none;
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(0,0,0,0.28);
+    color: rgba(255,255,255,0.92);
+  }
+  .lux-input::placeholder{ color: rgba(255,255,255,0.40); }
+  .lux-input:focus{
+    border-color: rgba(var(--sage),0.55);
+    box-shadow: 0 0 0 4px rgba(var(--sage),0.18);
   }
 
-  /* calendario / slot “a tabella” */
-  .lux-grid{
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,0.5);
+  .lux-sep{
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
   }
-  .lux-cell{
-    @apply grid place-items-center text-sm;
-    border-right: 1px solid var(--line);
-    border-bottom: 1px solid var(--line);
-    height: 42px;
-  }
-  .lux-cell-muted{ color: rgba(27,27,31,0.35); }
-  .lux-cell-active{
-    background: rgba(176,106,127,0.18);
-    color: #5b2940;
-    font-weight: 600;
-  }
+
+  /* “tabella” elegante per slots */
   .lux-slot{
-    @apply px-3 py-2 text-sm text-center;
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,0.7);
+    @apply rounded-lg border px-3 py-2 text-sm text-center;
+    border-color: rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.82);
   }
+  .lux-slot:hover{ background: rgba(255,255,255,0.10); }
   .lux-slot.selected{
-    background: #5b2940;
-    color: #fff;
-    border-color: rgba(91,41,64,0.4);
+    background: rgba(var(--rose),0.22);
+    border-color: rgba(var(--rose),0.38);
+    color: rgba(255,255,255,0.95);
+    box-shadow: 0 0 0 1px rgba(var(--rose),0.16) inset;
   }
 }
