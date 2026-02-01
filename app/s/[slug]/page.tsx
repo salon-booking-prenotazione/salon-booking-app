@@ -1,14 +1,14 @@
 import Link from "next/link";
 
-export default function SalonBookingPage({ params }: { params: { slug: string } }) {
+export default function PaginaPrenotazione({ params }: { params: { slug: string } }) {
   const slug = params.slug;
 
-  // Demo data (poi colleghiamo Supabase)
-  const salonName = slug === "demo" ? "Lorena Salon" : `Salon ${slug}`;
-  const month = "April 2026";
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  // Demo (poi colleghiamo Supabase)
+  const nomeSalone = slug === "demo" ? "Lorena Salon" : `Salone ${slug}`;
+  const mese = "Aprile 2026";
+  const giorni = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 
-  const grid = [
+  const calendario = [
     ["", "", "", "1", "2", "3", "4"],
     ["5", "6", "7", "8", "9", "10", "11"],
     ["12", "13", "14", "15", "16", "17", "18"],
@@ -16,119 +16,104 @@ export default function SalonBookingPage({ params }: { params: { slug: string } 
     ["26", "27", "28", "29", "30", "", ""],
   ];
 
-  const slots = ["1:00 pm", "1:30 pm", "2:00 pm", "2:30 pm", "3:00 pm", "3:30 pm"];
+  // Qui poi useremo gli slot reali dal DB
+  const orari = ["13:00", "13:30", "14:00", "14:30", "15:00", "15:30"];
+
+  // Qui poi useremo i servizi reali dal DB
+  const serviziDemo = ["Taglio", "Piega", "Colore", "Trattamento", "Barba"];
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
-        {/* LEFT: form */}
+        {/* SINISTRA: scelta servizio */}
         <section className="lux-card lux-frame p-8 md:p-10">
           <div className="flex items-start justify-between">
-            <h1 className="lux-title text-3xl md:text-4xl">Make an Appointment</h1>
-            <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Close">
+            <h1 className="lux-title text-3xl md:text-4xl">Prenota appuntamento</h1>
+            <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Chiudi">
               ✕
             </Link>
           </div>
 
           <div className="mt-3 lux-subtitle">
-            <b style={{ color: "var(--plum)" }}>{salonName}</b> • Prenotazione demo “bella”
+            <b style={{ color: "var(--plum)" }}>{nomeSalone}</b> • Prenotazione demo (poi mettiamo i dati reali)
           </div>
 
           <div className="mt-6 space-y-4">
             <div>
               <div className="text-sm mb-2" style={{ color: "var(--muted)", fontWeight: 700 }}>
-                Service Category
+                Servizio *
               </div>
-              <select className="lux-input" defaultValue="Body Treatments">
-                <option>Body Treatments</option>
-                <option>Hair</option>
-                <option>Nails</option>
+
+              {/* SOLO UN CAMPO SERVIZIO */}
+              <select className="lux-input" defaultValue={serviziDemo[0]}>
+                {serviziDemo.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
+
+              <div className="mt-2" style={{ color: "var(--muted)", fontSize: 13 }}>
+                Scegli il servizio. Poi selezioni data e orario.
+              </div>
             </div>
 
-            <div>
-              <div className="text-sm mb-2" style={{ color: "var(--muted)", fontWeight: 700 }}>
-                Service *
-              </div>
-              <select className="lux-input" defaultValue="2 Day Programs">
-                <option>2 Day Programs</option>
-                <option>Taglio & Piega</option>
-                <option>Colore</option>
-              </select>
-            </div>
+            <div className="lux-sep" />
 
-            <div>
-              <div className="text-sm mb-2" style={{ color: "var(--muted)", fontWeight: 700 }}>
-                Location
-              </div>
-              <select className="lux-input" defaultValue="Any">
-                <option value="Any">— Any —</option>
-                <option>Centro</option>
-                <option>Fuori città</option>
-              </select>
-            </div>
-
-            <div>
-              <div className="text-sm mb-2" style={{ color: "var(--muted)", fontWeight: 700 }}>
-                Employee
-              </div>
-              <select className="lux-input" defaultValue="Rachel Green">
-                <option>Rachel Green</option>
-                <option>Giulia</option>
-                <option>Martina</option>
-              </select>
+            <div style={{ color: "var(--muted)", fontSize: 13 }}>
+              <b>Come funziona:</b> 1) Servizio → 2) Data & Orario → 3) Conferma
             </div>
           </div>
 
           <div className="mt-8 flex gap-3">
-            <a className="lux-btn lux-btn-primary w-full" href="#calendar">
-              Next
+            <a className="lux-btn lux-btn-primary w-full" href="#calendario">
+              Avanti
             </a>
           </div>
         </section>
 
-        {/* RIGHT: calendar + slots */}
-        <section id="calendar" className="lux-card lux-frame p-8 md:p-10">
+        {/* DESTRA: calendario + orari */}
+        <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
           <div className="flex items-center justify-between">
-            <h2 className="lux-title text-2xl md:text-3xl">Make an Appointment</h2>
-            <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 700 }}>{month}</div>
+            <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
+            <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 700 }}>{mese}</div>
           </div>
 
-          {/* Days */}
+          {/* intestazione giorni */}
           <div className="mt-6 grid grid-cols-7 gap-0" style={{ color: "var(--muted)", fontSize: 12 }}>
-            {days.map((d) => (
-              <div key={d} className="text-center py-2" style={{ fontWeight: 700 }}>
-                {d}
+            {giorni.map((g) => (
+              <div key={g} className="text-center py-2" style={{ fontWeight: 700 }}>
+                {g}
               </div>
             ))}
           </div>
 
-          {/* Calendar grid */}
+          {/* calendario */}
           <div className="lux-grid">
             <div className="grid grid-cols-7">
-              {grid.flat().map((v, idx) => {
-                const isEmpty = v === "";
-                const isSelected = v === "14"; // demo selection
-                const isRound = v === "7"; // demo “today”
+              {calendario.flat().map((v, idx) => {
+                const vuoto = v === "";
+                const selezionato = v === "14"; // demo
+                const oggi = v === "7"; // demo
 
                 return (
                   <div
                     key={idx}
                     className={[
                       "lux-cell",
-                      isEmpty ? "lux-cell-muted" : "",
-                      isSelected ? "lux-cell-active" : "",
+                      vuoto ? "lux-cell-muted" : "",
+                      selezionato ? "lux-cell-active" : "",
                     ].join(" ")}
                     style={{
                       borderRight: idx % 7 === 6 ? "none" : undefined,
                       borderBottom: idx >= 28 ? "none" : undefined,
                       borderColor: "var(--line)",
-                      background: isRound ? "rgba(127,143,134,0.22)" : undefined,
-                      borderRadius: isRound ? 999 : undefined,
-                      margin: isRound ? 6 : 0,
-                      height: isRound ? 30 : 42,
-                      width: isRound ? 30 : "auto",
-                      justifySelf: isRound ? "center" : undefined,
+                      background: oggi ? "rgba(127,143,134,0.22)" : undefined,
+                      borderRadius: oggi ? 999 : undefined,
+                      margin: oggi ? 6 : 0,
+                      height: oggi ? 30 : 42,
+                      width: oggi ? 30 : "auto",
+                      justifySelf: oggi ? "center" : undefined,
                     }}
                   >
                     {v || " "}
@@ -138,10 +123,10 @@ export default function SalonBookingPage({ params }: { params: { slug: string } 
             </div>
           </div>
 
-          {/* Slots */}
+          {/* orari */}
           <div className="mt-6 grid grid-cols-3 gap-3">
-            {slots.map((t) => (
-              <div key={t} className={`lux-slot ${t === "1:30 pm" ? "selected" : ""}`}>
+            {orari.map((t) => (
+              <div key={t} className={`lux-slot ${t === "13:30" ? "selected" : ""}`}>
                 {t}
               </div>
             ))}
@@ -149,11 +134,15 @@ export default function SalonBookingPage({ params }: { params: { slug: string } 
 
           <div className="mt-8 flex gap-3">
             <button className="lux-btn lux-btn-primary w-full" type="button">
-              Next
+              Conferma
             </button>
             <Link className="lux-btn w-full" href="/">
-              Back
+              Indietro
             </Link>
+          </div>
+
+          <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
+            Nessuna app • Nessuna registrazione • Solo prenotazione semplice
           </div>
         </section>
       </div>
