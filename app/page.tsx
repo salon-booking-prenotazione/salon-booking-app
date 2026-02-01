@@ -4,8 +4,8 @@ export default function HomePage() {
   return (
     <div className="relative">
       {/* SEZIONE HERO */}
-      <section className="h-screen flex items-center justify-end pr-10 md:pr-20">
-        <div className="lux-card p-10 max-w-[720px] text-center -mt-16">
+      <section className="h-screen flex items-center justify-end pr-4 md:pr-32 lg:pr-40">
+        <div className="lux-card p-10 max-w-[720px] text-center -mt-16 translate-x-6">
           
           <div className="lux-badge mb-6 mx-auto w-fit">
             Stile luxury • Verde/Rosa più visibili • UI coerente
