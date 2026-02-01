@@ -2,159 +2,159 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === Palette tipo Screen 3 (MotoPress vibe) === */
+/* === MotoPress-ish, ma più premium === */
 :root{
-  --bg: #c6cec7;          /* salvia chiaro */
-  --cream: #f5f2ec;       /* carta/crema */
-  --line: rgba(35,35,38,0.18);
-  --rose-line: rgba(206, 160, 176, 0.75); /* bordo rosa */
-  --plum: #5b2a3f;        /* testo titolo prugna */
-  --text: rgba(35,35,38,0.80);
-  --muted: rgba(35,35,38,0.55);
+  --bg: #c7cec7;                 /* sage background */
+  --bg2:#bfc7c0;
+  --cream:#f6f2ec;               /* card paper */
+  --cream2:#f2ede6;
 
-  --sage-btn: #7f8f86;    /* bottone verde salvia */
-  --sage-btn-dark: #6f8077;
+  --plum:#5b2a3f;                /* titles */
+  --ink: rgba(28,28,30,0.82);
+  --muted: rgba(28,28,30,0.55);
 
-  --slot: rgba(255,255,255,0.65);
-  --slot-border: rgba(35,35,38,0.22);
-  --selected: #5b2a3f;    /* selezione bordeaux/prugna */
+  --sage:#7f8f86;                /* CTA */
+  --sage2:#6f8077;
+
+  --rose:#cfa0b2;                /* frame */
+  --rose2:#ddb7c5;
+
+  --line: rgba(28,28,30,0.16);
+  --line2: rgba(255,255,255,0.45);
 }
 
 html, body { height: 100%; }
 body{
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   font-family: var(--font-body), ui-sans-serif, system-ui;
 }
 
-/* sfondo con “forme morbide” come screen 3 (NO immagini, solo gradienti) */
+/* background con “forme” + leggero pattern (solo CSS) */
 .lux-bg{
   min-height: 100vh;
   background:
-    radial-gradient(700px 520px at 20% 25%, rgba(130, 150, 140, 0.35), transparent 62%),
-    radial-gradient(560px 460px at 70% 22%, rgba(210, 160, 175, 0.26), transparent 60%),
-    radial-gradient(900px 650px at 65% 85%, rgba(130, 150, 140, 0.22), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06));
+    radial-gradient(900px 700px at 18% 18%, rgba(127,143,134,0.40), transparent 62%),
+    radial-gradient(780px 560px at 78% 22%, rgba(207,160,178,0.30), transparent 60%),
+    radial-gradient(1000px 780px at 60% 90%, rgba(127,143,134,0.22), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05)),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0.06) 0px,
+      rgba(255,255,255,0.06) 2px,
+      rgba(0,0,0,0.00) 10px,
+      rgba(0,0,0,0.00) 16px
+    );
 }
 
-/* === Tipografia === */
+/* tipografia */
 .lux-title{
   font-family: var(--font-display), ui-serif, Georgia;
   color: var(--plum);
   font-weight: 500;
   letter-spacing: -0.02em;
 }
-.lux-subtitle{
-  color: var(--muted);
-}
+.lux-subtitle{ color: var(--muted); }
 
-/* === Card crema + bordo sottile === */
-.lux-card{
-  background: var(--cream);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 18px 55px rgba(0,0,0,0.12);
-}
-
-/* Cornice rosa esterna (come screen 3) */
-.lux-frame{
-  border: 6px solid var(--rose-line);
-  border-radius: 16px;
-}
-
-/* Badge in alto (testo piccolo) */
+/* badge top */
 .lux-badge{
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.45);
-  color: rgba(35,35,38,0.65);
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 14px;
+  border-radius:999px;
+  background: rgba(255,255,255,0.55);
+  border: 1px solid rgba(28,28,30,0.14);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  color: rgba(28,28,30,0.60);
   font-size: 13px;
 }
 
-/* Bottoni */
+/* CARD premium: bordo interno + carta + ombra morbida */
+.lux-card{
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(255,255,255,0.70), transparent 55%),
+    linear-gradient(180deg, var(--cream), var(--cream2));
+  border: 1px solid rgba(28,28,30,0.14);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,0.14),
+    0 0 0 1px rgba(255,255,255,0.55) inset;
+}
+
+/* cornice esterna “rosa” tipo screen 3 ma più elegante */
+.lux-frame{
+  border: 8px solid rgba(207,160,178,0.55);
+  border-radius: 22px;
+  box-shadow:
+    0 18px 55px rgba(0,0,0,0.12);
+}
+
+/* bottoni */
 .lux-btn{
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  padding: 10px 16px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.55);
-  color: rgba(35,35,38,0.78);
-  font-weight: 600;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius: 14px;
+  padding: 11px 18px;
+  border: 1px solid rgba(28,28,30,0.16);
+  background: rgba(255,255,255,0.65);
+  color: rgba(28,28,30,0.78);
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
 }
 .lux-btn:hover{ filter: brightness(1.02); }
 
 .lux-btn-primary{
-  background: var(--sage-btn);
+  background: linear-gradient(180deg, rgba(127,143,134,0.98), rgba(111,128,119,0.98));
+  color: rgba(255,255,255,0.95);
   border-color: rgba(0,0,0,0.10);
-  color: rgba(255,255,255,0.92);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.14);
+  box-shadow:
+    0 16px 30px rgba(127,143,134,0.22),
+    0 10px 20px rgba(0,0,0,0.12);
 }
-.lux-btn-primary:hover{ background: var(--sage-btn-dark); }
+.lux-btn-primary:hover{ transform: translateY(-1px); }
 
 .lux-btn-ghost{
   background: transparent;
+  box-shadow: none;
 }
 
-/* Input / Select */
-.lux-input{
-  width: 100%;
-  border-radius: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.70);
-  color: rgba(35,35,38,0.84);
-  outline: none;
-}
-.lux-input::placeholder{ color: rgba(35,35,38,0.38); }
-.lux-input:focus{
-  border-color: rgba(206,160,176,0.95);
-  box-shadow: 0 0 0 3px rgba(206,160,176,0.18);
-}
-
+/* separatore */
 .lux-sep{
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(35,35,38,0.20), transparent);
+  background: linear-gradient(90deg, transparent, rgba(28,28,30,0.18), transparent);
 }
 
-/* “Tabella” / slot (bordi sottili) */
+/* input */
+.lux-input{
+  width:100%;
+  border-radius: 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(28,28,30,0.16);
+  background: rgba(255,255,255,0.72);
+  color: rgba(28,28,30,0.82);
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.55) inset;
+}
+.lux-input:focus{
+  border-color: rgba(207,160,178,0.85);
+  box-shadow: 0 0 0 4px rgba(207,160,178,0.18);
+}
+
+/* slots “tabelle” */
 .lux-slot{
-  border-radius: 10px;
-  border: 1px solid var(--slot-border);
-  background: var(--slot);
+  border-radius: 12px;
+  border: 1px solid rgba(28,28,30,0.18);
+  background: rgba(255,255,255,0.70);
   padding: 10px 12px;
   text-align: center;
   font-size: 13px;
-  color: rgba(35,35,38,0.72);
+  color: rgba(28,28,30,0.72);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
 }
 .lux-slot.selected{
-  background: var(--selected);
+  background: linear-gradient(180deg, rgba(91,42,63,0.98), rgba(70,25,45,0.98));
+  color: rgba(255,255,255,0.95);
   border-color: rgba(91,42,63,0.55);
-  color: rgba(255,255,255,0.92);
-}
-
-/* Mini “tabella calendario” (se la usi) */
-.lux-grid{
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.40);
-}
-.lux-cell{
-  display: grid;
-  place-items: center;
-  height: 42px;
-  font-size: 13px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  color: rgba(35,35,38,0.70);
-}
-.lux-cell-muted{ color: rgba(35,35,38,0.28); }
-.lux-cell-active{
-  background: rgba(91,42,63,0.12);
-  color: var(--plum);
-  font-weight: 700;
 }
