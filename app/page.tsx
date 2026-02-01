@@ -8,7 +8,12 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-6xl px-6 md:px-10">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
             {/* TESTO (sinistra) */}
-            <div className="w-full lg:w-[58%]">
+            <div
+              className="
+                w-full lg:w-[58%]
+                lg:translate-x-12 lg:-translate-y-4
+              "
+            >
               {/* pannellino “glass” per leggibilità */}
               <div className="inline-block rounded-3xl px-6 py-6 md:px-8 md:py-7 backdrop-blur-md bg-white/25 border border-white/30 shadow-[0_20px_60px_rgba(0,0,0,0.12)]">
                 <h1 className="lux-title text-5xl md:text-6xl leading-tight">
@@ -50,15 +55,6 @@ export default function HomePage() {
             </div>
             {/* fine card */}
           </div>
-
-          {/* Spinta layout SOLO su desktop: titolo più a destra + un po’ più su */}
-          <style jsx>{`
-            @media (min-width: 1024px) {
-              .lux-title {
-                /* niente: lasciamo font come da CSS */
-              }
-            }
-          `}</style>
         </div>
       </section>
     </div>
