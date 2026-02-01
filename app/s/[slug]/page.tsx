@@ -1,209 +1,147 @@
-export default function BookingPage({
+import Link from "next/link";
+
+export default function SalonBookingPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  // ✅ per ora usiamo dati finti (poi colleghiamo Supabase)
-  const salons = [
-    {
-      name: "Jolanda Salon",
-      address: "Via Aldo Fedeli, Verona",
-      phone: "+393476221824",
-      slug: "jolanda-salon",
-    },
-    {
-      name: "Lorena Salon",
-      address: "Via Belluzzo 29, Verona",
-      phone: "+393397940573",
-      slug: "lorena-salon",
-    },
+  const slug = params.slug;
+
+  // Placeholder: qui poi agganci i dati reali (Supabase) in server component
+  const salonName = slug === "demo" ? "Demo Luxury Salon" : `Salon: ${slug}`;
+
+  const services = [
+    { name: "Taglio & Piega", duration: "60 min", price: "45€" },
+    { name: "Colore", duration: "90 min", price: "70€" },
+    { name: "Trattamento", duration: "45 min", price: "35€" },
   ];
 
-  const salon = salons.find((s) => s.slug === params.slug);
-
-  if (!salon) {
-    return (
-      <div className="min-h-screen bg-[#F3F7F4] text-[#1F1F1F] flex items-center justify-center p-6">
-        <div className="max-w-md rounded-3xl bg-white/85 p-8 shadow-lg">
-          <div className="text-xs tracking-widest text-[#6B6B6B]">NOT FOUND</div>
-          <h1 className="mt-2 font-serif text-3xl">Salone non trovato</h1>
-          <p className="mt-3 text-sm text-[#6B6B6B]">
-            Controlla il link oppure torna alla home.
-          </p>
-          <a
-            href="/"
-            className="mt-6 inline-flex rounded-full bg-[#2F6F5E] px-6 py-2 text-sm font-semibold text-white hover:bg-[#285E50] transition"
-          >
-            Torna alla home
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#F3F7F4] text-[#1F1F1F]">
-      {/* BACKGROUND (più “spa”, più visibile) */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-36 -left-36 h-[32rem] w-[32rem] rounded-full bg-[#E6A9BB]/35 blur-3xl" />
-        <div className="absolute top-24 -right-40 h-[34rem] w-[34rem] rounded-full bg-[#CFE2D9]/65 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-[30rem] w-[30rem] rounded-full bg-white/70 blur-3xl" />
-      </div>
+    <div className="space-y-10">
+      {/* HERO SALON */}
+      <section className="lux-card p-7 md:p-10">
+        <div className="flex items-start justify-between gap-6 flex-col md:flex-row">
+          <div className="space-y-3">
+            <div className="lux-badge">
+              <span className="h-2 w-2 rounded-full bg-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.65)]" />
+              Pagina prenotazione • /s/{slug}
+            </div>
 
-      <div className="relative mx-auto max-w-6xl px-5 py-12">
-        {/* Top bar */}
-        <div className="flex items-center justify-between gap-4">
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs font-semibold tracking-widest shadow-sm"
+            <h1 className="lux-title">{salonName}</h1>
+            <p className="lux-subtitle max-w-2xl">
+              Scegli un servizio, inserisci i dati e conferma. (UI pronta: puoi collegare la logica reale subito dopo)
+            </p>
+
+            <div className="flex gap-3 flex-wrap pt-2">
+              <a className="lux-btn lux-btn-primary" href="#prenota">
+                Prenota ora
+              </a>
+              <Link className="lux-btn lux-btn-ghost" href="/">
+                Torna alla Home
+              </Link>
+            </div>
+          </div>
+
+          <div className="lux-card p-5 w-full md:w-[360px]">
+            <div className="text-white/85 font-semibold">Info rapide</div>
+            <div className="text-white/55 text-sm mt-2 space-y-1">
+              <div>📍 Centro città</div>
+              <div>🕒 Lun–Sab 09:00–19:00</div>
+              <div>💬 WhatsApp disponibile</div>
+            </div>
+            <div className="lux-sep my-4" />
+            <a className="lux-btn w-full" href="https://wa.me/" target="_blank" rel="noreferrer">
+              Contatta su WhatsApp
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* SERVICES */}
+      <section className="grid lg:grid-cols-3 gap-6">
+        {services.map((s) => (
+          <div key={s.name} className="lux-card p-6">
+            <div className="flex items-center justify-between">
+              <div className="text-white/90 font-semibold">{s.name}</div>
+              <div className="text-emerald-300 font-semibold">{s.price}</div>
+            </div>
+            <div className="text-white/55 text-sm mt-2">Durata: {s.duration}</div>
+
+            <div className="lux-sep my-4" />
+
+            <a href="#prenota" className="lux-btn lux-btn-primary w-full">
+              Seleziona
+            </a>
+          </div>
+        ))}
+      </section>
+
+      {/* BOOKING FORM */}
+      <section id="prenota" className="lux-card p-7 md:p-10">
+        <div className="grid lg:grid-cols-2 gap-8 items-start">
+          <div className="space-y-3">
+            <h2 className="text-2xl md:text-3xl font-semibold">Prenotazione</h2>
+            <p className="text-white/60">
+              Questa è una versione “safe” per Vercel build: niente client hooks obbligatori.
+              Quando vuoi, agganci la submit a Supabase / API route.
+            </p>
+
+            <div className="lux-card p-5 mt-4">
+              <div className="text-white/85 font-semibold">Suggerimento luxury</div>
+              <p className="text-white/55 text-sm mt-1">
+                Mantieni massimo 4 campi e CTA chiara (verde/rosa): conversione molto più alta.
+              </p>
+            </div>
+          </div>
+
+          <form
+            className="lux-card p-6 space-y-4"
+            action="#"
+            method="post"
           >
-            ✦ SALON BOOKING
-          </a>
-
-          <div className="text-sm text-[#6B6B6B]">
-            WhatsApp • Semplice • Veloce
-          </div>
-        </div>
-
-        {/* HERO GLASS */}
-        <div className="mt-10 grid gap-10 lg:grid-cols-2 items-start">
-          {/* Left: salon info */}
-          <div className="rounded-3xl bg-white/70 p-8 shadow-lg backdrop-blur-md">
-            <div className="text-xs tracking-widest text-[#6B6B6B]">
-              PRENOTAZIONE
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-white/70">Nome</label>
+                <input className="lux-input mt-2" name="name" placeholder="Es. Martina" />
+              </div>
+              <div>
+                <label className="text-sm text-white/70">Telefono</label>
+                <input className="lux-input mt-2" name="phone" placeholder="Es. +39 ..." />
+              </div>
             </div>
 
-            <h1 className="mt-3 font-serif text-4xl md:text-5xl leading-tight">
-              {salon.name}
-            </h1>
+            <div>
+              <label className="text-sm text-white/70">Servizio</label>
+              <select className="lux-input mt-2" name="service" defaultValue={services[0]?.name}>
+                {services.map((s) => (
+                  <option key={s.name} value={s.name}>
+                    {s.name} • {s.price} • {s.duration}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            <p className="mt-4 text-sm text-[#6B6B6B]">
-              {salon.address}
-              <br />
-              Tel: {salon.phone}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-white/70">Data</label>
+                <input className="lux-input mt-2" type="date" name="date" />
+              </div>
+              <div>
+                <label className="text-sm text-white/70">Orario</label>
+                <input className="lux-input mt-2" type="time" name="time" />
+              </div>
+            </div>
+
+            <button type="submit" className="lux-btn lux-btn-primary w-full py-3">
+              Conferma prenotazione
+            </button>
+
+            <p className="text-xs text-white/45">
+              Dopo l’aggancio a Supabase, qui puoi mostrare conferma + link gestione + ICS.
             </p>
-
-            <div className="mt-8 grid gap-3">
-              <div className="rounded-2xl bg-white/85 p-4 shadow-sm">
-                <div className="text-sm font-semibold">✦ 1) Scegli servizio</div>
-                <div className="mt-1 text-sm text-[#6B6B6B]">
-                  Taglio, colore, piega…
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-white/85 p-4 shadow-sm">
-                <div className="text-sm font-semibold">◇ 2) Seleziona orario</div>
-                <div className="mt-1 text-sm text-[#6B6B6B]">
-                  Solo slot disponibili
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-white/85 p-4 shadow-sm">
-                <div className="text-sm font-semibold">● 3) Conferma su WhatsApp</div>
-                <div className="mt-1 text-sm text-[#6B6B6B]">
-                  Messaggio pronto, un click
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={`https://wa.me/${salon.phone.replace("+", "")}?text=${encodeURIComponent(
-                  `Ciao! Vorrei prenotare un appuntamento da ${salon.name}.`
-                )}`}
-                target="_blank"
-                className="inline-flex items-center justify-center rounded-full bg-[#2F6F5E] px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-[#285E50] transition"
-              >
-                Conferma su WhatsApp
-              </a>
-
-              <a
-                href="/"
-                className="inline-flex items-center justify-center rounded-full bg-white/80 px-6 py-3 text-sm font-semibold shadow-sm hover:bg-white transition"
-              >
-                Torna alla home
-              </a>
-            </div>
-          </div>
-
-          {/* Right: “booking card” mock premium */}
-          <div className="rounded-3xl bg-white/75 p-8 shadow-xl backdrop-blur-md">
-            <div className="text-xs tracking-widest text-[#6B6B6B]">
-              SELEZIONA
-            </div>
-
-            <h2 className="mt-3 font-serif text-3xl">
-              Scegli data & ora
-            </h2>
-
-            <p className="mt-3 text-sm text-[#6B6B6B]">
-              (Per ora è una demo “bella”. Poi colleghiamo calendario e slot reali.)
-            </p>
-
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
-                <div className="text-sm font-semibold">Servizio</div>
-                <div className="mt-2 flex gap-2 flex-wrap">
-                  {["Taglio", "Colore", "Piega", "Trattamento"].map((x) => (
-                    <span
-                      key={x}
-                      className="rounded-full bg-[#E6A9BB]/35 px-4 py-2 text-sm"
-                    >
-                      {x}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
-                <div className="text-sm font-semibold">Orari disponibili</div>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  {["10:00", "11:30", "14:00", "15:30", "17:00", "18:30"].map(
-                    (t) => (
-                      <button
-                        key={t}
-                        className="rounded-xl bg-white px-3 py-3 text-sm shadow-sm ring-1 ring-black/5 hover:ring-[#2F6F5E]/40 transition"
-                        type="button"
-                      >
-                        {t}
-                      </button>
-                    )
-                  )}
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-white/90 p-5 shadow-sm">
-                <div className="text-sm font-semibold">Nota (opzionale)</div>
-                <input
-                  className="mt-2 w-full rounded-xl bg-white px-4 py-3 text-sm shadow-sm ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#2F6F5E]/40"
-                  placeholder="Es. Ho i capelli lunghi…"
-                />
-              </div>
-
-              <div className="pt-2">
-                <a
-                  href={`https://wa.me/${salon.phone.replace("+", "")}?text=${encodeURIComponent(
-                    `Ciao! Vorrei prenotare da ${salon.name}.`
-                  )}`}
-                  target="_blank"
-                  className="inline-flex w-full items-center justify-center rounded-2xl bg-[#E6A9BB] px-6 py-4 text-sm font-semibold text-[#1F1F1F] shadow-md hover:bg-[#DD9CAF] transition"
-                >
-                  Invia richiesta su WhatsApp
-                </a>
-
-                <div className="mt-3 text-center text-xs text-[#6B6B6B]">
-                  Nessuna app • Nessuna registrazione • Solo WhatsApp
-                </div>
-              </div>
-            </div>
-          </div>
+          </form>
         </div>
-
-        {/* footer */}
-        <footer className="mt-14 text-center text-xs text-[#6B6B6B]">
-          © {new Date().getFullYear()} Salon Booking • Designed for modern salons ✦
-        </footer>
-      </div>
+      </section>
     </div>
   );
 }
