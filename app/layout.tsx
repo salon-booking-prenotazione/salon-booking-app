@@ -17,73 +17,29 @@ export const metadata: Metadata = {
   description: "Prenota il tuo appuntamento in pochi secondi",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="it">
       <body className={`${playfair.variable} ${inter.variable}`}>
         <div className="lux-bg">
           <div className="min-h-screen">
-            <header
-              className="sticky top-0 z-40 backdrop-blur border-b"
-              style={{
-                borderColor: "rgba(255,255,255,0.12)",
-                background: "rgba(0,0,0,0.35)",
-              }}
-            >
-              <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
-                <a href="/" className="flex items-center gap-3">
-                  <div
-                    className="h-9 w-9 grid place-items-center"
-                    style={{
-                      border: "1px solid rgba(255,255,255,0.14)",
-                      background: "rgba(255,255,255,0.06)",
-                    }}
-                  >
-                    <span className="text-lg">✦</span>
-                  </div>
-                  <div className="leading-tight">
-                    <div
-                      className="font-medium tracking-wide"
-                      style={{
-                        fontFamily: "var(--font-display), ui-serif, Georgia",
-                        color: "rgba(255,255,255,0.92)",
-                      }}
-                    >
-                      Salon Booking
-                    </div>
-                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
-                      Luxury scheduling
-                    </div>
-                  </div>
-                </a>
+            <header className="mx-auto max-w-6xl px-4 py-6 flex items-center justify-between">
+              <a href="/" className="lux-badge">
+                <span style={{ color: "var(--plum)", fontWeight: 700 }}>✦</span>
+                <span style={{ letterSpacing: "0.12em", fontWeight: 700 }}>
+                  SALON BOOKING
+                </span>
+              </a>
 
-                <nav className="flex items-center gap-2">
-                  <a className="lux-btn" href="/s/demo">
-                    Demo
-                  </a>
-                  <a className="lux-btn lux-btn-primary" href="/s/demo">
-                    Prenota ora
-                  </a>
-                </nav>
+              <div style={{ color: "var(--muted)", fontSize: 13 }}>
+                WhatsApp • Semplice • Veloce
               </div>
             </header>
 
-            <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
+            <main className="mx-auto max-w-6xl px-4 pb-14">{children}</main>
 
-            <footer
-              className="mx-auto max-w-6xl px-4 pb-10 pt-8 text-sm"
-              style={{ color: "rgba(255,255,255,0.55)" }}
-            >
-              <div className="lux-card p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div>© {new Date().getFullYear()} Salon Booking</div>
-                <div style={{ color: "rgba(255,255,255,0.45)" }}>
-                  Sage & rose — luxury UI • Next.js App Router
-                </div>
-              </div>
+            <footer className="mx-auto max-w-6xl px-4 pb-10 text-sm" style={{ color: "var(--muted)" }}>
+              © {new Date().getFullYear()} Salon Booking • Designed for modern salons ✦
             </footer>
           </div>
         </div>
