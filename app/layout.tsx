@@ -27,16 +27,20 @@ export default function RootLayout({
       <body className={`${playfair.variable} ${inter.variable}`}>
         <div className="lux-bg">
           <div className="min-h-screen">
-            <header className="sticky top-0 z-40 backdrop-blur bg-white/25 border-b"
-              style={{ borderColor: "var(--line)" }}
+            <header
+              className="sticky top-0 z-40 backdrop-blur border-b"
+              style={{
+                borderColor: "rgba(255,255,255,0.12)",
+                background: "rgba(0,0,0,0.35)",
+              }}
             >
               <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
                 <a href="/" className="flex items-center gap-3">
                   <div
                     className="h-9 w-9 grid place-items-center"
                     style={{
-                      border: "1px solid var(--line)",
-                      background: "rgba(255,255,255,0.55)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      background: "rgba(255,255,255,0.06)",
                     }}
                   >
                     <span className="text-lg">✦</span>
@@ -44,21 +48,24 @@ export default function RootLayout({
                   <div className="leading-tight">
                     <div
                       className="font-medium tracking-wide"
-                      style={{ fontFamily: "var(--font-display), ui-serif, Georgia", color: "#5b2940" }}
+                      style={{
+                        fontFamily: "var(--font-display), ui-serif, Georgia",
+                        color: "rgba(255,255,255,0.92)",
+                      }}
                     >
                       Salon Booking
                     </div>
-                    <div className="text-xs" style={{ color: "rgba(27,27,31,0.55)" }}>
+                    <div className="text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
                       Luxury scheduling
                     </div>
                   </div>
                 </a>
 
                 <nav className="flex items-center gap-2">
-                  <a className="lux-btn lux-btn-ghost" href="/s/demo">
+                  <a className="lux-btn" href="/s/demo">
                     Demo
                   </a>
-                  <a className="lux-btn lux-btn-sage" href="/s/demo">
+                  <a className="lux-btn lux-btn-primary" href="/s/demo">
                     Prenota ora
                   </a>
                 </nav>
@@ -67,12 +74,13 @@ export default function RootLayout({
 
             <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
 
-            <footer className="mx-auto max-w-6xl px-4 pb-10 pt-8 text-sm"
-              style={{ color: "rgba(27,27,31,0.55)" }}
+            <footer
+              className="mx-auto max-w-6xl px-4 pb-10 pt-8 text-sm"
+              style={{ color: "rgba(255,255,255,0.55)" }}
             >
               <div className="lux-card p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div>© {new Date().getFullYear()} Salon Booking</div>
-                <div style={{ color: "rgba(27,27,31,0.45)" }}>
+                <div style={{ color: "rgba(255,255,255,0.45)" }}>
                   Sage & rose — luxury UI • Next.js App Router
                 </div>
               </div>
