@@ -152,12 +152,6 @@ body{
   border-color: rgba(91,42,63,0.55);
 }
 /* ===== Video opening luxury ===== */
-.lux-bg {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-}
-
 .lux-video {
   position: fixed;
   inset: 0;
