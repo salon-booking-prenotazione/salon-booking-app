@@ -13,8 +13,8 @@ export default function HomePage() {
         p-10
         max-w-[520px]
         text-center
-        translate-x-14 md:translate-x-28 lg:translate-x-36
-        -translate-y-6 md:-translate-y-12
+        translate-x-14 md:translate-x-28 lg:translate-x-44
+        -translate-y-20 md:-translate-y-12
       "
     >
       <div className="lux-badge mb-6">
