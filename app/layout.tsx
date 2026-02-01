@@ -22,13 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="it">
       <body className={`${playfair.variable} ${inter.variable}`}>
         <div className="lux-bg">
-          <video
-  autoPlay
-  muted
-  loop
-  playsInline
-  className="lux-video"
->
+          <video autoPlay muted loop playsInline className="lux-video">
   <source src="/videos/lotus.mp4" type="video/mp4" />
 </video>
           <div className="min-h-screen">
