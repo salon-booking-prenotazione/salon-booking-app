@@ -21,8 +21,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="it">
       <body className={`${playfair.variable} ${inter.variable}`}>
+        {/* Wrapper globale */}
         <div className="lux-bg">
-          <div className="min-h-screen">
+          {/* Video background globale (colori originali) */}
+          <video autoPlay muted loop playsInline className="lux-video">
+            <source src="/images/videos/lotus.mp4" type="video/mp4" />
+          </video>
+
+          {/* Contenuto sopra al video */}
+          <div className="relative z-10 min-h-screen">
             <header className="mx-auto max-w-6xl px-4 py-6 flex items-center justify-between">
               <a href="/" className="lux-badge">
                 <span style={{ color: "var(--plum)", fontWeight: 700 }}>✦</span>
@@ -38,7 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             <main className="mx-auto max-w-6xl px-4 pb-14">{children}</main>
 
-            <footer className="mx-auto max-w-6xl px-4 pb-10 text-sm" style={{ color: "var(--muted)" }}>
+            <footer
+              className="mx-auto max-w-6xl px-4 pb-10 text-sm"
+              style={{ color: "var(--muted)" }}
+            >
               © {new Date().getFullYear()} Salon Booking • Designed for modern salons ✦
             </footer>
           </div>
