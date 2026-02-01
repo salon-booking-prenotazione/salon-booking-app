@@ -2,107 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg0: #07060a;
-  --bg1: #0b0712;
+:root{
+  --cream:#f6f3ee;
+  --ink:#1b1b1f;
+  --sage:#7f8f86;
+  --sage-2:#94a39b;
+  --rose:#b06a7f;
+  --rose-2:#d7a9b6;
+  --line: rgba(27,27,31,0.14);
 }
 
-html,
-body {
-  height: 100%;
-  background: var(--bg0);
-  color: rgba(255, 255, 255, 0.92);
+html,body{height:100%;}
+body{
+  font-family: var(--font-body), ui-sans-serif, system-ui;
+  background: #e9ece7;
+  color: var(--ink);
 }
 
-/* Background luxury globale (NO data-uri => evita PostCSSSyntaxError) */
-.lux-bg {
-  position: relative;
-  min-height: 100vh;
+.lux-bg{
+  min-height:100vh;
   background:
-    radial-gradient(1200px 800px at 20% 10%, rgba(16,185,129,0.20), transparent 60%),
-    radial-gradient(900px 600px at 85% 20%, rgba(244,63,94,0.20), transparent 55%),
-    radial-gradient(1200px 900px at 50% 110%, rgba(245,158,11,0.08), transparent 55%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+    radial-gradient(900px 600px at 20% 10%, rgba(176,106,127,0.18), transparent 55%),
+    radial-gradient(900px 600px at 85% 15%, rgba(127,143,134,0.22), transparent 55%),
+    linear-gradient(180deg, #e7ebe7, #e3e8e4);
 }
 
-/* Glow */
-.lux-glow {
-  pointer-events: none;
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(60px);
-  opacity: 0.7;
-}
-.lux-glow-1 {
-  width: 520px;
-  height: 520px;
-  left: -120px;
-  top: 120px;
-  background: rgba(16, 185, 129, 0.22);
-}
-.lux-glow-2 {
-  width: 520px;
-  height: 520px;
-  right: -160px;
-  top: 80px;
-  background: rgba(244, 63, 94, 0.20);
-}
-
-@layer components {
-  /* Card luxury: stesso bordo + background ovunque */
-  .lux-card {
-    @apply rounded-2xl border border-white/12 bg-white/5 backdrop-blur-md;
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,0.06) inset,
-      0 18px 60px rgba(0,0,0,0.35);
+@layer components{
+  /* card “cream” con bordo sottile come immagine */
+  .lux-card{
+    @apply rounded-none;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.10);
   }
 
-  .lux-title {
-    @apply text-3xl md:text-5xl font-semibold tracking-tight;
-  }
-  .lux-subtitle {
-    @apply text-white/65 text-base md:text-lg;
+  .lux-frame{
+    border: 6px solid rgba(176,106,127,0.35); /* cornice rosata */
   }
 
-  .lux-badge {
-    @apply inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-4 py-2 text-sm text-white/75;
+  .lux-h1{
+    font-family: var(--font-display), ui-serif, Georgia;
+    @apply text-4xl md:text-5xl font-medium tracking-tight;
+    color: #5b2940; /* prugna come titolo in immagine */
   }
 
-  .lux-btn {
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium border border-white/12 bg-white/10 hover:bg-white/14 transition;
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset;
+  .lux-muted{ @apply text-sm md:text-base; color: rgba(27,27,31,0.65); }
+
+  .lux-label{ @apply text-xs tracking-wide uppercase; color: rgba(27,27,31,0.55); }
+
+  .lux-select, .lux-input{
+    @apply w-full px-4 py-3;
+    background: rgba(255,255,255,0.65);
+    border: 1px solid var(--line);
+    outline: none;
   }
-  .lux-btn-ghost {
-    @apply bg-transparent hover:bg-white/8;
+  .lux-select:focus, .lux-input:focus{
+    border-color: rgba(176,106,127,0.55);
+    box-shadow: 0 0 0 3px rgba(176,106,127,0.18);
   }
 
-  /* Verde/Rosa più visibili */
-  .lux-btn-primary {
-    background: linear-gradient(
-      135deg,
-      rgba(16,185,129,0.95),
-      rgba(244,63,94,0.85)
-    );
-    border-color: rgba(255,255,255,0.16);
-    color: rgba(255,255,255,0.95);
+  .lux-btn{
+    @apply px-6 py-3 text-sm font-medium;
+    border: 1px solid var(--line);
+    background: #fff;
   }
-  .lux-btn-primary:hover {
-    filter: brightness(1.03);
+  .lux-btn-sage{
+    background: var(--sage);
+    color: #fff;
+    border-color: rgba(127,143,134,0.35);
+  }
+  .lux-btn-sage:hover{ filter: brightness(1.03); }
+
+  .lux-btn-ghost{
+    background: transparent;
   }
 
-  .lux-input {
-    @apply w-full rounded-xl border border-white/12 bg-black/20 px-4 py-3 text-white/90 placeholder:text-white/40 outline-none;
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset;
+  /* calendario / slot “a tabella” */
+  .lux-grid{
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.5);
   }
-  .lux-input:focus {
-    border-color: rgba(255,255,255,0.22);
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,0.08) inset,
-      0 0 0 4px rgba(16,185,129,0.15);
+  .lux-cell{
+    @apply grid place-items-center text-sm;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    height: 42px;
   }
-
-  .lux-sep {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  .lux-cell-muted{ color: rgba(27,27,31,0.35); }
+  .lux-cell-active{
+    background: rgba(176,106,127,0.18);
+    color: #5b2940;
+    font-weight: 600;
+  }
+  .lux-slot{
+    @apply px-3 py-2 text-sm text-center;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.7);
+  }
+  .lux-slot.selected{
+    background: #5b2940;
+    color: #fff;
+    border-color: rgba(91,41,64,0.4);
   }
 }
