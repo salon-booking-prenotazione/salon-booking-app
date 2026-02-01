@@ -158,3 +158,31 @@ body{
   color: rgba(255,255,255,0.95);
   border-color: rgba(91,42,63,0.55);
 }
+/* ===== Video opening luxury ===== */
+.lux-bg {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.lux-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+/* velo chiaro sopra il video */
+.lux-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(248, 245, 240, 0.75),
+    rgba(248, 245, 240, 0.88)
+  );
+  z-index: -1;
+}
