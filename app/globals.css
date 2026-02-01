@@ -2,111 +2,159 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === Palette tipo Screen 3 (MotoPress vibe) === */
 :root{
-  --bg0:#07060a;
-  --bg1:#0b0a12;
-  --ink: rgba(255,255,255,0.92);
+  --bg: #c6cec7;          /* salvia chiaro */
+  --cream: #f5f2ec;       /* carta/crema */
+  --line: rgba(35,35,38,0.18);
+  --rose-line: rgba(206, 160, 176, 0.75); /* bordo rosa */
+  --plum: #5b2a3f;        /* testo titolo prugna */
+  --text: rgba(35,35,38,0.80);
+  --muted: rgba(35,35,38,0.55);
 
-  /* Sage + Rose (più visibili ma eleganti) */
-  --sage: 140 170 158; /* soft sage */
-  --rose: 232 140 170; /* dusty rose */
-  --gold: 245 197 121; /* warm highlight */
+  --sage-btn: #7f8f86;    /* bottone verde salvia */
+  --sage-btn-dark: #6f8077;
 
-  --line: rgba(255,255,255,0.12);
-  --card: rgba(255,255,255,0.06);
+  --slot: rgba(255,255,255,0.65);
+  --slot-border: rgba(35,35,38,0.22);
+  --selected: #5b2a3f;    /* selezione bordeaux/prugna */
 }
 
-html, body { height:100%; }
+html, body { height: 100%; }
 body{
-  color: var(--ink);
-  background: var(--bg0);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-body), ui-sans-serif, system-ui;
 }
 
+/* sfondo con “forme morbide” come screen 3 (NO immagini, solo gradienti) */
 .lux-bg{
-  min-height:100vh;
+  min-height: 100vh;
   background:
-    radial-gradient(1100px 700px at 18% 12%, rgba(var(--sage),0.18), transparent 60%),
-    radial-gradient(900px 600px at 85% 18%, rgba(var(--rose),0.16), transparent 55%),
-    radial-gradient(1200px 800px at 50% 110%, rgba(var(--gold),0.08), transparent 60%),
-    linear-gradient(180deg, var(--bg0), var(--bg1));
+    radial-gradient(700px 520px at 20% 25%, rgba(130, 150, 140, 0.35), transparent 62%),
+    radial-gradient(560px 460px at 70% 22%, rgba(210, 160, 175, 0.26), transparent 60%),
+    radial-gradient(900px 650px at 65% 85%, rgba(130, 150, 140, 0.22), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.06));
 }
 
-@layer components{
-  .lux-card{
-    @apply rounded-2xl border backdrop-blur-md;
-    border-color: var(--line);
-    background: var(--card);
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,0.05) inset,
-      0 18px 60px rgba(0,0,0,0.45);
-  }
+/* === Tipografia === */
+.lux-title{
+  font-family: var(--font-display), ui-serif, Georgia;
+  color: var(--plum);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.lux-subtitle{
+  color: var(--muted);
+}
 
-  .lux-title{
-    font-family: var(--font-display), ui-serif, Georgia;
-    @apply text-3xl md:text-5xl font-medium tracking-tight;
-  }
-  .lux-subtitle{
-    @apply text-white/65 text-base md:text-lg;
-  }
+/* === Card crema + bordo sottile === */
+.lux-card{
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 18px 55px rgba(0,0,0,0.12);
+}
 
-  .lux-pill{
-    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm border;
-    border-color: rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.05);
-    color: rgba(255,255,255,0.78);
-  }
+/* Cornice rosa esterna (come screen 3) */
+.lux-frame{
+  border: 6px solid var(--rose-line);
+  border-radius: 16px;
+}
 
-  .lux-btn{
-    @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium border transition;
-    border-color: rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.08);
-  }
-  .lux-btn:hover{ background: rgba(255,255,255,0.12); }
+/* Badge in alto (testo piccolo) */
+.lux-badge{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.45);
+  color: rgba(35,35,38,0.65);
+  font-size: 13px;
+}
 
-  /* CTA luxury: sage -> rose */
-  .lux-btn-primary{
-    border-color: rgba(255,255,255,0.18);
-    background: linear-gradient(135deg,
-      rgba(var(--sage),0.95),
-      rgba(var(--rose),0.85)
-    );
-    color: rgba(255,255,255,0.95);
-    box-shadow:
-      0 10px 30px rgba(var(--sage),0.18),
-      0 8px 26px rgba(var(--rose),0.14);
-  }
-  .lux-btn-primary:hover{ filter: brightness(1.03); }
+/* Bottoni */
+.lux-btn{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.55);
+  color: rgba(35,35,38,0.78);
+  font-weight: 600;
+}
+.lux-btn:hover{ filter: brightness(1.02); }
 
-  .lux-input{
-    @apply w-full rounded-xl border px-4 py-3 outline-none;
-    border-color: rgba(255,255,255,0.14);
-    background: rgba(0,0,0,0.28);
-    color: rgba(255,255,255,0.92);
-  }
-  .lux-input::placeholder{ color: rgba(255,255,255,0.40); }
-  .lux-input:focus{
-    border-color: rgba(var(--sage),0.55);
-    box-shadow: 0 0 0 4px rgba(var(--sage),0.18);
-  }
+.lux-btn-primary{
+  background: var(--sage-btn);
+  border-color: rgba(0,0,0,0.10);
+  color: rgba(255,255,255,0.92);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.14);
+}
+.lux-btn-primary:hover{ background: var(--sage-btn-dark); }
 
-  .lux-sep{
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
-  }
+.lux-btn-ghost{
+  background: transparent;
+}
 
-  /* “tabella” elegante per slots */
-  .lux-slot{
-    @apply rounded-lg border px-3 py-2 text-sm text-center;
-    border-color: rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.06);
-    color: rgba(255,255,255,0.82);
-  }
-  .lux-slot:hover{ background: rgba(255,255,255,0.10); }
-  .lux-slot.selected{
-    background: rgba(var(--rose),0.22);
-    border-color: rgba(var(--rose),0.38);
-    color: rgba(255,255,255,0.95);
-    box-shadow: 0 0 0 1px rgba(var(--rose),0.16) inset;
-  }
+/* Input / Select */
+.lux-input{
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.70);
+  color: rgba(35,35,38,0.84);
+  outline: none;
+}
+.lux-input::placeholder{ color: rgba(35,35,38,0.38); }
+.lux-input:focus{
+  border-color: rgba(206,160,176,0.95);
+  box-shadow: 0 0 0 3px rgba(206,160,176,0.18);
+}
+
+.lux-sep{
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(35,35,38,0.20), transparent);
+}
+
+/* “Tabella” / slot (bordi sottili) */
+.lux-slot{
+  border-radius: 10px;
+  border: 1px solid var(--slot-border);
+  background: var(--slot);
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(35,35,38,0.72);
+}
+.lux-slot.selected{
+  background: var(--selected);
+  border-color: rgba(91,42,63,0.55);
+  color: rgba(255,255,255,0.92);
+}
+
+/* Mini “tabella calendario” (se la usi) */
+.lux-grid{
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.40);
+}
+.lux-cell{
+  display: grid;
+  place-items: center;
+  height: 42px;
+  font-size: 13px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: rgba(35,35,38,0.70);
+}
+.lux-cell-muted{ color: rgba(35,35,38,0.28); }
+.lux-cell-active{
+  background: rgba(91,42,63,0.12);
+  color: var(--plum);
+  font-weight: 700;
 }
