@@ -22,9 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="it">
       <body className={`${playfair.variable} ${inter.variable}`}>
         <div className="lux-bg">
-          <video autoPlay muted loop playsInline className="lux-video">
-  <source src="/videos/lotus.mp4" type="video/mp4" />
-</video>
           <div className="min-h-screen">
             <header className="mx-auto max-w-6xl px-4 py-6 flex items-center justify-between">
               <a href="/" className="lux-badge">
