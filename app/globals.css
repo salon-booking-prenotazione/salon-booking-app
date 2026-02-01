@@ -2,15 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/* reset base */
-html, body {
-  padding: 0;
-  margin: 0;
+:root {
+  /* palette luxury */
+  --bg0: #07060a;
+  --bg1: #0b0712;
+  --emerald: 16 185 129; /* tailwind emerald-500-ish */
+  --rose: 244 63 94;     /* tailwind rose-500 */
+  --gold: 245 158 11;    /* amber-500 */
 }
 
-/* colori base luxury */
-body {
-  background-color: #EEF4F0; /* verde latte */
-  color: #1F1F1F;
-  font-family: var(--font-sans);
+html, body {
+  height: 100%;
+  background: var(--bg0);
+  color: rgba(255,255,255,0.92);
+}
+
+.lux-bg {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, rgba(16,185,129,0.18), transparent 60%),
+    radial-gradient(900px 600px at 85% 20%, rgba(244,63,94,0.18), transparent 55%),
+    radial-gradient(1200px 900px at 50% 110%, rgba(245,158,11,0.08), transparent 55%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+}
+
+.lux-noise {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+.lux-glow {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(60px);
+  opacity: 0.7;
+}
+.lux-glow-1 {
+  width: 520px; height: 520px;
+  left: -120px; top: 120px;
+  background: rgba(16,185,129,0.22);
+}
+.lux-glow-2 {
+  width: 520px; height: 520px;
+  right: -160px; top: 80px;
+  background: rgba(244,63,94,0.20);
+}
+
+/* Card luxury: stesso bordo + background ovunque */
+.lux-card {
+  @apply rounded-2xl border border-white/12 bg-white/5 backdrop-blur-md;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06) inset,
+    0 18px 60px rgba(0,0,0,0.35);
+}
+
+/* Titoli luxury */
+.lux-title {
+  @apply text-3xl md:text-5xl font-semibold tracking-tight;
+}
+.lux-subtitle {
+  @apply text-white/65 text-base md:text-lg;
+}
+
+/* Badge gradient */
+.lux-badge {
+  @apply inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/5 px-4 py-2 text-sm text-white/75;
+}
+
+/* Bottoni */
+.lux-btn {
+  @apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium border border-white/12 bg-white/10 hover:bg-white/14 transition;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset;
+}
+.lux-btn-ghost {
+  @apply bg-transparent hover:bg-white/8;
+}
+.lux-btn-primary {
+  /* Verde/Rosa più visibili */
+  background: linear-gradient(135deg,
+    rgba(16,185,129,0.95),
+    rgba(244,63,94,0.85)
+  );
+  border-color: rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.95);
+}
+.lux-btn-primary:hover {
+  filter: brightness(1.03);
+}
+
+/* Input */
+.lux-input {
+  @apply w-full rounded-xl border border-white/12 bg-black/20 px-4 py-3 text-white/90 placeholder:text-white/40 outline-none;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+.lux-input:focus {
+  border-color: rgba(255,255,255,0.22);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.08) inset,
+    0 0 0 4px rgba(16,185,129,0.15);
+}
+
+/* Separatore */
+.lux-sep {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
 }
