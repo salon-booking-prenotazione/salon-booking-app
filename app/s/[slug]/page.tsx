@@ -61,9 +61,10 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               </div>
 
               {/* ✅ 1) Vuoto di default */}
-             <div className="mt-5">
+           <div className="mt-4">
   <select
-    className="lux-input"
+    className="lux-input mx-auto"
+    style={{ maxWidth: 360 }}
     value={servizio}
     onChange={(e) => setServizio(e.target.value)}
   >
