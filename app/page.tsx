@@ -9,13 +9,9 @@ export default function HomePage() {
         <div className="
   lux-card p-10 max-w-[520px] text-center
   translate-x-[6rem] md:translate-x-[10rem] lg:translate-x-[14rem]
-  -translate-y-[3rem] md:-translate-y-[5rem]
-">
-          <div className="lux-badge mb-6">
-            Stile luxury • Verde/Rosa più visibili • UI coerente
-          </div>
-
-          <h1 className="lux-title text-4xl md:text-5xl">
+  -translate-y-[3rem] md:-translate-y-[5rem]">
+  
+            <h1 className="lux-title text-4xl md:text-5xl">
             Il tuo momento di bellezza,
             <br />
             prenotato con eleganza.
