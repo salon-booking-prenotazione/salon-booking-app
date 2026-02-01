@@ -2,148 +2,34 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="w-full">
-      {/* ========================= */}
-      {/* SEZIONE 1 – VIDEO FULLSCREEN */}
-      {/* ========================= */}
-      <section className="relative h-screen w-full overflow-hidden">
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover"
-        >
-          <source src="/images/videos/lotus.mp4" type="video/mp4" />
-        </video>
+    <div className="relative">
+      {/* SEZIONE HERO (sopra il video) */}
+      <section className="h-screen flex items-center justify-center">
+        <div className="lux-card p-10 max-w-4xl text-center">
+          <div className="lux-badge mb-6">
+            Stile luxury • Verde/Rosa più visibili • UI coerente
+          </div>
 
-        {/* overlay leggero */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.55))",
-          }}
-        />
-
-        {/* titolo centrato */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
-          <h1
-            className="lux-title text-4xl md:text-6xl text-center"
-            style={{ color: "var(--plum)" }}
-          >
-            Il tuo momento di bellezza
+          <h1 className="lux-title text-4xl md:text-6xl">
+            Prenota in{" "}
+            <span style={{ color: "var(--sage-btn)" }}>pochi secondi</span>, con
+            un look{" "}
+            <span style={{ color: "var(--plum)" }}>premium</span>.
           </h1>
 
-          {/* freccia scroll */}
-          <div className="mt-10 flex flex-col items-center gap-2 text-sm"
-               style={{ color: "rgba(20,20,20,0.65)" }}>
-            <span>Scorri</span>
-            <span className="animate-bounce">↓</span>
+          <p className="lux-subtitle mt-6">
+            Una home chiara e una pagina prenotazione coerente: stessi bordi,
+            stesso background, stessa esperienza.
+          </p>
+
+          <div className="mt-8 flex justify-center gap-4 flex-wrap">
+            <Link href="/s/demo" className="lux-btn lux-btn-primary">
+              Prenota (demo)
+            </Link>
+            <Link href="/s/demo" className="lux-btn">
+              Vedi pagina salone
+            </Link>
           </div>
-        </div>
-      </section>
-
-      {/* ========================= */}
-      {/* SEZIONE 2 – HOME "PRESENTAZIONE" CENTRATA */}
-      {/* ========================= */}
-      <section className="min-h-screen w-full px-4 py-16 flex items-center justify-center">
-        <div className="w-full max-w-6xl space-y-10">
-          {/* HERO */}
-          <section className="lux-card p-8 md:p-10">
-            <div className="space-y-6">
-              <div className="lux-badge">
-                <span
-                  className="h-2 w-2 rounded-full"
-                  style={{ background: "var(--sage-btn)" }}
-                />
-                <span>Stile luxury • Verde/Rosa più visibili • UI coerente</span>
-              </div>
-
-              <h1 className="lux-title text-3xl md:text-5xl">
-                Prenota in{" "}
-                <span style={{ color: "var(--sage-btn)" }}>pochi secondi</span>, con un
-                look{" "}
-                <span style={{ color: "var(--plum)" }}>premium</span>.
-              </h1>
-
-              <p className="lux-subtitle max-w-2xl">
-                Una home chiara e una pagina prenotazione coerente: stessi bordi,
-                stesso background, stessa esperienza. Perfetta per saloni
-                piccoli/medi.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link className="lux-btn lux-btn-primary" href="/s/demo">
-                  Prenota (demo)
-                </Link>
-                <Link className="lux-btn" href="/s/demo">
-                  Vedi pagina salone
-                </Link>
-              </div>
-
-              <div className="lux-sep" />
-
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="lux-card p-5" style={{ boxShadow: "none" }}>
-                  <div style={{ color: "rgba(35,35,38,0.85)", fontWeight: 700 }}>
-                    Calendario facile
-                  </div>
-                  <div style={{ color: "var(--muted)", marginTop: 6, fontSize: 14 }}>
-                    UI pulita, pronto per ICS/Google Calendar.
-                  </div>
-                </div>
-
-                <div className="lux-card p-5" style={{ boxShadow: "none" }}>
-                  <div style={{ color: "rgba(35,35,38,0.85)", fontWeight: 700 }}>
-                    Conversione alta
-                  </div>
-                  <div style={{ color: "var(--muted)", marginTop: 6, fontSize: 14 }}>
-                    CTA verde/rosa visibile, pochi campi.
-                  </div>
-                </div>
-
-                <div className="lux-card p-5" style={{ boxShadow: "none" }}>
-                  <div style={{ color: "rgba(35,35,38,0.85)", fontWeight: 700 }}>
-                    Stesso stile ovunque
-                  </div>
-                  <div style={{ color: "var(--muted)", marginTop: 6, fontSize: 14 }}>
-                    Bordi + background identici su tutte le pagine.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* SECONDARY */}
-          <section className="grid lg:grid-cols-2 gap-6">
-            <div className="lux-card p-7">
-              <h2 className="lux-title text-2xl">Link condivisibile</h2>
-              <p className="lux-subtitle mt-2">
-                Ogni salone ha una pagina tipo: <b>/s/[slug]</b>
-              </p>
-              <div className="mt-4 flex gap-3 flex-wrap">
-                <Link className="lux-btn" href="/s/demo">
-                  /s/demo
-                </Link>
-                <Link className="lux-btn" href="/s/abc-salon">
-                  /s/abc-salon
-                </Link>
-              </div>
-            </div>
-
-            <div className="lux-card p-7">
-              <h2 className="lux-title text-2xl">Pronto per collegarsi ai tuoi dati</h2>
-              <p className="lux-subtitle mt-2">
-                La UI non rompe la build: poi agganciamo Supabase e gli slot reali.
-              </p>
-              <div className="mt-4">
-                <Link className="lux-btn lux-btn-primary" href="/s/demo">
-                  Vai alla prenotazione
-                </Link>
-              </div>
-            </div>
-          </section>
         </div>
       </section>
     </div>
