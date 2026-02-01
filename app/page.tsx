@@ -4,7 +4,7 @@ export default function HomePage() {
   return (
     <div className="w-full">
       {/* ========================= */}
-      {/* SEZIONE 1 – VIDEO INTRO */}
+      {/* SEZIONE 1 – VIDEO FULLSCREEN */}
       {/* ========================= */}
       <section className="relative h-screen w-full overflow-hidden">
         <video
@@ -17,31 +17,38 @@ export default function HomePage() {
           <source src="/images/videos/lotus.mp4" type="video/mp4" />
         </video>
 
-        {/* overlay soft per leggibilità */}
+        {/* overlay leggero */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(248,245,240,0.25), rgba(248,245,240,0.90))",
+              "linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.55))",
           }}
         />
 
-        {/* titolo opzionale sopra video */}
-        <div className="relative z-10 h-full flex items-center justify-center px-6">
+        {/* titolo centrato */}
+        <div className="relative z-10 h-full flex flex-col items-center justify-center px-6">
           <h1
             className="lux-title text-4xl md:text-6xl text-center"
             style={{ color: "var(--plum)" }}
           >
             Il tuo momento di bellezza
           </h1>
+
+          {/* freccia scroll */}
+          <div className="mt-10 flex flex-col items-center gap-2 text-sm"
+               style={{ color: "rgba(20,20,20,0.65)" }}>
+            <span>Scorri</span>
+            <span className="animate-bounce">↓</span>
+          </div>
         </div>
       </section>
 
       {/* ========================= */}
-      {/* SEZIONE 2 – HOME CONTENUTI */}
+      {/* SEZIONE 2 – HOME "PRESENTAZIONE" CENTRATA */}
       {/* ========================= */}
-      <section className="space-y-10 px-4 pb-20">
-        <div className="space-y-10">
+      <section className="min-h-screen w-full px-4 py-16 flex items-center justify-center">
+        <div className="w-full max-w-6xl space-y-10">
           {/* HERO */}
           <section className="lux-card p-8 md:p-10">
             <div className="space-y-6">
@@ -77,7 +84,6 @@ export default function HomePage() {
 
               <div className="lux-sep" />
 
-              {/* highlights */}
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="lux-card p-5" style={{ boxShadow: "none" }}>
                   <div style={{ color: "rgba(35,35,38,0.85)", fontWeight: 700 }}>
