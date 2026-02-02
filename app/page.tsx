@@ -11,10 +11,9 @@ export default function HomePage() {
             className="
               max-w-[620px]
               text-right
-              translate-x-10 md:translate-x-15 lg:translate-x-80
-              -translate-y-60 md:-translate-y-50
-            "
-          >
+             translate-x-8 md:translate-x-16 lg:translate-x-72 
+             -translate-y-48 md:-translate-y-40>
+            
             <h1 className="lux-calligraphy text-4xl md:text-6xl leading-tight">
               Ogni bellezza ha il suo tempo.
               <br />
