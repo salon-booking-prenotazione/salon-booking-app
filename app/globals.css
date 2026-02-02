@@ -173,4 +173,14 @@ body{
   );
   z-index: -1;
   pointer-events: none;
+  
+  .lux-calligraphy {
+  font-family: var(--font-display), serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--plum);
+  text-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
 }
