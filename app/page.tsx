@@ -11,8 +11,8 @@ export default function HomePage() {
             className="
               max-w-[620px]
               text-right
-              translate-x-8 md:translate-x-16 lg:translate-x-24
-              -translate-y-10 md:-translate-y-16
+              translate-x-10 md:translate-x-15 lg:translate-x-80
+              -translate-y-60 md:-translate-y-50
             "
           >
             <h1 className="lux-calligraphy text-4xl md:text-6xl leading-tight">
