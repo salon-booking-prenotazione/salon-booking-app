@@ -1,59 +1,88 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-type MonthCursor = { year: number; monthIndex: number }; // monthIndex: 0-11
-
-function daysInMonth(year: number, monthIndex: number) {
-  return new Date(year, monthIndex + 1, 0).getDate();
-}
-
-function firstDayOfMonth(year: number, monthIndex: number) {
-  return new Date(year, monthIndex, 1).getDay(); // 0=Sun ... 6=Sat
-}
-
-// LUN=1 ... DOM=0 (JS). Noi vogliamo griglia che parte da LUN.
-function mondayBasedIndex(jsDay: number) {
-  // jsDay: 0 (Sun) -> 6 (Sat)
-  // return: 0 (Mon) -> 6 (Sun)
-  return (jsDay + 6) % 7;
-}
-
-function formatMonthIT(year: number, monthIndex: number) {
-  const d = new Date(year, monthIndex, 1);
-  return d.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
-}
+type ServiceRow = {
+  id: string;
+  name: string;
+  duration_minutes: number;
+};
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
 
-export default function PaginaPrenotazione({
-  params,
-}: {
-  params: { slug: string };
-}) {
+function formatMonthIT(d: Date) {
+  const mesi = [
+    "Gennaio",
+    "Febbraio",
+    "Marzo",
+    "Aprile",
+    "Maggio",
+    "Giugno",
+    "Luglio",
+    "Agosto",
+    "Settembre",
+    "Ottobre",
+    "Novembre",
+    "Dicembre",
+  ];
+  return `${mesi[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function toYYYYMMDD(d: Date) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function buildCalendarGrid(monthAnchor: Date) {
+  // monthAnchor: una data qualsiasi dentro il mese che stai mostrando
+  const year = monthAnchor.getFullYear();
+  const month = monthAnchor.getMonth();
+
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+
+  // vogliamo grid che parte da Lun (1) e finisce Dom (7)
+  // JS: getDay() => 0=Dom,1=Lun,...6=Sab
+  const firstDayJs = first.getDay(); // 0..6
+  const firstDayMonBased = firstDayJs === 0 ? 7 : firstDayJs; // 1..7 (Lun..Dom)
+  const leadingEmpty = firstDayMonBased - 1; // quanti vuoti prima del 1
+
+  const daysInMonth = last.getDate();
+  const totalCells = Math.ceil((leadingEmpty + daysInMonth) / 7) * 7;
+
+  const cells: Array<{ date: Date | null }> = [];
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - leadingEmpty + 1;
+    if (dayNum < 1 || dayNum > daysInMonth) {
+      cells.push({ date: null });
+    } else {
+      cells.push({ date: new Date(year, month, dayNum) });
+    }
+  }
+  return cells;
+}
+
+export default function PaginaPrenotazione({ params }: { params: { slug: string } }) {
   const slug = params.slug;
 
-  // --- DEMO: Nome salone (poi lo collegheremo al DB) ---
+  const [services, setServices] = useState<ServiceRow[]>([]);
+  const [loadingServices, setLoadingServices] = useState(true);
+  const [servicesErr, setServicesErr] = useState<string | null>(null);
+
+  // demo nome salone (puoi poi sostituire con fetch vero se vuoi)
   const nomeSalone = slug === "lorena-salon" ? "Lorena Salon" : slug === "demo" ? "Lorena Salon" : `Salone ${slug}`;
 
-  // --- SERVIZI DEMO (poi lo collegheremo al DB con id reali) ---
-  const servizi = useMemo(
-    () => [
-      { id: "svc1", name: "Taglio Uomo", duration_minutes: 30 },
-      { id: "svc2", name: "Taglio", duration_minutes: 30 },
-      { id: "svc3", name: "Taglio + Piega", duration_minutes: 40 },
-      { id: "svc4", name: "Piega", duration_minutes: 45 },
-      { id: "svc5", name: "Colore + Piega", duration_minutes: 90 },
-      { id: "svc6", name: "Meches", duration_minutes: 90 },
-      { id: "svc7", name: "Balayage", duration_minutes: 120 },
-    ],
-    []
-  );
+  // mese “visibile”
+  const [monthAnchor, setMonthAnchor] = useState(() => {
+    // parti dal mese corrente (non “Aprile 2026” fisso)
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
 
-  // --- ORARI (demo) ---
+  const giorni = useMemo(() => ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"], []);
+
   const orari = useMemo(
     () => [
       "09:00","09:30","10:00","10:30","11:00","11:30",
@@ -64,353 +93,452 @@ export default function PaginaPrenotazione({
     []
   );
 
-  // --- DATI CLIENTE ---
+  const calendarCells = useMemo(() => buildCalendarGrid(monthAnchor), [monthAnchor]);
+
+  const [serviceId, setServiceId] = useState<string>("");
+  const [selectedDate, setSelectedDate] = useState<string>(""); // YYYY-MM-DD
+  const [selectedTime, setSelectedTime] = useState<string>("");
+
   const [customerName, setCustomerName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [note, setNote] = useState("");
 
-  // --- SELEZIONI ---
-  const [servizioId, setServizioId] = useState<string>("");
-  const [selectedDay, setSelectedDay] = useState<number | null>(null); // day number 1..31
-  const [oraSelezionata, setOraSelezionata] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitErr, setSubmitErr] = useState<string | null>(null);
 
-  // --- MESE DINAMICO (oggi) ---
-  const now = new Date();
-  const [cursor, setCursor] = useState<MonthCursor>({
-    year: now.getFullYear(),
-    monthIndex: now.getMonth(),
-  });
+  const timesRowRef = useRef<HTMLDivElement | null>(null);
 
-  const monthLabel = useMemo(
-    () => formatMonthIT(cursor.year, cursor.monthIndex),
-    [cursor.year, cursor.monthIndex]
-  );
+  // ✅ carica servizi REALI da Supabase con ANON KEY (browser)
+  useEffect(() => {
+    let cancelled = false;
 
-  const giorniHeader = useMemo(() => ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"], []);
+    async function loadServices() {
+      setLoadingServices(true);
+      setServicesErr(null);
 
-  // --- CALENDARIO GRIGLIA ---
-  const calendarCells = useMemo(() => {
-    const total = daysInMonth(cursor.year, cursor.monthIndex);
-    const firstJs = firstDayOfMonth(cursor.year, cursor.monthIndex); // 0..6
-    const offset = mondayBasedIndex(firstJs); // 0..6 where 0 is Mon
+      try {
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+        if (!url || !anon) {
+          throw new Error("Missing env: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY");
+        }
 
-    const cells: Array<{ day: number | null }> = [];
-    for (let i = 0; i < offset; i++) cells.push({ day: null });
-    for (let d = 1; d <= total; d++) cells.push({ day: d });
+        // 1) trova salon_id dal slug
+        const salonRes = await fetch(`${url}/rest/v1/salons?slug=eq.${encodeURIComponent(slug)}&select=id,name`, {
+          headers: {
+            apikey: anon,
+            Authorization: `Bearer ${anon}`,
+          },
+          cache: "no-store",
+        });
 
-    // completa a multiplo di 7
-    while (cells.length % 7 !== 0) cells.push({ day: null });
-    return cells;
-  }, [cursor.year, cursor.monthIndex]);
+        const salonJson = await salonRes.json();
+        if (!salonRes.ok || !Array.isArray(salonJson) || salonJson.length === 0) {
+          throw new Error("Salone non trovato");
+        }
+        const salonId = salonJson[0].id as string;
 
-  // Lunedì chiuso
-  function isMondayClosed(day: number) {
-    const d = new Date(cursor.year, cursor.monthIndex, day);
-    const js = d.getDay(); // 0=Sun 1=Mon
-    return js === 1;
+        // 2) carica servizi del salone
+        const svcRes = await fetch(
+          `${url}/rest/v1/services?salon_id=eq.${encodeURIComponent(salonId)}&select=id,name,duration_minutes&order=name.asc`,
+          {
+            headers: {
+              apikey: anon,
+              Authorization: `Bearer ${anon}`,
+            },
+            cache: "no-store",
+          }
+        );
+
+        const svcJson = await svcRes.json();
+        if (!svcRes.ok || !Array.isArray(svcJson)) {
+          throw new Error("Impossibile caricare i servizi");
+        }
+
+        if (!cancelled) {
+          setServices(svcJson as ServiceRow[]);
+        }
+      } catch (e: any) {
+        if (!cancelled) setServicesErr(e?.message || "Errore caricamento servizi");
+      } finally {
+        if (!cancelled) setLoadingServices(false);
+      }
+    }
+
+    loadServices();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  // ✅ lunedì chiuso (JS: getDay 1 = Lun)
+  function isClosedMonday(dateObj: Date) {
+    return dateObj.getDay() === 1;
   }
 
-  // Cambia mese (prev/next)
-  function addMonths(delta: number) {
-    const base = new Date(cursor.year, cursor.monthIndex, 1);
-    base.setMonth(base.getMonth() + delta);
-    setCursor({ year: base.getFullYear(), monthIndex: base.getMonth() });
-    // reset selezioni data/ora quando cambi mese (evita bug tipo “7 rimane selezionato”)
-    setSelectedDay(null);
-    setOraSelezionata(null);
+  function scrollTimes(dir: "left" | "right") {
+    const el = timesRowRef.current;
+    if (!el) return;
+    const amount = 320;
+    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
   }
-
-  // Data selezionata (stringa tipo YYYY-MM-DD)
-  const selectedDateStr = useMemo(() => {
-    if (!selectedDay) return "";
-    return `${cursor.year}-${pad2(cursor.monthIndex + 1)}-${pad2(selectedDay)}`;
-  }, [cursor.year, cursor.monthIndex, selectedDay]);
-
-  const servizioSelected = useMemo(
-    () => servizi.find((s) => s.id === servizioId) || null,
-    [servizi, servizioId]
-  );
 
   const canConfirm =
-    !!servizioId &&
-    !!selectedDay &&
-    !!oraSelezionata &&
-    contactPhone.trim().length >= 6; // minimo semplice, poi miglioriamo
+    !!serviceId &&
+    !!selectedDate &&
+    !!selectedTime &&
+    contactPhone.trim().length >= 6 &&
+    !submitting;
+
+  async function onConfirm() {
+    if (!canConfirm) return;
+
+    setSubmitting(true);
+    setSubmitErr(null);
+
+    try {
+      const res = await fetch("/api/appointments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          service_id: serviceId,
+          date: selectedDate,
+          time: selectedTime,
+          customer_name: customerName.trim(),
+          contact_phone: contactPhone.trim(),
+          contact_email: contactEmail.trim(),
+          note: note.trim(),
+        }),
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || !json?.ok) {
+        throw new Error(json?.error || "Errore creazione prenotazione");
+      }
+
+      // ✅ apre WhatsApp con il messaggio pronto
+      const wa = String(json.whatsapp_url || "");
+      if (wa) {
+        window.open(wa, "_blank", "noreferrer");
+      } else {
+        // fallback: se manca url
+        alert("Prenotazione creata ✅ (ma manca whatsapp_url)");
+      }
+    } catch (e: any) {
+      setSubmitErr(e?.message || "Errore");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
-        {/* SINISTRA */}
-        <section className="lux-card lux-frame p-8 md:p-10">
-          <div className="flex items-start justify-between">
-            <h1 className="lux-title text-3xl md:text-4xl">Prenota</h1>
-            <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Chiudi">
-              ✕
-            </Link>
-          </div>
-
-          <div className="mt-3 lux-subtitle">
-            <b style={{ color: "var(--plum)" }}>{nomeSalone}</b>
-          </div>
-
-          {/* SERVIZIO */}
-          <div className="mt-6">
-            <div
-              className="mb-3"
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "var(--muted)",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-              }}
-            >
-              Servizio *
+    <div className="lux-bg">
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
+          {/* SINISTRA */}
+          <section className="lux-card lux-frame p-8 md:p-10">
+            <div className="flex items-start justify-between">
+              <h1 className="lux-title text-3xl md:text-4xl">Prenota</h1>
+              <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Chiudi">
+                ✕
+              </Link>
             </div>
 
-            <div className="flex justify-center">
-              <div className="relative" style={{ maxWidth: 420, width: "100%" }}>
-                {/* Select con arrow custom più “a sinistra” */}
-                <select
-                  className="lux-input appearance-none pr-12"
-                  value={servizioId}
-                  onChange={(e) => setServizioId(e.target.value)}
-                >
-                  <option value="" disabled>
-                    Seleziona un servizio…
-                  </option>
-                  {servizi.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-
-                {/* Arrow custom */}
-                <div
-                  className="pointer-events-none absolute top-1/2 -translate-y-1/2"
-                  style={{
-                    right: 16,
-                    width: 34,
-                    height: 34,
-                    borderRadius: 10,
-                    border: "1px solid rgba(28,28,30,0.12)",
-                    background: "rgba(255,255,255,0.55)",
-                    display: "grid",
-                    placeItems: "center",
-                    color: "rgba(28,28,30,0.55)",
-                    fontWeight: 900,
-                  }}
-                >
-                  ▾
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* I TUOI DATI */}
-          <div className="mt-8">
-            <div
-              className="mb-3"
-              style={{
-                fontSize: 13,
-                fontWeight: 700,
-                color: "var(--muted)",
-                letterSpacing: "0.04em",
-                textTransform: "uppercase",
-              }}
-            >
-              I tuoi dati
+            <div className="mt-3 lux-subtitle">
+              <b style={{ color: "var(--plum)" }}>{nomeSalone}</b>
             </div>
 
-            <div className="grid gap-3">
-              <input
-                className="lux-input"
-                placeholder="Nome (opzionale)"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-              />
-              <input
-                className="lux-input"
-                placeholder="Telefono *"
-                value={contactPhone}
-                onChange={(e) => setContactPhone(e.target.value)}
-              />
-              <input
-                className="lux-input"
-                placeholder="Email (opzionale)"
-                value={contactEmail}
-                onChange={(e) => setContactEmail(e.target.value)}
-              />
-              <input
-                className="lux-input"
-                placeholder="Note (opzionale)"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-center">
-            <a className="lux-btn lux-btn-primary" style={{ minWidth: 240 }} href="#calendario">
-              Avanti
-            </a>
-          </div>
-        </section>
-
-        {/* DESTRA */}
-        <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
-          <div className="flex items-center justify-between">
-            <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
-
-            {/* Header mese con prev/next */}
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                className="lux-btn"
-                style={{ padding: "8px 12px", borderRadius: 12 }}
-                onClick={() => addMonths(-1)}
-                aria-label="Mese precedente"
-              >
-                ‹
-              </button>
-
+            {/* SERVIZIO */}
+            <div className="mt-6">
               <div
+                className="mb-3"
                 style={{
-                  color: "var(--muted)",
                   fontSize: 13,
-                  fontWeight: 800,
-                  textTransform: "capitalize",
-                  padding: "6px 10px",
+                  fontWeight: 600,
+                  color: "var(--muted)",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
                 }}
               >
-                {monthLabel}
+                Servizio *
               </div>
 
-              <button
-                type="button"
-                className="lux-btn"
-                style={{ padding: "8px 12px", borderRadius: 12 }}
-                onClick={() => addMonths(1)}
-                aria-label="Mese successivo"
-              >
-                ›
-              </button>
+              {/* Select con freccia custom (più “a sinistra” e più elegante) */}
+              <div className="flex justify-center">
+                <div className="relative" style={{ maxWidth: 420, width: "100%" }}>
+                  <select
+                    className="lux-input"
+                    style={{
+                      width: "100%",
+                      appearance: "none",
+                      WebkitAppearance: "none",
+                      MozAppearance: "none",
+                      paddingRight: 44, // spazio per freccia
+                    }}
+                    value={serviceId}
+                    onChange={(e) => setServiceId(e.target.value)}
+                    disabled={loadingServices}
+                  >
+                    <option value="" disabled>
+                      {loadingServices ? "Carico servizi..." : "Seleziona un servizio…"}
+                    </option>
+                    {services.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* freccia custom */}
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: 14, // un po’ più a sinistra rispetto al bordo
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: 26,
+                      height: 26,
+                      borderRadius: 10,
+                      display: "grid",
+                      placeItems: "center",
+                      border: "1px solid rgba(28,28,30,0.14)",
+                      background: "rgba(255,255,255,0.55)",
+                      pointerEvents: "none",
+                      color: "rgba(28,28,30,0.60)",
+                      fontWeight: 900,
+                    }}
+                  >
+                    ▾
+                  </div>
+                </div>
+              </div>
+
+              {servicesErr && (
+                <div className="mt-3 text-center" style={{ fontSize: 13, color: "crimson" }}>
+                  ✖ {servicesErr}
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Giorni header */}
-          <div className="mt-6 grid grid-cols-7 gap-0" style={{ color: "var(--muted)", fontSize: 12 }}>
-            {giorniHeader.map((g) => (
-              <div key={g} className="text-center py-2" style={{ fontWeight: 800 }}>
-                {g}
+            {/* DATI CLIENTE */}
+            <div className="mt-8">
+              <div
+                className="mb-3"
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "var(--muted)",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                }}
+              >
+                I tuoi dati
               </div>
-            ))}
-          </div>
 
-          {/* Griglia calendario */}
-          <div className="grid grid-cols-7" style={{ borderTop: "1px solid var(--line)" }}>
-            {calendarCells.map((cell, idx) => {
-              const d = cell.day;
-              const isEmpty = d == null;
-              const closed = d != null && isMondayClosed(d);
-              const isSelected = d != null && selectedDay === d;
+              <div className="grid gap-3">
+                <input
+                  className="lux-input"
+                  placeholder="Nome (opzionale)"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                />
+                <input
+                  className="lux-input"
+                  placeholder="Telefono *"
+                  value={contactPhone}
+                  onChange={(e) => setContactPhone(e.target.value)}
+                />
+                <input
+                  className="lux-input"
+                  placeholder="Email (opzionale)"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                />
+                <input
+                  className="lux-input"
+                  placeholder="Note (opzionale)"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                />
+              </div>
+            </div>
 
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    borderRight: idx % 7 === 6 ? "none" : "1px solid var(--line)",
-                    borderBottom: "1px solid var(--line)",
-                    minHeight: 46,
-                  }}
+            <div className="mt-6 flex justify-center">
+              <a className="lux-btn lux-btn-primary" style={{ minWidth: 240 }} href="#calendario">
+                Avanti
+              </a>
+            </div>
+          </section>
+
+          {/* DESTRA */}
+          <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
+            <div className="flex items-center justify-between">
+              <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
+
+              {/* mese + frecce eleganti */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  className="lux-btn"
+                  style={{ padding: "8px 12px", borderRadius: 12, boxShadow: "none" }}
+                  onClick={() => setMonthAnchor((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))}
+                  aria-label="Mese precedente"
                 >
+                  ‹
+                </button>
+
+                <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 800, minWidth: 110, textAlign: "center" }}>
+                  {formatMonthIT(monthAnchor)}
+                </div>
+
+                <button
+                  type="button"
+                  className="lux-btn"
+                  style={{ padding: "8px 12px", borderRadius: 12, boxShadow: "none" }}
+                  onClick={() => setMonthAnchor((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))}
+                  aria-label="Mese successivo"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+
+            {/* header giorni */}
+            <div className="mt-6 grid grid-cols-7 gap-0" style={{ color: "var(--muted)", fontSize: 12 }}>
+              {giorni.map((g) => (
+                <div key={g} className="text-center py-2" style={{ fontWeight: 800 }}>
+                  {g}
+                </div>
+              ))}
+            </div>
+
+            {/* calendario */}
+            <div className="grid grid-cols-7">
+              {calendarCells.map((cell, idx) => {
+                if (!cell.date) {
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        borderRight: idx % 7 === 6 ? "none" : "1px solid var(--line)",
+                        borderBottom: idx >= calendarCells.length - 7 ? "none" : "1px solid var(--line)",
+                        height: 48,
+                      }}
+                    />
+                  );
+                }
+
+                const d = cell.date;
+                const dateStr = toYYYYMMDD(d);
+                const isSelected = selectedDate === dateStr;
+
+                const closed = isClosedMonday(d);
+
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      borderRight: idx % 7 === 6 ? "none" : "1px solid var(--line)",
+                      borderBottom: idx >= calendarCells.length - 7 ? "none" : "1px solid var(--line)",
+                    }}
+                  >
+                    <button
+                      type="button"
+                      disabled={closed}
+                      onClick={() => {
+                        if (closed) return;
+                        setSelectedDate(dateStr);
+                        setSelectedTime("");
+                      }}
+                      className="w-full h-[48px] grid place-items-center relative"
+                      style={{
+                        cursor: closed ? "not-allowed" : "pointer",
+                        background: isSelected ? "rgba(91,42,63,0.10)" : "transparent",
+                        color: closed ? "rgba(35,35,38,0.28)" : "rgba(35,35,38,0.78)",
+                        fontWeight: isSelected ? 900 : 600,
+                      }}
+                    >
+                      {isSelected && (
+                        <span
+                          className="absolute h-9 w-9 rounded-full"
+                          style={{
+                            background: "rgba(91,42,63,0.14)",
+                            border: "1px solid rgba(91,42,63,0.22)",
+                          }}
+                        />
+                      )}
+                      <span className="relative z-10">{d.getDate()}</span>
+
+                      {closed && (
+                        <span
+                          className="absolute bottom-[6px] text-[10px]"
+                          style={{ color: "rgba(35,35,38,0.32)", fontWeight: 800, letterSpacing: "0.06em" }}
+                        >
+                          CHIUSO
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* orari: frecce sx/dx + scroll orizzontale */}
+            <div className="mt-6">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                <div style={{ fontWeight: 800, color: "var(--muted)", fontSize: 12 }}>
+                  Orari disponibili{selectedDate ? ` • ${selectedDate}` : ""}
+                </div>
+
+                <div className="flex gap-2">
                   <button
                     type="button"
-                    disabled={isEmpty || closed}
-                    onClick={() => {
-                      if (!d) return;
-                      setSelectedDay(d);
-                      setOraSelezionata(null); // reset ora quando cambi giorno
-                    }}
-                    className="w-full h-[46px] grid place-items-center relative"
-                    style={{
-                      cursor: isEmpty || closed ? "not-allowed" : "pointer",
-                      background: isSelected ? "rgba(91,42,63,0.10)" : "transparent",
-                      color: isEmpty
-                        ? "rgba(35,35,38,0.20)"
-                        : closed
-                        ? "rgba(35,35,38,0.30)"
-                        : "rgba(35,35,38,0.72)",
-                      fontWeight: isSelected ? 900 : 600,
-                      opacity: closed ? 0.55 : 1,
-                    }}
-                    title={closed ? "Chiuso (lunedì)" : undefined}
+                    className="lux-btn"
+                    style={{ padding: "8px 12px", borderRadius: 12, boxShadow: "none" }}
+                    onClick={() => scrollTimes("left")}
+                    aria-label="Scorri a sinistra"
                   >
-                    {isSelected && (
-                      <span
-                        className="absolute h-8 w-8 rounded-full"
-                        style={{
-                          background: "rgba(91,42,63,0.18)",
-                          border: "1px solid rgba(91,42,63,0.25)",
-                        }}
-                      />
-                    )}
-
-                    {/* Etichetta “CHIUSO” mini per lunedì */}
-                    {closed && d && (
-                      <span
-                        className="absolute bottom-1"
-                        style={{
-                          fontSize: 9,
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                          color: "rgba(35,35,38,0.35)",
-                        }}
-                      >
-                        chiuso
-                      </span>
-                    )}
-
-                    <span className="relative z-10">{d ?? " "}</span>
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className="lux-btn"
+                    style={{ padding: "8px 12px", borderRadius: 12, boxShadow: "none" }}
+                    onClick={() => scrollTimes("right")}
+                    aria-label="Scorri a destra"
+                  >
+                    ›
                   </button>
                 </div>
-              );
-            })}
-          </div>
+              </div>
 
-          {/* Orari con “ascensore” */}
-          <div className="mt-6">
-            <div
-              style={{
-                fontSize: 13,
-                fontWeight: 800,
-                color: "var(--muted)",
-                marginBottom: 10,
-              }}
-            >
-              Orari disponibili {selectedDateStr ? `• ${selectedDateStr}` : ""}
-            </div>
-
-            <div
-              style={{
-                maxHeight: 320,
-                overflowY: "auto",
-                paddingRight: 6,
-              }}
-            >
-              <div className="grid grid-cols-3 gap-3">
+              <div
+                ref={timesRowRef}
+                style={{
+                  marginTop: 12,
+                  overflowX: "auto",
+                  overflowY: "hidden",
+                  display: "flex",
+                  gap: 10,
+                  paddingBottom: 6,
+                  scrollBehavior: "smooth",
+                  WebkitOverflowScrolling: "touch",
+                }}
+              >
                 {orari.map((t) => (
                   <button
                     key={t}
                     type="button"
-                    disabled={!selectedDay}
-                    onClick={() => setOraSelezionata(t)}
-                    className={`lux-slot ${oraSelezionata === t ? "selected" : ""}`}
+                    disabled={!selectedDate}
+                    onClick={() => setSelectedTime(t)}
+                    className={`lux-slot ${selectedTime === t ? "selected" : ""}`}
                     style={{
-                      opacity: selectedDay ? 1 : 0.55,
-                      cursor: selectedDay ? "pointer" : "not-allowed",
+                      minWidth: 110,
+                      opacity: !selectedDate ? 0.5 : 1,
+                      cursor: !selectedDate ? "not-allowed" : "pointer",
                     }}
                   >
                     {t}
@@ -418,41 +546,38 @@ export default function PaginaPrenotazione({
                 ))}
               </div>
             </div>
-          </div>
 
-          {/* Bottoni */}
-          <div className="mt-8 flex gap-3">
-            <button
-              className="lux-btn lux-btn-primary w-full"
-              type="button"
-              disabled={!canConfirm}
-              style={{
-                opacity: canConfirm ? 1 : 0.55,
-                filter: canConfirm ? "none" : "grayscale(0.25)",
-                // quando è attivo: più scuro (si nota subito)
-                background: canConfirm
-                  ? "linear-gradient(180deg, rgba(111,128,119,1), rgba(92,110,101,1))"
-                  : "linear-gradient(180deg, rgba(127,143,134,0.65), rgba(111,128,119,0.65))",
-              }}
-              onClick={() => {
-                // Per ora solo demo: qui poi colleghiamo la chiamata API /api/appointments/create
-                alert(
-                  `Conferma (demo)\n\nSalone: ${nomeSalone}\nServizio: ${servizioSelected?.name}\nData: ${selectedDateStr}\nOra: ${oraSelezionata}\nTel: ${contactPhone}`
-                );
-              }}
-            >
-              Conferma
-            </button>
+            {submitErr && (
+              <div className="mt-4" style={{ color: "crimson", fontWeight: 800 }}>
+                ✖ {submitErr}
+              </div>
+            )}
 
-            <Link className="lux-btn w-full" href="/">
-              Indietro
-            </Link>
-          </div>
+            {/* bottoni */}
+            <div className="mt-8 flex gap-3">
+              <button
+                className={`lux-btn w-full ${canConfirm ? "lux-btn-primary" : ""}`}
+                type="button"
+                onClick={onConfirm}
+                disabled={!canConfirm}
+                style={{
+                  opacity: canConfirm ? 1 : 0.55,
+                  filter: canConfirm ? "none" : "grayscale(0.15)",
+                }}
+              >
+                {submitting ? "Confermo..." : "Conferma"}
+              </button>
 
-          <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
-            Dopo la conferma si apre WhatsApp con il messaggio pronto ✨
-          </div>
-        </section>
+              <Link className="lux-btn w-full" href="/">
+                Indietro
+              </Link>
+            </div>
+
+            <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
+              Dopo la conferma si apre WhatsApp con il messaggio pronto ✨
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
