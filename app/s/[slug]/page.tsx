@@ -57,32 +57,40 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
   const timesWrapRef = useRef<HTMLDivElement | null>(null);
 
   // ====== FETCH SERVICES ======
-  useEffect(() => {
-    let cancelled = false;
+useEffect(() => {
+  let cancelled = false;
 
-    async function run() {
-      setErr(""); // reset eventuali errori precedenti
-      try {
-        const r = await fetch(`/api/salon/services?slug=${encodeURIComponent(slug)}`, { cache: "no-store" });
-       const j = await r.json().catch(() => ({}));
-       if (!r.ok || !j?.ok || !Array.isArray(j.services)) throw new Error(j?.error || "Servizi non disponibili");
-       setServices(j.services);
-        }
+  async function run() {
+    setErr("");
+    try {
+      const r = await fetch(
+        `/api/salon/services?slug=${encodeURIComponent(slug)}`,
+        { cache: "no-store" }
+      );
 
-        if (!cancelled) setServices(j.services);
-      } catch (e: any) {
-        if (!cancelled) {
-          setServices([]);
-          setErr(e?.message || "Servizi non disponibili");
-        }
+      const j = await r.json().catch(() => ({}));
+
+      if (!r.ok || !j?.ok || !Array.isArray(j.services)) {
+        throw new Error(j?.error || "Servizi non disponibili");
+      }
+
+      if (!cancelled) {
+        setServices(j.services);
+      }
+    } catch (e: any) {
+      if (!cancelled) {
+        setServices([]);
+        setErr(e?.message || "Servizi non disponibili");
       }
     }
+  }
 
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
+  run();
+
+  return () => {
+    cancelled = true;
+  };
+}, [slug]);
 
   const selectedService = useMemo(() => services.find((s) => s.id === serviceId), [services, serviceId]);
 
