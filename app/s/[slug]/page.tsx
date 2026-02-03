@@ -174,21 +174,22 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               Servizio *
             </div>
 
-            <select
-              className="lux-input"
-              style={{ maxWidth: 420, width: "100%", margin: "0 auto", display: "block" }}
-              value={serviceId}
-              onChange={(e) => setServiceId(e.target.value)}
-            >
-              <option value="" disabled>
-                Seleziona un servizio…
-              </option>
-              {servizi.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+           <select
+  className="lux-input"
+  style={{ maxWidth: 360, width: "100%" }}
+  value={servizio}
+  onChange={(e) => setServizio(e.target.value)}
+>
+  <option value="" disabled>
+    Seleziona un servizio…
+  </option>
+
+  {servizi.map((s) => (
+    <option key={s.id} value={s.id}>
+      {s.name}
+    </option>
+  ))}
+</select>
           </div>
 
           {/* DATI */}
