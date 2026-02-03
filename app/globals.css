@@ -186,6 +186,8 @@ body{
   opacity: 0.96;         /* rende più soft */
   color: var(--plum);
   text-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
-  /* nasconde la scrollbar nel carousel orari */
+}
+
+/* nasconde la scrollbar nel carousel orari */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
