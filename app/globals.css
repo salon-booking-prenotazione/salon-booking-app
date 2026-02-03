@@ -182,8 +182,8 @@ body{
   font-family: var(--font-display), ui-serif, Georgia;
   font-style: italic;
   font-weight: 400;
-  letter-spacing: 0.02em; /* prima 0.01 */
-  opacity: 0.92;         /* rende più soft */
+  letter-spacing: 0.03em; /* prima 0.01 */
+  opacity: 0.96;         /* rende più soft */
   color: var(--plum);
   text-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
 }
