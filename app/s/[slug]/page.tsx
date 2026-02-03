@@ -237,44 +237,51 @@ useEffect(() => {
                 Servizio *
               </div>
 
-              {/* ✅ tendina con freccia custom + padding corretto */}
-              <div style={{ position: "relative" }}>
-                <select
-                  className="lux-input"
-                  style={{
-                    width: "100%",
-                    paddingRight: 44,
-                    appearance: "none" as any,
-                    opacity: services.length ? 1 : 0.6,
-                  }}
-                  value={serviceId}
-                  onChange={(e) => setServiceId(e.target.value)}
-                  disabled={!services.length}
-                >
-                  <option value="" disabled>
-                    {services.length ? "Seleziona un servizio..." : "Caricamento servizi..."}
-                  </option>
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
+              {/* ✅ tendina servizio rifinita */}
+<div style={{ position: "relative" }}>
+  <select
+    className="lux-input"
+    value={serviceId}
+    onChange={(e) => setServiceId(e.target.value)}
+    disabled={!services.length}
+    style={{
+      width: "100%",
+      paddingRight: 52,
+      paddingLeft: 16,
+      appearance: "none",
+      WebkitAppearance: "none",
+      MozAppearance: "none",
+      cursor: "pointer",
+      opacity: services.length ? 1 : 0.6,
+    }}
+  >
+    <option value="" disabled>
+      {services.length ? "Seleziona un servizio..." : "Caricamento servizi..."}
+    </option>
 
-                <span
-                  style={{
-                    position: "absolute",
-                    right: 16,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    pointerEvents: "none",
-                    opacity: 0.55,
-                    fontWeight: 900,
-                  }}
-                >
-                  ▾
-                </span>
-              </div>
+    {services.map((s) => (
+      <option key={s.id} value={s.id}>
+        {s.name}
+      </option>
+    ))}
+  </select>
+
+  <span
+    aria-hidden
+    style={{
+      position: "absolute",
+      right: 18,
+      top: "50%",
+      transform: "translateY(-50%)",
+      pointerEvents: "none",
+      opacity: 0.55,
+      fontSize: 14,
+      fontWeight: 900,
+    }}
+  >
+    ▾
+  </span>
+</div>
             </div>
 
             <div className="mt-8">
