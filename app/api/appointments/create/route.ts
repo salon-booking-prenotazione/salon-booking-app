@@ -162,7 +162,16 @@ export async function POST(req: Request) {
       : `/api/calendar/appointment?id=${appt.id}`;
 
     const waPhone = String(salon.phone || "").replace(/\s+/g, "");
-const msg = "TEST 123 - SE VEDI QUESTO, IL FILE È GIUSTO ✅";
+    const msg =
+  `✨ Prenotazione richiesta\n\n` +
+  `🏷️ Salone: ${salon.name}\n` +
+  `💇 Servizio: ${svc.name}\n` +
+  `📅 Data / Ora: ${date} • ${time}\n` +
+  `📱 Tel: ${contact_phone}\n\n` +
+  `🔗 Gestisci o disdici la prenotazione:\n` +
+  `${manage_url}\n\n` +
+  `🗓️ Aggiungi al calendario:\n` +
+  `${calendar_ics_url}`;
      
     const whatsapp_url =
       waPhone && waPhone.startsWith("+")
