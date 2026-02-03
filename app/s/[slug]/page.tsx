@@ -319,37 +319,29 @@ useEffect(() => {
             </div>
           </section>
 
-          {/* DESTRA */}
-          <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
+        <div className="lux-cal-head">
+  <button
+    type="button"
+    className="lux-btn"
+    style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+    onClick={() => setMonthCursor((d) => addMonths(d, -1))}
+    aria-label="Mese precedente"
+  >
+    ‹
+  </button>
 
-              {/* ✅ mese con frecce */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="lux-btn"
-                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                  onClick={() => setMonthCursor((d) => addMonths(d, -1))}
-                  aria-label="Mese precedente"
-                >
-                  ‹
-                </button>
+  <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
 
-                <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 800, minWidth: 160, textAlign: "center" }}>
-                  {monthLabelIT(monthCursor)}
-                </div>
-
-                <button
-                  type="button"
-                  className="lux-btn"
-                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                  onClick={() => setMonthCursor((d) => addMonths(d, +1))}
-                  aria-label="Mese successivo"
-                >
-                  ›
-                </button>
-              </div>
+  <button
+    type="button"
+    className="lux-btn"
+    style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+    onClick={() => setMonthCursor((d) => addMonths(d, +1))}
+    aria-label="Mese successivo"
+  >
+    ›
+  </button>
+</div>
             </div>
 
             <div className="mt-6 grid grid-cols-7 gap-0" style={{ color: "var(--muted)", fontSize: 12 }}>
@@ -361,56 +353,49 @@ useEffect(() => {
             </div>
 
             {/* calendario */}
-            <div className="grid grid-cols-7" style={{ borderTop: "1px solid var(--line)" }}>
-              {grid.map((cell, idx) => {
-                const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
-                const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
+           <div className="lux-cal mt-5">
+  <div className="lux-cal-grid">
+    {weekDays.map((g) => (
+      <div key={g} className="lux-cal-dow">{g}</div>
+    ))}
+  </div>
 
-                return (
-                  <div
-                    key={idx}
-                    style={{
-                      borderRight: idx % 7 === 6 ? "none" : "1px solid var(--line)",
-                      borderBottom: "1px solid var(--line)",
-                      minHeight: 54,
-                      background: disabled ? "rgba(28,28,30,0.02)" : "transparent",
-                    }}
-                  >
-                    <button
-                      type="button"
-                      disabled={disabled}
-                      onClick={() => {
-                        if (!cell.dateStr) return;
-                        setSelectedDate(cell.dateStr);
-                        setSelectedTime("");
-                        timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-                      }}
-                      className="w-full h-[54px] grid place-items-center"
-                      style={{
-                        cursor: disabled ? "not-allowed" : "pointer",
-                        color: disabled ? "rgba(28,28,30,0.25)" : "rgba(28,28,30,0.72)",
-                        fontWeight: isSelected ? 900 : 600,
-                        background: isSelected ? "rgba(91,42,63,0.10)" : "transparent",
-                      }}
-                    >
-                      {cell.day ? (
-                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.05 }}>
-                          <span>{cell.day}</span>
-                          {/* ✅ lunedì chiuso */}
-                          {cell.isoWeekday === 1 && (
-                            <span style={{ fontSize: 10, opacity: 0.55, marginTop: 4, letterSpacing: "0.06em" }}>
-                              CHIUSO
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span />
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+  <div className="lux-cal-grid">
+    {grid.map((cell, idx) => {
+      const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
+      const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
+
+      return (
+        <div key={idx} className="lux-cal-cell">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              if (!cell.dateStr) return;
+              setSelectedDate(cell.dateStr);
+              setSelectedTime("");
+              timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+            }}
+            className={[
+              "lux-cal-btn",
+              disabled ? "disabled" : "",
+              isSelected ? "selected" : "",
+            ].join(" ")}
+          >
+            {cell.day ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
+                <span>{cell.day}</span>
+                {cell.isoWeekday === 1 && <span className="lux-closed-tag">CHIUSO</span>}
+              </div>
+            ) : (
+              <span />
+            )}
+          </button>
+        </div>
+      );
+    })}
+  </div>
+</div>
 
             {/* orari */}
             <div className="mt-6">
