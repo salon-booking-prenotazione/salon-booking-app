@@ -247,7 +247,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               </Link>
             </div>
 
-            <div className="mt-3 lux-subtitle">
+            <="mt-3 lux-subtitle">
               <b style={{ color: "var(--plum)" }}>{nomeSalone}</b>
             </div>
 
@@ -375,8 +375,10 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
 
           {/* DESTRA */}
           <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
-            <div className="flex items-center justify-between">
-              <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
+            <div className="flex items-center justify-between gap-6 flex-wrap">
+  <h2 className="lux-title text-2xl md:text-3xl">
+    Scegli data e ora
+  </h2>
 
               {/* mese + frecce eleganti */}
               <div className="flex items-center gap-2">
@@ -422,11 +424,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                   return (
                     <div
                       key={idx}
-                      style={{
-                        borderRight: idx % 7 === 6 ? "none" : "1px solid var(--line)",
-                        borderBottom: idx >= calendarCells.length - 7 ? "none" : "1px solid var(--line)",
-                        height: 48,
-                      }}
+                      style={{ maxWidth: 420, margin: "0 auto" }}
                     />
                   );
                 }
@@ -491,7 +489,11 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
                 <div style={{ fontWeight: 800, color: "var(--muted)", fontSize: 12 }}>
                   Orari disponibili{selectedDate ? ` • ${selectedDate}` : ""}
-                </div>
+                  {!selectedDate && (
+  <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 6 }}>
+    Seleziona prima una data
+  </div>
+)}
 
                 <div className="flex gap-2">
                   <button
@@ -537,7 +539,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                     className={`lux-slot ${selectedTime === t ? "selected" : ""}`}
                     style={{
                       minWidth: 110,
-                      opacity: !selectedDate ? 0.5 : 1,
+                      opacity: !selectedDate ? 0.35 : 1,
                       cursor: !selectedDate ? "not-allowed" : "pointer",
                     }}
                   >
@@ -561,7 +563,8 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                 onClick={onConfirm}
                 disabled={!canConfirm}
                 style={{
-                  opacity: canConfirm ? 1 : 0.55,
+                  opacity: canConfirm ? 1 : 0.4,
+                  background: canConfirm ? "var(--primary)" : "rgba(120,120,120,0.35)",
                   filter: canConfirm ? "none" : "grayscale(0.15)",
                 }}
               >
