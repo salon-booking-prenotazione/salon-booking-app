@@ -191,3 +191,88 @@ body{
 /* nasconde la scrollbar nel carousel orari */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ===== Calendar premium ===== */
+.lux-cal {
+  border: 1px solid rgba(28,28,30,0.14);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.55);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
+}
+
+.lux-cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(28,28,30,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0.45));
+}
+
+.lux-cal-month {
+  font-weight: 900;
+  font-size: 14px;
+  color: rgba(28,28,30,0.70);
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+}
+
+.lux-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.lux-cal-dow {
+  padding: 10px 0;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(28,28,30,0.55);
+  border-bottom: 1px solid rgba(28,28,30,0.10);
+  background: rgba(255,255,255,0.35);
+}
+
+.lux-cal-cell {
+  border-right: 1px solid rgba(28,28,30,0.10);
+  border-bottom: 1px solid rgba(28,28,30,0.10);
+  min-height: 58px;
+}
+
+.lux-cal-cell:nth-child(7n) { border-right: none; }
+
+.lux-cal-btn {
+  width: 100%;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  font-weight: 800;
+  color: rgba(28,28,30,0.72);
+  transition: 120ms ease;
+}
+
+.lux-cal-btn:hover {
+  background: rgba(91,42,63,0.07);
+}
+
+.lux-cal-btn.selected {
+  background: rgba(91,42,63,0.12);
+  box-shadow: 0 0 0 2px rgba(91,42,63,0.18) inset;
+}
+
+.lux-cal-btn.disabled {
+  cursor: not-allowed;
+  color: rgba(28,28,30,0.22);
+  background: rgba(28,28,30,0.03);
+}
+
+.lux-closed-tag {
+  margin-top: 4px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: rgba(91,42,63,0.55);
+}
+
