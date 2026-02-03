@@ -231,9 +231,9 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
       setSubmitErr(e?.message || "Errore");
     } finally {
       setSubmitting(false);
-    }
-
-  return (
+     }
+ 
+    return (
     <div className="lux-bg">
       <div className="mx-auto max-w-6xl px-4 py-10">
         <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
