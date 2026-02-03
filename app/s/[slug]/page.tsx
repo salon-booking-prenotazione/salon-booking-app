@@ -51,17 +51,14 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
   const giorni = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 
   const servizi = useMemo(
-    () => [
-      { id: "svc1", name: "Taglio Uomo" },
-      { id: "svc2", name: "Taglio" },
-      { id: "svc3", name: "Taglio + Piega" },
-      { id: "svc4", name: "Piega" },
-      { id: "svc5", name: "Colore + Piega" },
-      { id: "svc6", name: "Meches" },
-      { id: "svc7", name: "Permanente" },
-    ],
-    []
-  );
+  () => [
+    { id: "08388bcd-4e9f-4cb2-b44f-d5ed1ac6cef0", name: "Taglio Uomo" },
+    { id: "08470f2c-cd30-4ef9-aae1-0239effc92d6", name: "Taglio" },
+    { id: "0f27e36b-7844-484b-8188-50539b3596fc", name: "Taglio + Piega" },
+    { id: "12104213-3387-4ac8-b577-5e8722db51df", name: "Piega" },
+  ],
+  []
+);
 
   const orari = useMemo(
     () => [
