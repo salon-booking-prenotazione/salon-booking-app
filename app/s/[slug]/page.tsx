@@ -64,10 +64,9 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
       setErr(""); // reset eventuali errori precedenti
       try {
         const r = await fetch(`/api/salon/services?slug=${encodeURIComponent(slug)}`, { cache: "no-store" });
-        const j = await r.json().catch(() => ({}));
-
-        if (!r.ok || !j?.ok || !Array.isArray(j.services)) {
-          throw new Error(j?.error || "Servizi non disponibili");
+       const j = await r.json().catch(() => ({}));
+       if (!r.ok || !j?.ok || !Array.isArray(j.services)) throw new Error(j?.error || "Servizi non disponibili");
+       setServices(j.services);
         }
 
         if (!cancelled) setServices(j.services);
