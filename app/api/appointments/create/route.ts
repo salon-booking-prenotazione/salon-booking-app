@@ -83,22 +83,37 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: "Salone non trovato" }, { status: 404 });
     }
 
-    // 2) Servizio
-    const { data: svc, error: svcErr } = await supabase
-      .from("services")
-      .select("id,name,duration_minutes")
-      .eq("id", service_id)
-      .eq("salon_id", salon.id)
-      .single();
+    // 2) Durata servizio (accetta sia UUID che nome)
+let svc: any = null;
 
-    if (svcErr || !svc) {
-      return NextResponse.json({ ok: false, error: "Servizio non trovato" }, { status: 404 });
-    }
+// Provo prima come UUID
+const byId = await supabase
+  .from("services")
+  .select("id,name,duration_minutes")
+  .eq("id", service_id)
+  .eq("salon_id", salon.id)
+  .maybeSingle();
 
-    const duration = Number(svc.duration_minutes || 0);
-    if (!duration || duration < 5) {
-      return NextResponse.json({ ok: false, error: "Durata servizio non valida" }, { status: 400 });
-    }
+if (byId.data) {
+  svc = byId.data;
+} else {
+  // Se non è UUID, provo come NOME servizio (match esatto)
+  const byName = await supabase
+    .from("services")
+    .select("id,name,duration_minutes")
+    .eq("name", service_id)
+    .eq("salon_id", salon.id)
+    .maybeSingle();
+
+  if (byName.data) svc = byName.data;
+}
+
+if (!svc) {
+  return NextResponse.json(
+    { ok: false, error: `Servizio non trovato: ${service_id}` },
+    { status: 404 }
+  );
+}
 
     // 3) Roma -> UTC
     const start_time = romeLocalToUtcISO(date, time);
