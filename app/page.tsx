@@ -22,10 +22,10 @@ export default function HomePage() {
 
           {/* bottoni */}
           <div className="mt-8 flex justify-end gap-3 flex-wrap">
-            <Link href="/s/demo" className="lux-btn lux-btn-primary">
+            <Link href="/s/lorena-salon">Prenota</Link>
               Prenota (demo)
             </Link>
-            <Link href="/s/demo" className="lux-btn">
+          <Link href="/s/lorena-salon">Vedi pagina salone</Link>
               Vedi pagina salone
             </Link>
           </div>
