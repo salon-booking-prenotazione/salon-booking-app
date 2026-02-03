@@ -166,7 +166,7 @@ export async function POST(req: Request) {
   `Prenotazione richiesta\n\n` +
   `Salone: ${salon.name}\n` +
   `Servizio: ${svc.name}\n` +
-  `Data / Ora: ${date} ${time}\n` +
+  `Data / Ora: ${date} – ${time}\n` +
   `Telefono: ${contact_phone}\n\n` +
   `Gestisci o disdici la prenotazione:\n` +
   `${manage_url}\n\n` +
