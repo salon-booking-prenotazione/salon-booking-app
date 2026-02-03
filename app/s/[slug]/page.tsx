@@ -3,34 +3,62 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function todayRomeYMD() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Rome",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const y = parts.find((p) => p.type === "year")?.value ?? "2026";
+  const m = parts.find((p) => p.type === "month")?.value ?? "01";
+  const d = parts.find((p) => p.type === "day")?.value ?? "01";
+  return `${y}-${m}-${d}`;
+}
+
+function monthLabelIT(year: number, month1to12: number) {
+  const d = new Date(Date.UTC(year, month1to12 - 1, 1, 12, 0, 0));
+  return d.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+}
+
+function buildMonthGrid(year: number, month1to12: number) {
+  // grid 6x7
+  const first = new Date(Date.UTC(year, month1to12 - 1, 1, 12, 0, 0));
+  // dayOfWeek: 0=Sun..6=Sat => vogliamo Lun..Dom
+  const dowSun0 = first.getUTCDay();
+  const dowMon0 = (dowSun0 + 6) % 7; // Lun=0 .. Dom=6
+
+  const daysInMonth = new Date(Date.UTC(year, month1to12, 0, 12, 0, 0)).getUTCDate();
+  const cells: Array<number | null> = Array(42).fill(null);
+
+  let day = 1;
+  for (let i = dowMon0; i < 42 && day <= daysInMonth; i++) {
+    cells[i] = day++;
+  }
+  return cells;
+}
+
 export default function PaginaPrenotazione({ params }: { params: { slug: string } }) {
   const slug = params.slug;
 
+  // TODO: poi lo prenderemo dal DB
   const nomeSalone = slug === "demo" ? "Lorena Salon" : `Salone ${slug}`;
-  const mese = "Aprile 2026";
+
   const giorni = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 
-  // Demo: lista servizi (poi la colleghiamo al DB)
   const servizi = useMemo(
     () => [
-      { id: "demo-taglio-uomo", name: "Taglio Uomo" },
-      { id: "demo-taglio", name: "Taglio" },
-      { id: "demo-taglio-piega", name: "Taglio + Piega" },
-      { id: "demo-piega", name: "Piega" },
-      { id: "demo-colore-piega", name: "Colore + Piega" },
-      { id: "demo-meches", name: "Meches" },
-      { id: "demo-permanente", name: "Permanente" },
-    ],
-    []
-  );
-
-  const calendario = useMemo(
-    () => [
-      ["", "", "", "1", "2", "3", "4"],
-      ["5", "6", "7", "8", "9", "10", "11"],
-      ["12", "13", "14", "15", "16", "17", "18"],
-      ["19", "20", "21", "22", "23", "24", "25"],
-      ["26", "27", "28", "29", "30", "", ""],
+      { id: "svc1", name: "Taglio Uomo" },
+      { id: "svc2", name: "Taglio" },
+      { id: "svc3", name: "Taglio + Piega" },
+      { id: "svc4", name: "Piega" },
+      { id: "svc5", name: "Colore + Piega" },
+      { id: "svc6", name: "Meches" },
+      { id: "svc7", name: "Permanente" },
     ],
     []
   );
@@ -45,45 +73,43 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
     []
   );
 
+  const today = todayRomeYMD();
+  const [Y, M, D] = today.split("-").map(Number);
+
+  const [viewYear] = useState<number>(Y);
+  const [viewMonth] = useState<number>(M);
+
+  const mese = monthLabelIT(viewYear, viewMonth);
+  const grid = useMemo(() => buildMonthGrid(viewYear, viewMonth), [viewYear, viewMonth]);
+
   const [serviceId, setServiceId] = useState<string>("");
   const [giornoSelezionato, setGiornoSelezionato] = useState<number | null>(null);
   const [oraSelezionata, setOraSelezionata] = useState<string | null>(null);
 
-  // contatti
   const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
   const [note, setNote] = useState("");
 
-  // risultato prenotazione
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [done, setDone] = useState<null | {
-    whatsapp_url: string;
-    manage_url: string;
-    calendar_ics_url: string;
-  }>(null);
 
-  const oggiDemo = 7;
+  const selectedYMD = useMemo(() => {
+    if (!giornoSelezionato) return "";
+    return `${viewYear}-${pad2(viewMonth)}-${pad2(giornoSelezionato)}`;
+  }, [giornoSelezionato, viewYear, viewMonth]);
 
-  // Aprile 2026 (mese 04)
-  function selectedDateStr(): string | null {
-    if (!giornoSelezionato) return null;
-    const dd = String(giornoSelezionato).padStart(2, "0");
-    return `2026-04-${dd}`;
-  }
+  const todayDay = D;
 
   async function conferma() {
     setErr(null);
-    setDone(null);
 
-    const dateStr = selectedDateStr();
-    if (!serviceId || !dateStr || !oraSelezionata) {
+    if (!serviceId || !giornoSelezionato || !oraSelezionata) {
       setErr("Seleziona servizio, data e orario.");
       return;
     }
-    if (!phone.trim()) {
-      setErr("Inserisci il numero di telefono.");
+    if (!contactPhone.trim()) {
+      setErr("Telefono obbligatorio.");
       return;
     }
 
@@ -95,11 +121,11 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
         body: JSON.stringify({
           slug,
           service_id: serviceId,
-          date: dateStr,
+          date: selectedYMD,
           time: oraSelezionata,
           customer_name: customerName,
-          contact_phone: phone,
-          contact_email: email,
+          contact_phone: contactPhone,
+          contact_email: contactEmail,
           note,
         }),
       });
@@ -109,14 +135,10 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
         throw new Error(json.error || "Errore creazione prenotazione");
       }
 
-      setDone({
-        whatsapp_url: json.whatsapp_url,
-        manage_url: json.manage_url,
-        calendar_ics_url: json.calendar_ics_url,
-      });
-
-      // apre WhatsApp (nuova tab)
-      window.open(json.whatsapp_url, "_blank", "noopener,noreferrer");
+      // apre WhatsApp (messaggio pronto)
+      if (json.whatsapp_url) {
+        window.open(json.whatsapp_url, "_blank");
+      }
     } catch (e: any) {
       setErr(e?.message || "Errore");
     } finally {
@@ -127,8 +149,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
-
-        {/* SINISTRA: servizio + contatti */}
+        {/* SINISTRA */}
         <section className="lux-card lux-frame p-8 md:p-10">
           <div className="flex items-start justify-between">
             <h1 className="lux-title text-3xl md:text-4xl">Prenota</h1>
@@ -143,87 +164,93 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
 
           {/* SERVIZIO */}
           <div className="mt-6">
-            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            <div
+              className="mb-3"
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "var(--muted)",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
               Servizio *
             </div>
 
-            <div className="mt-3">
-              <select
-                className="lux-input"
-                value={serviceId}
-                onChange={(e) => setServiceId(e.target.value)}
-              >
-                <option value="" disabled>Seleziona un servizio…</option>
-                {servizi.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+            <select
+              className="lux-input"
+              style={{ maxWidth: 420, width: "100%", margin: "0 auto", display: "block" }}
+              value={serviceId}
+              onChange={(e) => setServiceId(e.target.value)}
+            >
+              <option value="" disabled>
+                Seleziona un servizio…
+              </option>
+              {servizi.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* DATI */}
+          <div className="mt-6">
+            <div
+              className="mb-3"
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "var(--muted)",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+              }}
+            >
+              I tuoi dati
             </div>
-          </div>
 
-          <div className="lux-sep my-6" />
-
-          {/* CONTATTI */}
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-            I tuoi dati
-          </div>
-
-          <div className="mt-3 grid gap-3">
-            <input
-              className="lux-input"
-              placeholder="Nome (opzionale)"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            />
-            <input
-              className="lux-input"
-              placeholder="Telefono *"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-            <input
-              className="lux-input"
-              placeholder="Email (opzionale)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              className="lux-input"
-              placeholder="Note (opzionale)"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
+            <div style={{ display: "grid", gap: 10 }}>
+              <input
+                className="lux-input"
+                placeholder="Nome (opzionale)"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+              <input
+                className="lux-input"
+                placeholder="Telefono *"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+              />
+              <input
+                className="lux-input"
+                placeholder="Email (opzionale)"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+              />
+              <input
+                className="lux-input"
+                placeholder="Note (opzionale)"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
+            </div>
           </div>
 
           {err && (
             <div className="mt-4" style={{ color: "crimson", fontWeight: 700 }}>
-              ❌ {err}
-            </div>
-          )}
-
-          {done && (
-            <div className="mt-5 lux-card p-4" style={{ background: "rgba(255,255,255,0.70)" }}>
-              <div style={{ fontWeight: 900, marginBottom: 8 }}>✅ Prenotazione creata</div>
-              <div className="flex gap-3 flex-wrap">
-                <a className="lux-btn lux-btn-primary" href={done.whatsapp_url} target="_blank" rel="noreferrer">
-                  Apri WhatsApp
-                </a>
-                <a className="lux-btn" href={done.calendar_ics_url} target="_blank" rel="noreferrer">
-                  Scarica ICS
-                </a>
-                <a className="lux-btn" href={done.manage_url} target="_blank" rel="noreferrer">
-                  Gestisci / Disdici
-                </a>
-              </div>
+              ✕ {err}
             </div>
           )}
         </section>
 
-        {/* DESTRA: calendario + orari + conferma */}
-        <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
+        {/* DESTRA */}
+        <section className="lux-card lux-frame p-8 md:p-10">
           <div className="flex items-center justify-between">
             <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
-            <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 800 }}>{mese}</div>
+            <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 800 }}>
+              {mese}
+            </div>
           </div>
 
           <div className="mt-6 grid grid-cols-7 gap-0" style={{ color: "var(--muted)", fontSize: 12 }}>
@@ -235,19 +262,19 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
           </div>
 
           <div className="grid grid-cols-7">
-            {calendario.flat().map((v, idx) => {
-              const vuoto = v === "";
-              const n = vuoto ? null : Number(v);
+            {grid.map((v, idx) => {
+              const vuoto = v === null;
+              const n = v;
 
               const isSelected = n !== null && giornoSelezionato === n;
-              const isToday = n !== null && n === oggiDemo;
+              const isToday = n !== null && n === todayDay;
 
               return (
                 <div
                   key={idx}
                   style={{
                     borderRight: idx % 7 === 6 ? "none" : "1px solid var(--line)",
-                    borderBottom: idx >= 28 ? "none" : "1px solid var(--line)",
+                    borderBottom: idx >= 35 ? "none" : "1px solid var(--line)",
                   }}
                 >
                   <button
@@ -259,11 +286,14 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                       cursor: vuoto ? "default" : "pointer",
                       background: isSelected ? "rgba(91,42,63,0.10)" : "transparent",
                       color: vuoto ? "rgba(35,35,38,0.28)" : "rgba(35,35,38,0.72)",
-                      fontWeight: isSelected ? 900 : 500,
+                      fontWeight: isSelected ? 900 : 600,
                     }}
                   >
                     {isToday && !isSelected && (
-                      <span className="absolute h-8 w-8 rounded-full" style={{ background: "rgba(127,143,134,0.28)" }} />
+                      <span
+                        className="absolute h-8 w-8 rounded-full"
+                        style={{ background: "rgba(127,143,134,0.22)" }}
+                      />
                     )}
                     {isSelected && (
                       <span
@@ -274,7 +304,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                         }}
                       />
                     )}
-                    <span className="relative z-10">{v || " "}</span>
+                    <span className="relative z-10">{n ?? " "}</span>
                   </button>
                 </div>
               );
@@ -299,10 +329,10 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               className="lux-btn lux-btn-primary w-full"
               type="button"
               onClick={conferma}
-              disabled={loading || !serviceId || !giornoSelezionato || !oraSelezionata}
-              style={{ opacity: loading || !serviceId || !giornoSelezionato || !oraSelezionata ? 0.6 : 1 }}
+              disabled={loading}
+              style={{ opacity: loading ? 0.7 : 1 }}
             >
-              {loading ? "Confermo..." : "Conferma"}
+              {loading ? "Invio..." : "Conferma"}
             </button>
 
             <Link className="lux-btn w-full" href="/">
