@@ -3,207 +3,137 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-type ServiceRow = {
-  id: string;
-  name: string;
-  duration_minutes: number;
-};
+type Service = { id: string; name: string; duration_minutes: number };
+type Salon = { id: string; name: string; slug: string; phone?: string | null };
 
-type SalonRow = {
-  id: string;
-  name: string;
-  slug: string;
-};
-
-function pad2(n: number) {
-  return String(n).padStart(2, "0");
-}
-
-// YYYY-MM-DD per Europe/Rome (sicuro)
-function todayRomeYMD(): string {
-  const now = new Date();
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Europe/Rome",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(now);
-  const y = parts.find((p) => p.type === "year")?.value ?? "2026";
-  const m = parts.find((p) => p.type === "month")?.value ?? "01";
-  const d = parts.find((p) => p.type === "day")?.value ?? "01";
-  return `${y}-${m}-${d}`;
-}
-
-// mese visibile (Roma)
-function monthLabelRome(date: Date): string {
-  return date.toLocaleDateString("it-IT", {
-    timeZone: "Europe/Rome",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-export default function PaginaPrenotazione({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default function PaginaPrenotazione({ params }: { params: { slug: string } }) {
   const slug = params.slug;
 
-  // UI calendario
+  // UI (demo calendario statico, poi lo renderemo reale)
+  const mese = "Aprile 2026";
   const giorni = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
-
-  // Orari demo (poi li renderemo dinamici)
-  const orari = useMemo(
+  const calendario = useMemo(
     () => [
-      "09:00",
-      "09:30",
-      "10:00",
-      "10:30",
-      "11:00",
-      "11:30",
-      "12:00",
-      "12:30",
-      "13:00",
-      "13:30",
-      "14:00",
-      "14:30",
-      "15:00",
-      "15:30",
-      "16:00",
-      "16:30",
-      "17:00",
-      "17:30",
-      "18:00",
-      "18:30",
-      "19:00",
+      ["", "", "", "1", "2", "3", "4"],
+      ["5", "6", "7", "8", "9", "10", "11"],
+      ["12", "13", "14", "15", "16", "17", "18"],
+      ["19", "20", "21", "22", "23", "24", "25"],
+      ["26", "27", "28", "29", "30", "", ""],
     ],
     []
   );
 
-  // Stato dati salone/servizi da DB
-  const [salon, setSalon] = useState<SalonRow | null>(null);
-  const [services, setServices] = useState<ServiceRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const orari = useMemo(
+    () => [
+      "09:00","09:30","10:00","10:30","11:00","11:30",
+      "12:00","12:30","13:00","13:30","14:00","14:30",
+      "15:00","15:30","16:00","16:30","17:00","17:30",
+      "18:00","18:30","19:00",
+    ],
+    []
+  );
 
-  // Form
+  // Stato data/services
+  const [salon, setSalon] = useState<Salon | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
+  const [loadingSalon, setLoadingSalon] = useState(true);
+
+  // Scelte utente
   const [serviceId, setServiceId] = useState<string>("");
+  const [giornoSelezionato, setGiornoSelezionato] = useState<number | null>(null);
+  const [oraSelezionata, setOraSelezionata] = useState<string | null>(null);
+
+  // Dati cliente
   const [customerName, setCustomerName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [note, setNote] = useState("");
 
-  // Data/ora selezionate
-  const [selectedDate, setSelectedDate] = useState<string>(todayRomeYMD()); // YYYY-MM-DD
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
-  // Mese corrente (Roma) per calendario demo
-  const [monthCursor] = useState<Date>(new Date());
-
-  // Stato chiamata API
+  // Messaggi
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [okMsg, setOkMsg] = useState<string | null>(null);
 
-  // Carica salon + services dal backend (consigliato: route server)
+  // Carica salone + servizi veri
   useEffect(() => {
-    let cancelled = false;
+    let alive = true;
+    setLoadingSalon(true);
+    setErrorMsg(null);
 
-    async function load() {
-      setLoading(true);
-      setErrorMsg(null);
+    fetch(`/api/public/salon?slug=${encodeURIComponent(slug)}`)
+      .then(async (r) => {
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) throw new Error(j.error || "Errore caricamento salone");
+        return j as { ok: true; salon: Salon; services: Service[] };
+      })
+      .then((j) => {
+        if (!alive) return;
+        setSalon(j.salon);
+        setServices(j.services || []);
+      })
+      .catch((e: any) => {
+        if (!alive) return;
+        setErrorMsg(e?.message || "Errore");
+      })
+      .finally(() => {
+        if (!alive) return;
+        setLoadingSalon(false);
+      });
 
-      try {
-        const res = await fetch(`/api/public/salon?slug=${encodeURIComponent(slug)}`, {
-          cache: "no-store",
-        });
-        const json = await res.json().catch(() => ({}));
-
-        if (!res.ok || !json?.ok) {
-          throw new Error(json?.error || "Impossibile caricare il salone");
-        }
-
-        if (cancelled) return;
-
-        setSalon(json.salon);
-        setServices(json.services || []);
-      } catch (e: any) {
-        if (!cancelled) setErrorMsg(e?.message || "Errore caricamento");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
     return () => {
-      cancelled = true;
+      alive = false;
     };
   }, [slug]);
 
-  // Calendario demo: griglia finta del mese (per ora semplice)
-  // (Va benissimo per UI, poi la renderemo reale e con giorni disabilitati)
-  const calendario = useMemo(() => {
-    // demo: 1..30 in griglia 7 col
-    // NON è un calendario reale: è solo UI provvisoria
-    const cells = Array.from({ length: 35 }, (_, i) => {
-      const day = i - 3; // sposta di 3 per avere un po' di vuoti
-      if (day < 1 || day > 30) return "";
-      return String(day);
-    });
+  function dateISOFromDay(day: number) {
+    // demo: Aprile 2026
+    const dd = String(day).padStart(2, "0");
+    return `2026-04-${dd}`;
+  }
 
-    const rows: string[][] = [];
-    for (let i = 0; i < cells.length; i += 7) rows.push(cells.slice(i, i + 7));
-    return rows;
-  }, []);
-
-  const meseLabel = useMemo(() => monthLabelRome(monthCursor), [monthCursor]);
-
-  // giorno “selected” nel calendario demo: usiamo il giorno della selectedDate
-  const selectedDayNum = useMemo(() => {
-    const d = Number(selectedDate.split("-")[2] || 1);
-    return Number.isFinite(d) ? d : 1;
-  }, [selectedDate]);
-
-  async function onConfirm() {
-    setSubmitting(true);
+  async function conferma() {
     setErrorMsg(null);
-    setOkMsg(null);
 
+    if (!serviceId || !giornoSelezionato || !oraSelezionata) {
+      setErrorMsg("Seleziona servizio, data e orario.");
+      return;
+    }
+    if (!contactPhone.trim()) {
+      setErrorMsg("Telefono obbligatorio.");
+      return;
+    }
+
+    const payload = {
+      slug,
+      service_id: serviceId,
+      date: dateISOFromDay(giornoSelezionato),
+      time: oraSelezionata,
+      customer_name: customerName.trim(),
+      contact_phone: contactPhone.trim(),
+      contact_email: contactEmail.trim(),
+      note: note.trim(),
+    };
+
+    setSubmitting(true);
     try {
-      if (!serviceId) throw new Error("Seleziona un servizio");
-      if (!selectedDate) throw new Error("Seleziona una data");
-      if (!selectedTime) throw new Error("Seleziona un orario");
-      if (!contactPhone.trim()) throw new Error("Inserisci il telefono");
-
       const res = await fetch("/api/appointments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-          service_id: serviceId,
-          date: selectedDate, // YYYY-MM-DD (Rome)
-          time: selectedTime, // HH:mm (Rome)
-          customer_name: customerName,
-          contact_phone: contactPhone,
-          contact_email: contactEmail,
-          note,
-        }),
+        body: JSON.stringify(payload),
       });
-
       const json = await res.json().catch(() => ({}));
 
       if (!res.ok || !json.ok) {
-        throw new Error(json?.error || "Errore creazione prenotazione");
+        throw new Error(json.error || "Errore creazione prenotazione");
       }
 
       // Apri WhatsApp con messaggio pronto
       if (json.whatsapp_url) {
         window.open(json.whatsapp_url, "_blank", "noopener,noreferrer");
+      } else {
+        setErrorMsg("Prenotazione creata, ma WhatsApp non disponibile.");
       }
-
-      setOkMsg("Prenotazione creata ✅ (si è aperto WhatsApp)");
     } catch (e: any) {
-      setErrorMsg(e?.message || "Errore interno");
+      setErrorMsg(e?.message || "Errore");
     } finally {
       setSubmitting(false);
     }
@@ -216,23 +146,28 @@ export default function PaginaPrenotazione({
         <section className="lux-card lux-frame p-8 md:p-10">
           <div className="flex items-start justify-between">
             <h1 className="lux-title text-3xl md:text-4xl">Prenota</h1>
-            <Link href="/" className="lux-btn" aria-label="Chiudi">
+            <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Chiudi">
               ✕
             </Link>
           </div>
 
           <div className="mt-3 lux-subtitle">
-            <b style={{ color: "var(--plum)" }}>
-              {loading ? "Caricamento..." : salon?.name || `Salone ${slug}`}
-            </b>
+            {loadingSalon ? (
+              <span>Caricamento…</span>
+            ) : salon ? (
+              <b style={{ color: "var(--plum)" }}>{salon.name}</b>
+            ) : (
+              <span style={{ color: "crimson" }}>Salone non trovato</span>
+            )}
           </div>
 
-          <div className="mt-7">
+          {/* SERVIZIO */}
+          <div className="mt-6">
             <div
               className="mb-3"
               style={{
                 fontSize: 13,
-                fontWeight: 700,
+                fontWeight: 600,
                 color: "var(--muted)",
                 letterSpacing: "0.04em",
                 textTransform: "uppercase",
@@ -241,113 +176,83 @@ export default function PaginaPrenotazione({
               Servizio *
             </div>
 
-            {/* ✅ tendina NON troppo lontana: niente justify-center */}
             <select
               className="lux-input"
               value={serviceId}
               onChange={(e) => setServiceId(e.target.value)}
-              disabled={loading || services.length === 0}
+              disabled={!salon || loadingSalon}
             >
               <option value="" disabled>
-                {loading ? "Carico servizi..." : "Seleziona un servizio…"}
+                Seleziona un servizio…
               </option>
               {services.map((s) => (
                 <option key={s.id} value={s.id}>
-                  {s.name}
+                  {s.name} ({s.duration_minutes} min)
                 </option>
               ))}
             </select>
+          </div>
 
-            <div className="mt-6">
-              <div
-                className="mb-3"
-                style={{
-                  fontSize: 13,
-                  fontWeight: 700,
-                  color: "var(--muted)",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                }}
-              >
-                I tuoi dati
-              </div>
-
-              <div className="grid gap-3">
-                <input
-                  className="lux-input"
-                  placeholder="Nome (opzionale)"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                />
-                <input
-                  className="lux-input"
-                  placeholder="Telefono *"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                />
-                <input
-                  className="lux-input"
-                  placeholder="Email (opzionale)"
-                  value={contactEmail}
-                  onChange={(e) => setContactEmail(e.target.value)}
-                />
-                <input
-                  className="lux-input"
-                  placeholder="Note (opzionale)"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                />
-              </div>
+          {/* DATI */}
+          <div className="mt-8">
+            <div
+              className="mb-3"
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--muted)",
+                letterSpacing: "0.04em",
+                textTransform: "uppercase",
+              }}
+            >
+              I tuoi dati
             </div>
 
-            {errorMsg && (
-              <div style={{ marginTop: 12, color: "crimson", fontWeight: 800 }}>
-                ✕ {errorMsg}
-              </div>
-            )}
-            {okMsg && (
-              <div style={{ marginTop: 12, color: "rgb(22,163,74)", fontWeight: 800 }}>
-                ✓ {okMsg}
-              </div>
-            )}
-
-            <div className="mt-6 flex gap-3">
-              <button
-                className="lux-btn lux-btn-primary w-full"
-                type="button"
-                onClick={onConfirm}
-                disabled={submitting || !serviceId || !selectedTime || !contactPhone.trim()}
-                style={{
-                  opacity:
-                    submitting || !serviceId || !selectedTime || !contactPhone.trim() ? 0.6 : 1,
-                }}
-              >
-                {submitting ? "Confermo..." : "Conferma"}
-              </button>
-
-              <Link className="lux-btn w-full" href="/">
-                Indietro
-              </Link>
-            </div>
-
-            <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
-              Dopo la conferma si apre WhatsApp con il messaggio pronto ✨
+            <div className="grid gap-3">
+              <input
+                className="lux-input"
+                placeholder="Nome (opzionale)"
+                value={customerName}
+                onChange={(e) => setCustomerName(e.target.value)}
+              />
+              <input
+                className="lux-input"
+                placeholder="Telefono *"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+              />
+              <input
+                className="lux-input"
+                placeholder="Email (opzionale)"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+              />
+              <input
+                className="lux-input"
+                placeholder="Note (opzionale)"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+              />
             </div>
           </div>
+
+          {errorMsg && (
+            <div className="mt-4" style={{ color: "crimson", fontWeight: 800 }}>
+              ✕ {errorMsg}
+            </div>
+          )}
         </section>
 
         {/* DESTRA */}
         <section className="lux-card lux-frame p-8 md:p-10">
           <div className="flex items-center justify-between">
             <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
-            <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 800 }}>
-              {meseLabel}
-            </div>
+            <div style={{ color: "var(--muted)", fontSize: 13, fontWeight: 700 }}>{mese}</div>
           </div>
 
           <div className="mt-6 grid grid-cols-7 gap-0" style={{ color: "var(--muted)", fontSize: 12 }}>
             {giorni.map((g) => (
-              <div key={g} className="text-center py-2" style={{ fontWeight: 800 }}>
+              <div key={g} className="text-center py-2" style={{ fontWeight: 700 }}>
                 {g}
               </div>
             ))}
@@ -357,7 +262,7 @@ export default function PaginaPrenotazione({
             {calendario.flat().map((v, idx) => {
               const vuoto = v === "";
               const n = vuoto ? null : Number(v);
-              const isSelected = n !== null && n === selectedDayNum;
+              const isSelected = n !== null && giornoSelezionato === n;
 
               return (
                 <div
@@ -370,18 +275,13 @@ export default function PaginaPrenotazione({
                   <button
                     type="button"
                     disabled={vuoto}
-                    onClick={() => {
-                      if (!n) return;
-                      // aggiorna selectedDate mantenendo YYYY-MM-
-                      const [Y, M] = selectedDate.split("-").slice(0, 2);
-                      setSelectedDate(`${Y}-${M}-${pad2(n)}`);
-                    }}
+                    onClick={() => n !== null && setGiornoSelezionato(n)}
                     className="w-full h-[42px] grid place-items-center relative"
                     style={{
                       cursor: vuoto ? "default" : "pointer",
                       background: isSelected ? "rgba(91,42,63,0.10)" : "transparent",
                       color: vuoto ? "rgba(35,35,38,0.28)" : "rgba(35,35,38,0.72)",
-                      fontWeight: isSelected ? 900 : 600,
+                      fontWeight: isSelected ? 800 : 500,
                     }}
                   >
                     {isSelected && (
@@ -405,12 +305,36 @@ export default function PaginaPrenotazione({
               <button
                 key={t}
                 type="button"
-                onClick={() => setSelectedTime(t)}
-                className={`lux-slot ${selectedTime === t ? "selected" : ""}`}
+                onClick={() => setOraSelezionata(t)}
+                className={`lux-slot ${oraSelezionata === t ? "selected" : ""}`}
               >
                 {t}
               </button>
             ))}
+          </div>
+
+          <div className="mt-8 flex gap-3">
+            <button
+              className="lux-btn lux-btn-primary w-full"
+              type="button"
+              onClick={conferma}
+              disabled={submitting || !serviceId || !giornoSelezionato || !oraSelezionata || !contactPhone.trim()}
+              style={{
+                opacity:
+                  submitting || !serviceId || !giornoSelezionato || !oraSelezionata || !contactPhone.trim()
+                    ? 0.6
+                    : 1,
+              }}
+            >
+              {submitting ? "Confermo..." : "Conferma"}
+            </button>
+            <Link className="lux-btn w-full" href="/">
+              Indietro
+            </Link>
+          </div>
+
+          <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
+            Dopo la conferma si apre WhatsApp con il messaggio pronto ✨
           </div>
         </section>
       </div>
