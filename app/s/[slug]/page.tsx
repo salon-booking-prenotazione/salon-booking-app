@@ -232,7 +232,6 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
     } finally {
       setSubmitting(false);
     }
-  }
 
   return (
     <div className="lux-bg">
