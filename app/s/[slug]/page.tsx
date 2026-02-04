@@ -1,277 +1,420 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+"use client";
 
-/* === MotoPress-ish, ma più premium === */
-:root{
-  --bg: #c7cec7;                 /* sage background */
-  --bg2:#bfc7c0;
-  --cream:#f6f2ec;               /* card paper */
-  --cream2:#f2ede6;
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-  --plum:#5b2a3f;                /* titles */
-  --ink: rgba(28,28,30,0.82);
-  --muted: rgba(28,28,30,0.55);
+type ServiceItem = { id: string; name: string; duration_minutes: number };
 
-  --sage:#7f8f86;                /* CTA */
-  --sage2:#6f8077;
-
-  --rose:#cfa0b2;                /* frame */
-  --rose2:#ddb7c5;
-
-  --line: rgba(28,28,30,0.16);
-  --line2: rgba(255,255,255,0.45);
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+function ymd(d: Date) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+function monthLabelIT(d: Date) {
+  return d.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+}
+function addMonths(base: Date, delta: number) {
+  const d = new Date(base);
+  d.setMonth(d.getMonth() + delta, 1);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+function daysInMonth(year: number, monthIndex0: number) {
+  return new Date(year, monthIndex0 + 1, 0).getDate();
+}
+// Monday=1 ... Sunday=7
+function weekdayISO(d: Date) {
+  const js = d.getDay(); // 0 Sun ... 6 Sat
+  return js === 0 ? 7 : js;
 }
 
-html, body { height: 100%; }
-body{
-  background: var(--bg);
-  color: var(--ink);
-  font-family: ui-sans-serif, system-ui;
-}
+export default function PaginaPrenotazione({ params }: { params: { slug: string } }) {
+  const slug = params.slug;
 
-/* background con “forme” + leggero pattern (solo CSS) */
-.lux-bg{
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(900px 700px at 18% 18%, rgba(127,143,134,0.40), transparent 62%),
-    radial-gradient(780px 560px at 78% 22%, rgba(207,160,178,0.30), transparent 60%),
-    radial-gradient(1000px 780px at 60% 90%, rgba(127,143,134,0.22), transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
-}
+  const [services, setServices] = useState<ServiceItem[]>([]);
+  const [serviceId, setServiceId] = useState<string>("");
 
-/* overlay leggero (su tutto schermo) */
-.lux-bg::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.12)
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [note, setNote] = useState("");
+
+  const [monthCursor, setMonthCursor] = useState<Date>(() => {
+    const d = new Date();
+    d.setDate(1);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  });
+
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
+
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string>("");
+
+  const timesWrapRef = useRef<HTMLDivElement | null>(null);
+
+  // ====== FETCH SERVICES ======
+  useEffect(() => {
+    let cancelled = false;
+
+    async function run() {
+      setErr("");
+      try {
+        const r = await fetch(`/api/salon/services?slug=${encodeURIComponent(slug)}`, { cache: "no-store" });
+        const j = await r.json().catch(() => ({}));
+
+        if (!r.ok || !j?.ok || !Array.isArray(j.services)) {
+          throw new Error(j?.error || "Servizi non disponibili");
+        }
+
+        if (!cancelled) setServices(j.services);
+      } catch (e: any) {
+        if (!cancelled) {
+          setServices([]);
+          setErr(e?.message || "Servizi non disponibili");
+        }
+      }
+    }
+
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  const selectedService = useMemo(() => services.find((s) => s.id === serviceId), [services, serviceId]);
+
+  // reset quando cambio mese o servizio
+  useEffect(() => {
+    setSelectedDate("");
+    setSelectedTime("");
+    timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+  }, [monthCursor]);
+
+  useEffect(() => {
+    setSelectedDate("");
+    setSelectedTime("");
+    timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+  }, [serviceId]);
+
+  const grid = useMemo(() => {
+    const year = monthCursor.getFullYear();
+    const m0 = monthCursor.getMonth();
+    const total = daysInMonth(year, m0);
+
+    const first = new Date(year, m0, 1);
+    const firstIso = weekdayISO(first);
+    const offset = firstIso - 1;
+
+    const cells: Array<{ day: number | null; dateStr: string | null; isoWeekday: number | null }> = [];
+
+    for (let i = 0; i < offset; i++) cells.push({ day: null, dateStr: null, isoWeekday: null });
+
+    for (let d = 1; d <= total; d++) {
+      const dt = new Date(year, m0, d);
+      cells.push({ day: d, dateStr: ymd(dt), isoWeekday: weekdayISO(dt) });
+    }
+
+    while (cells.length % 7 !== 0) cells.push({ day: null, dateStr: null, isoWeekday: null });
+
+    return cells;
+  }, [monthCursor]);
+
+  const weekDays = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
+
+  const times = useMemo(
+    () => [
+      "09:00","09:30","10:00","10:30","11:00","11:30",
+      "12:00","12:30","13:00","13:30","14:00","14:30",
+      "15:00","15:30","16:00","16:30","17:00","17:30",
+      "18:00","18:30","19:00",
+    ],
+    []
   );
-  pointer-events: none;
-  z-index: 0;
-}
 
-/* tutto il contenuto sopra l'overlay */
-.lux-content{
-  position: relative;
-  z-index: 1;
-}
+  function scrollTimes(dir: "left" | "right") {
+    const el = timesWrapRef.current;
+    if (!el) return;
+    const amount = Math.round(el.clientWidth * 0.75);
+    el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  }
 
-/* tipografia */
-.lux-title{
-  font-family: ui-serif, Georgia;
-  color: var(--plum);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-.lux-subtitle{ color: var(--muted); }
+  function isClosedDay(isoWeekday: number | null) {
+    return isoWeekday === 1; // lunedì
+  }
 
-/* badge top */
-.lux-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:10px;
-  padding:10px 14px;
-  border-radius:999px;
-  background: rgba(255,255,255,0.55);
-  border: 1px solid rgba(28,28,30,0.14);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  color: rgba(28,28,30,0.60);
-  font-size: 13px;
-}
+  const canConfirm = !!serviceId && !!selectedDate && !!selectedTime && phone.trim().length >= 6 && !loading;
 
-/* CARD premium: bordo interno + carta + ombra morbida */
-.lux-card{
-  border-radius: 18px;
-  background:
-    radial-gradient(120% 120% at 20% 0%, rgba(255,255,255,0.70), transparent 55%),
-    linear-gradient(180deg, var(--cream), var(--cream2));
-  border: 1px solid rgba(28,28,30,0.14);
-  box-shadow:
-    0 24px 70px rgba(0,0,0,0.14),
-    0 0 0 1px rgba(255,255,255,0.55) inset;
-}
+  async function onConfirm() {
+    if (!canConfirm) return;
 
-/* cornice esterna “rosa” */
-.lux-frame{
-  border: 8px solid rgba(207,160,178,0.60);
-  border-radius: 22px;
-  box-shadow: 0 18px 55px rgba(0,0,0,0.12);
-}
+    setLoading(true);
+    setErr("");
 
-/* bottoni */
-.lux-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  border-radius: 14px;
-  padding: 11px 18px;
-  border: 1px solid rgba(28,28,30,0.16);
-  background: rgba(255,255,255,0.65);
-  color: rgba(28,28,30,0.78);
-  font-weight: 700;
-  box-shadow: 0 10px 22px rgba(0,0,0,0.10);
-}
-.lux-btn:hover{ filter: brightness(1.02); }
+    try {
+      const res = await fetch("/api/appointments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug,
+          service_id: serviceId,
+          date: selectedDate,
+          time: selectedTime,
+          customer_name: name.trim(),
+          contact_phone: phone.trim(),
+          contact_email: email.trim(),
+          note: note.trim(),
+        }),
+      });
 
-.lux-btn-primary{
-  background: linear-gradient(180deg, rgba(127,143,134,0.98), rgba(111,128,119,0.98));
-  color: rgba(255,255,255,0.95);
-  border-color: rgba(0,0,0,0.10);
-  box-shadow:
-    0 16px 30px rgba(127,143,134,0.22),
-    0 10px 20px rgba(0,0,0,0.12);
-}
-.lux-btn-primary:hover{ transform: translateY(-1px); }
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) throw new Error(json?.error || "Errore creazione prenotazione");
 
-.lux-btn-ghost{
-  background: transparent;
-  box-shadow: none;
-}
+      if (json.whatsapp_url) window.location.href = json.whatsapp_url;
+      else throw new Error("Manca whatsapp_url nella risposta API");
+    } catch (e: any) {
+      setErr(e?.message || "Errore");
+    } finally {
+      setLoading(false);
+    }
+  }
 
-/* input */
-.lux-input{
-  width:100%;
-  border-radius: 14px;
-  padding: 12px 14px;
-  border: 1px solid rgba(28,28,30,0.16);
-  background: rgba(255,255,255,0.72);
-  color: rgba(28,28,30,0.82);
-  outline: none;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.55) inset;
-}
-.lux-input:focus{
-  border-color: rgba(207,160,178,0.85);
-  box-shadow: 0 0 0 4px rgba(207,160,178,0.18);
-}
+  return (
+    <div className="lux-bg">
+      <div className="mx-auto max-w-6xl px-4 py-10">
+        <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
+          {/* SINISTRA */}
+          <section className="lux-card lux-frame p-8 md:p-10">
+            <div className="flex items-start justify-between">
+              <h1 className="lux-title text-3xl md:text-4xl">Prenota</h1>
+              <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Chiudi">
+                ✕
+              </Link>
+            </div>
 
-/* slots orari */
-.lux-slot{
-  border-radius: 12px;
-  border: 1px solid rgba(28,28,30,0.18);
-  background: rgba(255,255,255,0.70);
-  padding: 10px 12px;
-  text-align: center;
-  font-size: 13px;
-  color: rgba(28,28,30,0.72);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-}
-.lux-slot.selected{
-  background: linear-gradient(180deg, rgba(91,42,63,0.98), rgba(70,25,45,0.98));
-  color: rgba(255,255,255,0.95);
-  border-color: rgba(91,42,63,0.55);
-}
+            <div className="mt-3 lux-subtitle">
+              <b style={{ color: "var(--plum)" }}>{slug === "lorena-salon" ? "Lorena Salon" : slug}</b>
+            </div>
 
-/* scrittura elegante */
-.lux-calligraphy {
-  font-family: ui-serif, Georgia;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  opacity: 0.92;
-  color: var(--plum);
-  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
-}
+            <div className="mt-7">
+              <div className="mb-3" style={{ fontSize: 13, fontWeight: 600, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                Servizio *
+              </div>
 
-/* nasconde scrollbar orari */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+              <div style={{ position: "relative" }}>
+                <select
+                  className="lux-input"
+                  value={serviceId}
+                  onChange={(e) => setServiceId(e.target.value)}
+                  disabled={!services.length}
+                  style={{
+                    width: "100%",
+                    paddingRight: 52,
+                    paddingLeft: 16,
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none",
+                    cursor: "pointer",
+                    opacity: services.length ? 1 : 0.6,
+                  }}
+                >
+                  <option value="" disabled>
+                    {services.length ? "Seleziona" : "Caricamento..."}
+                  </option>
 
-/* ===========================
-   CALENDARIO - VERSIONE BELLA
-   =========================== */
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
 
-.lux-cal{
-  margin-top: 18px;
-  border-radius: 18px;
-  border: 1px solid rgba(28,28,30,0.12);
-  overflow: hidden;
-  background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0.45));
-  box-shadow: 0 18px 45px rgba(0,0,0,0.10);
-}
+                <span
+                  aria-hidden
+                  style={{
+                    position: "absolute",
+                    right: 18,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    pointerEvents: "none",
+                    opacity: 0.55,
+                    fontSize: 14,
+                    fontWeight: 900,
+                  }}
+                >
+                  ▾
+                </span>
+              </div>
+            </div>
 
-.lux-cal-head{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(28,28,30,0.12);
-  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.55));
-}
+            <div className="mt-8">
+              <div className="mb-3" style={{ fontSize: 13, fontWeight: 600, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                I tuoi dati
+              </div>
 
-.lux-cal-month{
-  flex: 1 1 auto;
-  text-align: center;
-  font-size: 13px;
-  font-weight: 900;
-  color: rgba(28,28,30,0.60);
-  letter-spacing: 0.03em;
-  text-transform: capitalize;
-}
+              <div className="grid gap-3">
+                <input className="lux-input" placeholder="Nome (opzionale)" value={name} onChange={(e) => setName(e.target.value)} />
+                <input className="lux-input" placeholder="Telefono *" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                <input className="lux-input" placeholder="Email (opzionale)" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <input className="lux-input" placeholder="Note (opzionale)" value={note} onChange={(e) => setNote(e.target.value)} />
+              </div>
 
-.lux-cal-grid{
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
+              {err && <div className="mt-3" style={{ color: "crimson", fontWeight: 800 }}>✖ {err}</div>}
+            </div>
 
-.lux-cal-dow{
-  padding: 10px 0;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 900;
-  color: rgba(28,28,30,0.55);
-  border-bottom: 1px solid rgba(28,28,30,0.10);
-  background: rgba(255,255,255,0.55);
-}
+            <div className="mt-6 flex justify-center">
+              <a className="lux-btn lux-btn-primary" style={{ minWidth: 240 }} href="#calendario">
+                Avanti
+              </a>
+            </div>
+          </section>
 
-.lux-cal-cell{
-  border-right: 1px solid rgba(28,28,30,0.10);
-  border-bottom: 1px solid rgba(28,28,30,0.10);
-  min-height: 70px;
-}
-.lux-cal-cell:nth-child(7n){
-  border-right: none;
-}
+          {/* DESTRA */}
+          <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
+            </div>
 
-.lux-cal-btn{
-  width: 100%;
-  height: 70px;
-  display: grid;
-  place-items: center;
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  font-weight: 800;
-  color: rgba(28,28,30,0.75);
-  transition: background 120ms ease, transform 120ms ease, opacity 120ms ease;
-}
-.lux-cal-btn:hover{
-  background: rgba(207,160,178,0.10);
-}
+            {/* CALENDARIO */}
+            <div className="lux-cal mt-5">
+              <div className="lux-cal-head">
+                <button
+                  type="button"
+                  className="lux-btn"
+                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                  onClick={() => setMonthCursor((d) => addMonths(d, -1))}
+                  aria-label="Mese precedente"
+                >
+                  ‹
+                </button>
 
-.lux-cal-btn.selected{
-  background: rgba(91,42,63,0.10);
-  box-shadow: inset 0 0 0 2px rgba(91,42,63,0.22);
-}
+                <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
 
-.lux-cal-btn.disabled{
-  cursor: not-allowed;
-  color: rgba(28,28,30,0.25);
-  background: rgba(28,28,30,0.02);
-  opacity: 0.65;
-}
+                <button
+                  type="button"
+                  className="lux-btn"
+                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                  onClick={() => setMonthCursor((d) => addMonths(d, +1))}
+                  aria-label="Mese successivo"
+                >
+                  ›
+                </button>
+              </div>
 
-.lux-closed-tag{
-  margin-top: 6px;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.10em;
-  opacity: 0.65;
-  color: rgba(91,42,63,0.80);
+              <div className="lux-cal-grid lux-cal-dows">
+                {weekDays.map((g) => (
+                  <div key={g} className="lux-cal-dow">
+                    {g}
+                  </div>
+                ))}
+              </div>
+
+              <div className="lux-cal-grid lux-cal-days">
+                {grid.map((cell, idx) => {
+                  const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
+                  const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
+
+                  return (
+                    <div key={idx} className="lux-cal-cell">
+                      <button
+                        type="button"
+                        disabled={disabled}
+                        onClick={() => {
+                          if (!cell.dateStr) return;
+                          setSelectedDate(cell.dateStr);
+                          setSelectedTime("");
+                          timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+                        }}
+                        className={[
+                          "lux-cal-btn",
+                          disabled ? "is-disabled" : "",
+                          isSelected ? "is-selected" : "",
+                        ].join(" ")}
+                      >
+                        {cell.day ? (
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
+                            <span>{cell.day}</span>
+                            {cell.isoWeekday === 1 ? <span className="lux-closed-tag">CHIUSO</span> : null}
+                          </div>
+                        ) : (
+                          <span />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ORARI */}
+            <div className="mt-6">
+              <div style={{ fontSize: 13, fontWeight: 800, color: "var(--muted)", marginBottom: 10 }}>
+                Orari disponibili{selectedDate ? ` • ${selectedDate}` : ""}
+              </div>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <button type="button" className="lux-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }} onClick={() => scrollTimes("left")}>
+                  ‹
+                </button>
+
+                <div
+                  ref={timesWrapRef}
+                  className="no-scrollbar"
+                  style={{ overflowX: "auto", overflowY: "hidden", display: "flex", gap: 10, paddingBottom: 6, scrollBehavior: "smooth", width: "100%" }}
+                >
+                  {times.map((t) => {
+                    const selected = t === selectedTime;
+                    return (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => setSelectedTime(t)}
+                        className={`lux-slot ${selected ? "selected" : ""}`}
+                        style={{ minWidth: 110, flex: "0 0 auto", opacity: selectedDate ? 1 : 0.5, pointerEvents: selectedDate ? "auto" : "none" }}
+                      >
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button type="button" className="lux-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }} onClick={() => scrollTimes("right")}>
+                  ›
+                </button>
+              </div>
+            </div>
+
+            {/* BOTTONI */}
+            <div className="mt-8 flex gap-3">
+              <button
+                className="lux-btn lux-btn-primary w-full"
+                type="button"
+                onClick={onConfirm}
+                disabled={!canConfirm}
+                style={{ opacity: canConfirm ? 1 : 0.45, cursor: canConfirm ? "pointer" : "not-allowed" }}
+              >
+                {loading ? "Invio..." : "Conferma"}
+              </button>
+
+              <Link className="lux-btn w-full" href="/">
+                Indietro
+              </Link>
+            </div>
+
+            <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
+              Dopo la conferma si apre WhatsApp con il messaggio pronto ✨
+            </div>
+
+            {selectedService?.duration_minutes ? (
+              <div className="mt-2" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
+                Durata servizio: <b>{selectedService.duration_minutes} min</b>
+              </div>
+            ) : null}
+          </section>
+        </div>
+      </div>
+    </div>
+  );
 }
