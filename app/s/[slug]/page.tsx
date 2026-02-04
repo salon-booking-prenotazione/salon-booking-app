@@ -32,7 +32,6 @@ function weekdayISO(d: Date) {
 export default function PaginaPrenotazione({ params }: { params: { slug: string } }) {
   const slug = params.slug;
 
-  // ====== STATE ======
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [serviceId, setServiceId] = useState<string>("");
 
@@ -48,8 +47,8 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
     return d;
   });
 
-  const [selectedDate, setSelectedDate] = useState<string>(""); // YYYY-MM-DD
-  const [selectedTime, setSelectedTime] = useState<string>(""); // HH:mm
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedTime, setSelectedTime] = useState<string>("");
 
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string>("");
@@ -87,7 +86,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
 
   const selectedService = useMemo(() => services.find((s) => s.id === serviceId), [services, serviceId]);
 
-  // ✅ RESET selezioni quando cambi mese o servizio
+  // reset quando cambio mese o servizio
   useEffect(() => {
     setSelectedDate("");
     setSelectedTime("");
@@ -100,36 +99,31 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
     timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   }, [serviceId]);
 
-  // ====== CALENDAR GRID ======
   const grid = useMemo(() => {
     const year = monthCursor.getFullYear();
     const m0 = monthCursor.getMonth();
     const total = daysInMonth(year, m0);
 
-    // offset (Lun=0 ... Dom=6)
     const first = new Date(year, m0, 1);
-    const firstIso = weekdayISO(first); // 1..7
-    const offset = firstIso - 1; // Lun=0
+    const firstIso = weekdayISO(first);
+    const offset = firstIso - 1;
 
     const cells: Array<{ day: number | null; dateStr: string | null; isoWeekday: number | null }> = [];
 
-    for (let i = 0; i < offset; i++) {
-      cells.push({ day: null, dateStr: null, isoWeekday: null });
-    }
+    for (let i = 0; i < offset; i++) cells.push({ day: null, dateStr: null, isoWeekday: null });
+
     for (let d = 1; d <= total; d++) {
       const dt = new Date(year, m0, d);
-      const ds = ymd(dt);
-      cells.push({ day: d, dateStr: ds, isoWeekday: weekdayISO(dt) });
+      cells.push({ day: d, dateStr: ymd(dt), isoWeekday: weekdayISO(dt) });
     }
-    while (cells.length % 7 !== 0) {
-      cells.push({ day: null, dateStr: null, isoWeekday: null });
-    }
+
+    while (cells.length % 7 !== 0) cells.push({ day: null, dateStr: null, isoWeekday: null });
+
     return cells;
   }, [monthCursor]);
 
   const weekDays = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
 
-  // ====== TIMES (demo finché non colleghiamo disponibilità reali) ======
   const times = useMemo(
     () => [
       "09:00","09:30","10:00","10:30","11:00","11:30",
@@ -147,19 +141,12 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
     el.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
   }
 
-  // blocca lunedì (ISO weekday 1)
   function isClosedDay(isoWeekday: number | null) {
-    return isoWeekday === 1;
+    return isoWeekday === 1; // lunedì
   }
 
-  const canConfirm =
-    !!serviceId &&
-    !!selectedDate &&
-    !!selectedTime &&
-    phone.trim().length >= 6 &&
-    !loading;
+  const canConfirm = !!serviceId && !!selectedDate && !!selectedTime && phone.trim().length >= 6 && !loading;
 
-  // ====== SUBMIT ======
   async function onConfirm() {
     if (!canConfirm) return;
 
@@ -183,15 +170,10 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
       });
 
       const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json.ok) {
-        throw new Error(json?.error || "Errore creazione prenotazione");
-      }
+      if (!res.ok || !json.ok) throw new Error(json?.error || "Errore creazione prenotazione");
 
-      if (json.whatsapp_url) {
-        window.location.href = json.whatsapp_url;
-      } else {
-        throw new Error("Manca whatsapp_url nella risposta API");
-      }
+      if (json.whatsapp_url) window.location.href = json.whatsapp_url;
+      else throw new Error("Manca whatsapp_url nella risposta API");
     } catch (e: any) {
       setErr(e?.message || "Errore");
     } finally {
@@ -217,20 +199,10 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
             </div>
 
             <div className="mt-7">
-              <div
-                className="mb-3"
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "var(--muted)",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                }}
-              >
+              <div className="mb-3" style={{ fontSize: 13, fontWeight: 600, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
                 Servizio *
               </div>
 
-              {/* ✅ tendina servizio rifinita */}
               <div style={{ position: "relative" }}>
                 <select
                   className="lux-input"
@@ -251,7 +223,6 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                   <option value="" disabled>
                     {services.length ? "Seleziona un servizio..." : "Caricamento servizi..."}
                   </option>
-
                   {services.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -278,16 +249,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
             </div>
 
             <div className="mt-8">
-              <div
-                className="mb-3"
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: "var(--muted)",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                }}
-              >
+              <div className="mb-3" style={{ fontSize: 13, fontWeight: 600, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
                 I tuoi dati
               </div>
 
@@ -298,11 +260,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                 <input className="lux-input" placeholder="Note (opzionale)" value={note} onChange={(e) => setNote(e.target.value)} />
               </div>
 
-              {err && (
-                <div className="mt-3" style={{ color: "crimson", fontWeight: 800 }}>
-                  ✖ {err}
-                </div>
-              )}
+              {err && <div className="mt-3" style={{ color: "crimson", fontWeight: 800 }}>✖ {err}</div>}
             </div>
 
             <div className="mt-6 flex justify-center">
@@ -318,76 +276,39 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
             </div>
 
-            {/* ✅ Calendario premium (header + griglia insieme) */}
-<div className="lux-cal mt-5">
-  <div className="lux-cal-head">
-    <button
-      type="button"
-      className="lux-btn"
-      style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-      onClick={() => setMonthCursor((d) => addMonths(d, -1))}
-      aria-label="Mese precedente"
-    >
-      ‹
-    </button>
+            {/* ✅ CALENDARIO (header + griglia insieme) */}
+            <div className="lux-cal mt-5">
+              <div className="lux-cal-head">
+                <button
+                  type="button"
+                  className="lux-btn"
+                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                  onClick={() => setMonthCursor((d) => addMonths(d, -1))}
+                  aria-label="Mese precedente"
+                >
+                  ‹
+                </button>
 
-    <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
+                <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
 
-    <button
-      type="button"
-      className="lux-btn"
-      style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-      onClick={() => setMonthCursor((d) => addMonths(d, +1))}
-      aria-label="Mese successivo"
-    >
-      ›
-    </button>
-  </div>
-
-  <div className="lux-cal-grid">
-    {weekDays.map((g) => (
-      <div key={g} className="lux-cal-dow">
-        {g}
-      </div>
-    ))}
-  </div>
-
-  <div className="lux-cal-grid">
-    {grid.map((cell, idx) => {
-      const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
-      const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
-
-      return (
-        <div key={idx} className="lux-cal-cell">
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => {
-              if (!cell.dateStr) return;
-              setSelectedDate(cell.dateStr);
-              setSelectedTime("");
-              timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-            }}
-            className={[
-              "lux-cal-btn",
-              disabled ? "disabled" : "",
-              isSelected ? "selected" : "",
-            ].join(" ")}
-          >
-            {cell.day ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
-                <span>{cell.day}</span>
-                {cell.isoWeekday === 1 ? <span className="lux-closed-tag">CHIUSO</span> : null}
+                <button
+                  type="button"
+                  className="lux-btn"
+                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                  onClick={() => setMonthCursor((d) => addMonths(d, +1))}
+                  aria-label="Mese successivo"
+                >
+                  ›
+                </button>
               </div>
-            ) : (
-              <span />
-            )}
-          </button>
-        </div>
-      );
-    })}
-  </div>
-</div>
+
+              <div className="lux-cal-grid">
+                {weekDays.map((g) => (
+                  <div key={g} className="lux-cal-dow">
+                    {g}
+                  </div>
+                ))}
+              </div>
 
               <div className="lux-cal-grid">
                 {grid.map((cell, idx) => {
@@ -405,11 +326,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                           setSelectedTime("");
                           timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
                         }}
-                        className={[
-                          "lux-cal-btn",
-                          disabled ? "disabled" : "",
-                          isSelected ? "selected" : "",
-                        ].join(" ")}
+                        className={["lux-cal-btn", disabled ? "disabled" : "", isSelected ? "selected" : ""].join(" ")}
                       >
                         {cell.day ? (
                           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
@@ -426,35 +343,21 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               </div>
             </div>
 
-            {/* orari */}
+            {/* ORARI */}
             <div className="mt-6">
               <div style={{ fontSize: 13, fontWeight: 800, color: "var(--muted)", marginBottom: 10 }}>
                 Orari disponibili{selectedDate ? ` • ${selectedDate}` : ""}
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <button
-                  type="button"
-                  className="lux-btn"
-                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                  onClick={() => scrollTimes("left")}
-                  aria-label="Scorri a sinistra"
-                >
+                <button type="button" className="lux-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }} onClick={() => scrollTimes("left")}>
                   ‹
                 </button>
 
                 <div
                   ref={timesWrapRef}
                   className="no-scrollbar"
-                  style={{
-                    overflowX: "auto",
-                    overflowY: "hidden",
-                    display: "flex",
-                    gap: 10,
-                    paddingBottom: 6,
-                    scrollBehavior: "smooth",
-                    width: "100%",
-                  }}
+                  style={{ overflowX: "auto", overflowY: "hidden", display: "flex", gap: 10, paddingBottom: 6, scrollBehavior: "smooth", width: "100%" }}
                 >
                   {times.map((t) => {
                     const selected = t === selectedTime;
@@ -464,12 +367,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                         type="button"
                         onClick={() => setSelectedTime(t)}
                         className={`lux-slot ${selected ? "selected" : ""}`}
-                        style={{
-                          minWidth: 110,
-                          flex: "0 0 auto",
-                          opacity: selectedDate ? 1 : 0.5,
-                          pointerEvents: selectedDate ? "auto" : "none",
-                        }}
+                        style={{ minWidth: 110, flex: "0 0 auto", opacity: selectedDate ? 1 : 0.5, pointerEvents: selectedDate ? "auto" : "none" }}
                       >
                         {t}
                       </button>
@@ -477,29 +375,20 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                   })}
                 </div>
 
-                <button
-                  type="button"
-                  className="lux-btn"
-                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                  onClick={() => scrollTimes("right")}
-                  aria-label="Scorri a destra"
-                >
+                <button type="button" className="lux-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }} onClick={() => scrollTimes("right")}>
                   ›
                 </button>
               </div>
             </div>
 
+            {/* BOTTONI */}
             <div className="mt-8 flex gap-3">
               <button
                 className="lux-btn lux-btn-primary w-full"
                 type="button"
                 onClick={onConfirm}
                 disabled={!canConfirm}
-                style={{
-                  opacity: canConfirm ? 1 : 0.45,
-                  cursor: canConfirm ? "pointer" : "not-allowed",
-                  filter: canConfirm ? "none" : "grayscale(0.2)",
-                }}
+                style={{ opacity: canConfirm ? 1 : 0.45, cursor: canConfirm ? "pointer" : "not-allowed" }}
               >
                 {loading ? "Invio..." : "Conferma"}
               </button>
