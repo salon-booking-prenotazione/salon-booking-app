@@ -221,8 +221,9 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                   }}
                 >
                   <option value="" disabled>
-  {services.length ? "Seleziona" : "Caricamento..."}
-</option>
+                    {services.length ? "Seleziona" : "Caricamento..."}
+                  </option>
+
                   {services.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -276,7 +277,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
             </div>
 
-            {/* ✅ CALENDARIO (header + griglia insieme) */}
+            {/* CALENDARIO */}
             <div className="lux-cal mt-5">
               <div className="lux-cal-head">
                 <button
@@ -302,7 +303,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                 </button>
               </div>
 
-              <div className="lux-cal-grid">
+              <div className="lux-cal-grid lux-cal-dows">
                 {weekDays.map((g) => (
                   <div key={g} className="lux-cal-dow">
                     {g}
@@ -310,7 +311,7 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                 ))}
               </div>
 
-              <div className="lux-cal-grid">
+              <div className="lux-cal-grid lux-cal-days">
                 {grid.map((cell, idx) => {
                   const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
                   const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
@@ -326,26 +327,20 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                           setSelectedTime("");
                           timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
                         }}
-                        className={["lux-cal-btn", disabled ? "disabled" : "", isSelected ? "selected" : ""].join(" ")}
+                        className={[
+                          "lux-cal-btn",
+                          disabled ? "is-disabled" : "",
+                          isSelected ? "is-selected" : "",
+                        ].join(" ")}
                       >
-                       {cell.day ? (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      lineHeight: 1.1,
-    }}
-  >
-    <span>{cell.day}</span>
-
-    {cell.isoWeekday === 1 && (
-      <span className="lux-closed-tag">CHIUSO</span>
-    )}
-  </div>
-) : (
-  <span />
-)}
+                        {cell.day ? (
+                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
+                            <span>{cell.day}</span>
+                            {cell.isoWeekday === 1 ? <span className="lux-closed-tag">CHIUSO</span> : null}
+                          </div>
+                        ) : (
+                          <span />
+                        )}
                       </button>
                     </div>
                   );
