@@ -2,19 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* === MotoPress-ish, ma più premium === */
 :root{
-  --bg: #c7cec7;
-  --cream:#f6f2ec;
+  --bg: #c7cec7;                 /* sage background */
+  --bg2:#bfc7c0;
+  --cream:#f6f2ec;               /* card paper */
   --cream2:#f2ede6;
 
-  --plum:#5b2a3f;
+  --plum:#5b2a3f;                /* titles */
   --ink: rgba(28,28,30,0.82);
   --muted: rgba(28,28,30,0.55);
 
-  --sage:#7f8f86;
+  --sage:#7f8f86;                /* CTA */
   --sage2:#6f8077;
 
-  --rose:#cfa0b2;
+  --rose:#cfa0b2;                /* frame */
+  --rose2:#ddb7c5;
 
   --line: rgba(28,28,30,0.16);
   --line2: rgba(255,255,255,0.45);
@@ -22,24 +25,14 @@
 
 html, body { height: 100%; }
 body{
+  margin: 0;
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body), ui-sans-serif, system-ui;
 }
 
-/* ✅ CONTENITORE SFONDO */
-.lux-bg{
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(900px 700px at 18% 18%, rgba(127,143,134,0.40), transparent 62%),
-    radial-gradient(780px 560px at 78% 22%, rgba(207,160,178,0.30), transparent 60%),
-    radial-gradient(1000px 780px at 60% 90%, rgba(127,143,134,0.22), transparent 62%);
-}
-
-/* ✅ VIDEO FULLSCREEN (dietro a tutto) */
-.lux-video {
+/* VIDEO full screen dietro a tutto */
+.lux-video{
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -48,24 +41,26 @@ body{
   z-index: -2;
 }
 
-/* ✅ OVERLAY (niente quadrati: è sempre full screen) */
-.lux-bg::before {
+/* wrapper */
+.lux-bg{
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* overlay leggero sopra al video (NON deve creare “quadrati”) */
+.lux-bg::before{
   content: "";
   position: fixed;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.12)
+    rgba(255,255,255,0.10),
+    rgba(255,255,255,0.18)
   );
-  pointer-events: none;
   z-index: -1;
-}
-
-/* ✅ Tutto il contenuto sopra */
-.lux-content{
-  position: relative;
-  z-index: 1;
+  pointer-events: none;
 }
 
 /* tipografia */
@@ -76,6 +71,17 @@ body{
   letter-spacing: -0.02em;
 }
 .lux-subtitle{ color: var(--muted); }
+
+/* scrittura elegante tipo calligraphy (senza bold) */
+.lux-calligraphy{
+  font-family: var(--font-display), ui-serif, Georgia;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  opacity: 0.92;
+  color: var(--plum);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+}
 
 /* badge top */
 .lux-badge{
@@ -103,6 +109,7 @@ body{
     0 0 0 1px rgba(255,255,255,0.55) inset;
 }
 
+/* cornice esterna rosa */
 .lux-frame{
   border: 8px solid rgba(207,160,178,0.60);
   border-radius: 22px;
@@ -155,17 +162,105 @@ body{
   box-shadow: 0 0 0 4px rgba(207,160,178,0.18);
 }
 
-/* scrittura elegante */
-.lux-calligraphy {
-  font-family: var(--font-display), ui-serif, Georgia;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  opacity: 0.92;
-  color: var(--plum);
-  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+/* slots orari */
+.lux-slot{
+  border-radius: 12px;
+  border: 1px solid rgba(28,28,30,0.18);
+  background: rgba(255,255,255,0.70);
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(28,28,30,0.72);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
+.lux-slot.selected{
+  background: linear-gradient(180deg, rgba(91,42,63,0.98), rgba(70,25,45,0.98));
+  color: rgba(255,255,255,0.95);
+  border-color: rgba(91,42,63,0.55);
 }
 
-/* nasconde scrollbar */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* ===== CALENDARIO (per renderlo leggibile) ===== */
+.lux-cal{
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(28,28,30,0.14);
+  background: rgba(255,255,255,0.55);
+  box-shadow: 0 18px 50px rgba(0,0,0,0.10);
+}
+
+.lux-cal-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(28,28,30,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.55));
+}
+
+.lux-cal-month{
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: rgba(28,28,30,0.65);
+  text-align: center;
+  flex: 1;
+}
+
+.lux-cal-grid{
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.lux-cal-dow{
+  text-align: center;
+  padding: 10px 0;
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(28,28,30,0.55);
+  border-bottom: 1px solid rgba(28,28,30,0.08);
+  background: rgba(255,255,255,0.45);
+}
+
+.lux-cal-cell{
+  border-right: 1px solid rgba(28,28,30,0.08);
+  border-bottom: 1px solid rgba(28,28,30,0.08);
+}
+.lux-cal-cell:nth-child(7n){
+  border-right: none;
+}
+
+.lux-cal-btn{
+  width: 100%;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: rgba(28,28,30,0.72);
+  font-weight: 800;
+}
+
+.lux-cal-btn:hover{
+  background: rgba(91,42,63,0.06);
+}
+
+.lux-cal-btn.selected{
+  background: rgba(91,42,63,0.12);
+  box-shadow: 0 0 0 2px rgba(207,160,178,0.55) inset;
+}
+
+.lux-cal-btn.disabled{
+  cursor: not-allowed;
+  color: rgba(28,28,30,0.25);
+  background: rgba(28,28,30,0.02);
+}
+
+.lux-closed-tag{
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  opacity: 0.55;
+}
