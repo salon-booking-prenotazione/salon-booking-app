@@ -163,10 +163,10 @@ body{
   z-index: -1;
 }
 
-/* velo chiaro sopra il video */
+/* velo chiaro sopra background (NON fixed) */
 .lux-bg::before {
   content: "";
-  position: fixed;
+  position: absolute;   /* <-- prima era fixed */
   inset: 0;
   background: linear-gradient(
     to bottom,
@@ -175,6 +175,16 @@ body{
   );
   z-index: 0;
   pointer-events: none;
+}
+
+/* importantissimo: contenuti sopra il velo */
+.lux-bg {
+  position: relative;   /* <-- aggiungi se non c’è */
+}
+
+.lux-bg > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* scrittura elegante tipo calligraphy (senza bold) */
