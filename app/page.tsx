@@ -4,9 +4,14 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="lux-bg">
+    <div className="relative lux-bg">
+      {/* ✅ VIDEO BACKGROUND */}
+      <video className="lux-video" autoPlay muted loop playsInline>
+        <source src="/lotus.mp4" type="video/mp4" />
+      </video>
+
+      {/* ✅ CONTENUTO SOPRA OVERLAY */}
       <div className="lux-content">
-        {/* HERO full screen */}
         <section className="h-screen w-full flex items-center justify-end px-6 md:px-10 lg:px-20">
           <div className="max-w-3xl text-right">
             <h1 className="lux-calligraphy text-4xl md:text-6xl">
