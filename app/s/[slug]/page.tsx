@@ -328,14 +328,24 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                         }}
                         className={["lux-cal-btn", disabled ? "disabled" : "", isSelected ? "selected" : ""].join(" ")}
                       >
-                        {cell.day ? (
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
-                            <span>{cell.day}</span>
-                            {cell.isoWeekday === 1 ? <span className="lux-closed-tag">CHIUSO</span> : null}
-                          </div>
-                        ) : (
-                          <span />
-                        )}
+                       {cell.day ? (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      lineHeight: 1.1,
+    }}
+  >
+    <span>{cell.day}</span>
+
+    {cell.isoWeekday === 1 && (
+      <span className="lux-closed-tag">CHIUSO</span>
+    )}
+  </div>
+) : (
+  <span />
+)}
                       </button>
                     </div>
                   );
