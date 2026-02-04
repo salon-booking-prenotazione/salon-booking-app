@@ -221,8 +221,8 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
                   }}
                 >
                   <option value="" disabled>
-                    {services.length ? "Seleziona un servizio..." : "Caricamento servizi..."}
-                  </option>
+  {services.length ? "Seleziona" : "Caricamento..."}
+</option>
                   {services.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
