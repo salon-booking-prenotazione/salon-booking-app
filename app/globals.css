@@ -2,56 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* === MotoPress-ish, ma più premium === */
+/* ====== Theme ====== */
 :root{
-  --bg: #c7cec7;                 /* sage background */
-  --bg2:#bfc7c0;
-  --cream:#f6f2ec;               /* card paper */
+  --bg: #c7cec7;
+  --cream:#f6f2ec;
   --cream2:#f2ede6;
 
-  --plum:#5b2a3f;                /* titles */
+  --plum:#5b2a3f;
   --ink: rgba(28,28,30,0.82);
   --muted: rgba(28,28,30,0.55);
 
-  --sage:#7f8f86;                /* CTA */
+  --sage:#7f8f86;
   --sage2:#6f8077;
 
-  --rose:#cfa0b2;                /* frame */
-  --rose2:#ddb7c5;
-
-  --line: rgba(28,28,30,0.16);
-  --line2: rgba(255,255,255,0.45);
+  --rose:#cfa0b2;
+  --line: rgba(28,28,30,0.14);
 }
 
 html, body { height: 100%; }
 body{
-  background: var(--bg);
+  margin: 0;
   color: var(--ink);
-  font-family: var(--font-body), ui-sans-serif, system-ui;
+  font-family: ui-sans-serif, system-ui;
+  background: var(--bg);
 }
 
-/* background con “forme” + leggero pattern (solo CSS) */
+/* ====== Background (NO “quadrato” strano) ====== */
 .lux-bg{
   min-height: 100vh;
   position: relative;
   overflow: hidden;
+
+  /* se la tua immagine è pubblica (es. /public/lotus.webp o .jpg), mettila qui */
   background:
-    radial-gradient(900px 700px at 18% 18%, rgba(127,143,134,0.40), transparent 62%),
-    radial-gradient(780px 560px at 78% 22%, rgba(207,160,178,0.30), transparent 60%),
-    radial-gradient(1000px 780px at 60% 90%, rgba(127,143,134,0.22), transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.03));
+    radial-gradient(900px 700px at 18% 18%, rgba(127,143,134,0.25), transparent 62%),
+    radial-gradient(780px 560px at 78% 22%, rgba(207,160,178,0.22), transparent 60%),
+    radial-gradient(1000px 780px at 60% 90%, rgba(127,143,134,0.18), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
 }
 
-/* tipografia */
+/* se hai anche un’immagine di background via CSS (opzionale):
+   - metti l’immagine in /public/lotus.jpg
+   - e sblocca queste 3 righe
+*/
+/*
+.lux-bg{
+  background-image: url("/lotus.jpg");
+  background-size: cover;
+  background-position: center;
+}
+*/
+
 .lux-title{
-  font-family: var(--font-display), ui-serif, Georgia;
   color: var(--plum);
   font-weight: 500;
   letter-spacing: -0.02em;
 }
 .lux-subtitle{ color: var(--muted); }
 
-/* badge top */
+/* ====== Badge top ====== */
 .lux-badge{
   display:inline-flex;
   align-items:center;
@@ -65,7 +74,7 @@ body{
   font-size: 13px;
 }
 
-/* CARD premium: bordo interno + carta + ombra morbida */
+/* ====== Card + Frame ====== */
 .lux-card{
   border-radius: 18px;
   background:
@@ -77,15 +86,13 @@ body{
     0 0 0 1px rgba(255,255,255,0.55) inset;
 }
 
-/* cornice esterna “rosa” tipo screen 3 ma più elegante */
 .lux-frame{
   border: 8px solid rgba(207,160,178,0.60);
   border-radius: 22px;
-  box-shadow:
-    0 18px 55px rgba(0,0,0,0.12);
+  box-shadow: 0 18px 55px rgba(0,0,0,0.12);
 }
 
-/* bottoni */
+/* ====== Buttons ====== */
 .lux-btn{
   display:inline-flex;
   align-items:center;
@@ -97,8 +104,10 @@ body{
   color: rgba(28,28,30,0.78);
   font-weight: 700;
   box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+  transition: transform .12s ease, filter .12s ease;
 }
 .lux-btn:hover{ filter: brightness(1.02); }
+.lux-btn:active{ transform: translateY(1px); }
 
 .lux-btn-primary{
   background: linear-gradient(180deg, rgba(127,143,134,0.98), rgba(111,128,119,0.98));
@@ -108,20 +117,13 @@ body{
     0 16px 30px rgba(127,143,134,0.22),
     0 10px 20px rgba(0,0,0,0.12);
 }
-.lux-btn-primary:hover{ transform: translateY(-1px); }
 
 .lux-btn-ghost{
   background: transparent;
   box-shadow: none;
 }
 
-/* separatore */
-.lux-sep{
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(28,28,30,0.18), transparent);
-}
-
-/* input */
+/* ====== Inputs ====== */
 .lux-input{
   width:100%;
   border-radius: 14px;
@@ -137,7 +139,7 @@ body{
   box-shadow: 0 0 0 4px rgba(207,160,178,0.18);
 }
 
-/* slots “tabelle” */
+/* ====== Slots ====== */
 .lux-slot{
   border-radius: 12px;
   border: 1px solid rgba(28,28,30,0.18);
@@ -153,154 +155,100 @@ body{
   color: rgba(255,255,255,0.95);
   border-color: rgba(91,42,63,0.55);
 }
-/* ===== Video opening luxury ===== */
-.lux-video {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  z-index: -1;
-}
 
-/* velo chiaro sopra background (NON fixed) */
-.lux-bg::before {
-  content: "";
-  position: absolute;   /* <-- prima era fixed */
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.06),
-    rgba(255, 255, 255, 0.10)
-  );
-  z-index: 0;
-  pointer-events: none;
-}
+/* ====== No scrollbar ====== */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* importantissimo: contenuti sopra il velo */
-.lux-bg {
-  position: relative;   /* <-- aggiungi se non c’è */
-}
-
-.lux-bg > * {
-  position: relative;
-  z-index: 1;
-}
-
-/* scrittura elegante tipo calligraphy (senza bold) */
+/* ====== Calligraphy ====== */
 .lux-calligraphy {
-  font-family: var(--font-display), ui-serif, Georgia;
+  font-family: ui-serif, Georgia;
   font-style: italic;
   font-weight: 400;
-  letter-spacing: 0.03em; /* prima 0.01 */
-  opacity: 0.96;         /* rende più soft */
+  letter-spacing: 0.03em;
+  opacity: 0.96;
   color: var(--plum);
   text-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
 }
 
-/* nasconde la scrollbar nel carousel orari */
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-/* ====== CALENDARIO (FIX: CSS valido, niente nesting) ====== */
-body { margin: 0; }
-
-/* contenitore calendario */
+/* =========================================================
+   ✅ CALENDARIO “BELLO” (questo è quello che ti mancava)
+   ========================================================= */
 .lux-cal{
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
-  border: 1px solid rgba(28,28,30,0.14);
+  border: 1px solid rgba(28,28,30,0.12);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.08);
   background: rgba(255,255,255,0.55);
-  box-shadow: 0 18px 45px rgba(0,0,0,0.10);
 }
 
 /* header mese */
 .lux-cal-head{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 12px 12px;
   border-bottom: 1px solid rgba(28,28,30,0.12);
   background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0.45));
 }
+.lux-cal-head button{ flex: 0 0 auto; }
 
 .lux-cal-month{
-  color: rgba(28,28,30,0.62);
   font-size: 13px;
   font-weight: 900;
-  letter-spacing: 0.03em;
+  color: rgba(28,28,30,0.58);
   text-transform: capitalize;
-}
-
-/* ✅ questo sostituisce il tuo "button { ... }" annidato */
-.lux-cal-head button{
-  flex: 0 0 auto;
+  letter-spacing: 0.02em;
 }
 
 /* griglia */
 .lux-cal-grid{
-  display: grid;
+  display:grid;
   grid-template-columns: repeat(7, 1fr);
 }
 
-.lux-cal-dows{
-  background: rgba(255,255,255,0.58);
-  border-bottom: 1px solid rgba(28,28,30,0.10);
-}
-
 .lux-cal-dow{
-  text-align: center;
   padding: 10px 0;
+  text-align:center;
   font-size: 12px;
   font-weight: 900;
-  color: rgba(28,28,30,0.55);
+  color: rgba(28,28,30,0.50);
+  background: rgba(255,255,255,0.55);
+  border-bottom: 1px solid rgba(28,28,30,0.10);
 }
 
-/* celle giorni */
 .lux-cal-cell{
-  border-right: 1px solid rgba(28,28,30,0.10);
-  border-bottom: 1px solid rgba(28,28,30,0.10);
-  background: rgba(255,255,255,0.40);
+  border-right: 1px solid rgba(28,28,30,0.08);
+  border-bottom: 1px solid rgba(28,28,30,0.08);
 }
-.lux-cal-cell:nth-child(7n){
-  border-right: none;
-}
+.lux-cal-cell:nth-child(7n){ border-right: none; }
 
 .lux-cal-btn{
-  width: 100%;
-  height: 64px;
-  display: grid;
-  place-items: center;
-  background: transparent;
+  width:100%;
+  height: 58px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(255,255,255,0.35);
+  color: rgba(28,28,30,0.72);
+  font-weight: 800;
   border: none;
   cursor: pointer;
-  font-weight: 800;
-  color: rgba(28,28,30,0.70);
-  transition: transform .06s ease, background .12s ease;
+  transition: background .12s ease, transform .12s ease;
 }
-.lux-cal-btn:hover{
-  background: rgba(91,42,63,0.06);
-}
-.lux-cal-btn:active{
-  transform: scale(0.98);
-}
-
-.lux-cal-btn.is-disabled{
-  cursor: not-allowed;
-  color: rgba(28,28,30,0.22);
+.lux-cal-btn:hover{ background: rgba(91,42,63,0.08); }
+.lux-cal-btn.selected{ background: rgba(91,42,63,0.14); }
+.lux-cal-btn.disabled{
+  cursor:not-allowed;
+  color: rgba(28,28,30,0.25);
   background: rgba(28,28,30,0.02);
-}
-.lux-cal-btn.is-selected{
-  background: rgba(91,42,63,0.10);
-  outline: 2px solid rgba(207,160,178,0.45);
-  outline-offset: -2px;
 }
 
 .lux-closed-tag{
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 10px;
-  letter-spacing: 0.08em;
-  opacity: 0.60;
   font-weight: 900;
+  letter-spacing: 0.06em;
+  opacity: 0.55;
 }
