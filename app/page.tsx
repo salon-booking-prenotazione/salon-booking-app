@@ -5,33 +5,38 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <div className="relative lux-bg">
-      {/* ✅ VIDEO BACKGROUND */}
-      <video className="lux-video" autoPlay muted loop playsInline>
+      {/* VIDEO full screen dietro a tutto */}
+      <video
+        className="lux-video"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+      >
         <source src="/lotus.mp4" type="video/mp4" />
       </video>
 
-      {/* ✅ CONTENUTO SOPRA OVERLAY */}
-      <div className="lux-content">
-        <section className="h-screen w-full flex items-center justify-end px-6 md:px-10 lg:px-20">
-          <div className="max-w-3xl text-right">
-            <h1 className="lux-calligraphy text-4xl md:text-6xl">
-              Ogni bellezza ha il suo tempo.
-              <br />
-              Scegli il tuo.
-            </h1>
+      {/* HERO full screen */}
+      <section className="h-screen w-full flex items-center justify-end px-6 md:px-10 lg:px-20">
+        <div className="max-w-3xl text-right">
+          <h1 className="lux-calligraphy text-4xl md:text-6xl">
+            Ogni bellezza ha il suo tempo.
+            <br />
+            Scegli il tuo.
+          </h1>
 
-            <div className="mt-8 flex justify-end gap-3 flex-wrap">
-              <Link href="/s/lorena-salon" className="lux-btn lux-btn-primary">
-                Prenota
-              </Link>
+          <div className="mt-8 flex justify-end gap-3 flex-wrap">
+            <Link href="/s/lorena-salon" className="lux-btn lux-btn-primary">
+              Prenota
+            </Link>
 
-              <Link href="/s/lorena-salon" className="lux-btn">
-                Vedi pagina salone
-              </Link>
-            </div>
+            <Link href="/s/lorena-salon" className="lux-btn">
+              Vedi pagina salone
+            </Link>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
