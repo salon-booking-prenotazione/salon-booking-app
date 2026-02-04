@@ -207,9 +207,12 @@ body{
   justify-content: space-between;
   gap: 12px;
   padding: 10px 12px;
-  border-bottom: 1px solid rgba(28,28,30,0.12);
+  border-bottom: 1px solid rgba(28, 28, 30, 0.12);
   background: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(255,255,255,0.45));
-  button { flex: 0 0 auto; }
+}
+
+.lux-cal-head button {
+  flex: 0 0 auto;
 }
 
 .lux-cal-month {
@@ -218,8 +221,11 @@ body{
   color: rgba(28,28,30,0.70);
   letter-spacing: 0.02em;
   text-transform: capitalize;
-  text-align: center;
+}
+
+.lux-cal-month {
   flex: 1;
+  text-align: center;
 }
 
 .lux-cal-grid {
