@@ -279,3 +279,5 @@ body{
   opacity: 0.65;
   text-transform: uppercase;
 }
+
+body { outline: 6px solid red !important; }
