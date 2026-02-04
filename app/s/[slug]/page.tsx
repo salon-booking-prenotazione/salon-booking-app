@@ -318,40 +318,76 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
               <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
             </div>
 
-            {/* ✅ Header mese premium */}
-            <div className="lux-cal-head mt-5">
-              <button
-                type="button"
-                className="lux-btn"
-                style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                onClick={() => setMonthCursor((d) => addMonths(d, -1))}
-                aria-label="Mese precedente"
-              >
-                ‹
-              </button>
+            {/* ✅ Calendario premium (header + griglia insieme) */}
+<div className="lux-cal mt-5">
+  <div className="lux-cal-head">
+    <button
+      type="button"
+      className="lux-btn"
+      style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+      onClick={() => setMonthCursor((d) => addMonths(d, -1))}
+      aria-label="Mese precedente"
+    >
+      ‹
+    </button>
 
-              <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
+    <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
 
-              <button
-                type="button"
-                className="lux-btn"
-                style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                onClick={() => setMonthCursor((d) => addMonths(d, +1))}
-                aria-label="Mese successivo"
-              >
-                ›
-              </button>
-            </div>
+    <button
+      type="button"
+      className="lux-btn"
+      style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+      onClick={() => setMonthCursor((d) => addMonths(d, +1))}
+      aria-label="Mese successivo"
+    >
+      ›
+    </button>
+  </div>
 
-            {/* ✅ Calendario premium */}
-            <div className="lux-cal mt-3">
-              <div className="lux-cal-grid">
-                {weekDays.map((g) => (
-                  <div key={g} className="lux-cal-dow">
-                    {g}
-                  </div>
-                ))}
+  <div className="lux-cal-grid">
+    {weekDays.map((g) => (
+      <div key={g} className="lux-cal-dow">
+        {g}
+      </div>
+    ))}
+  </div>
+
+  <div className="lux-cal-grid">
+    {grid.map((cell, idx) => {
+      const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
+      const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
+
+      return (
+        <div key={idx} className="lux-cal-cell">
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => {
+              if (!cell.dateStr) return;
+              setSelectedDate(cell.dateStr);
+              setSelectedTime("");
+              timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+            }}
+            className={[
+              "lux-cal-btn",
+              disabled ? "disabled" : "",
+              isSelected ? "selected" : "",
+            ].join(" ")}
+          >
+            {cell.day ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
+                <span>{cell.day}</span>
+                {cell.isoWeekday === 1 ? <span className="lux-closed-tag">CHIUSO</span> : null}
               </div>
+            ) : (
+              <span />
+            )}
+          </button>
+        </div>
+      );
+    })}
+  </div>
+</div>
 
               <div className="lux-cal-grid">
                 {grid.map((cell, idx) => {
