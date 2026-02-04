@@ -23,7 +23,6 @@ function addMonths(base: Date, delta: number) {
 function daysInMonth(year: number, monthIndex0: number) {
   return new Date(year, monthIndex0 + 1, 0).getDate();
 }
-// Monday=1 ... Sunday=7
 function weekdayISO(d: Date) {
   const js = d.getDay(); // 0 Sun ... 6 Sat
   return js === 0 ? 7 : js;
@@ -55,7 +54,6 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
 
   const timesWrapRef = useRef<HTMLDivElement | null>(null);
 
-  // ====== FETCH SERVICES ======
   useEffect(() => {
     let cancelled = false;
 
@@ -86,7 +84,6 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
 
   const selectedService = useMemo(() => services.find((s) => s.id === serviceId), [services, serviceId]);
 
-  // reset quando cambio mese o servizio
   useEffect(() => {
     setSelectedDate("");
     setSelectedTime("");
@@ -183,236 +180,280 @@ export default function PaginaPrenotazione({ params }: { params: { slug: string 
 
   return (
     <div className="lux-bg">
-      <div className="mx-auto max-w-6xl px-4 py-10">
-        <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
-          {/* SINISTRA */}
-          <section className="lux-card lux-frame p-8 md:p-10">
-            <div className="flex items-start justify-between">
-              <h1 className="lux-title text-3xl md:text-4xl">Prenota</h1>
-              <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Chiudi">
-                ✕
-              </Link>
-            </div>
-
-            <div className="mt-3 lux-subtitle">
-              <b style={{ color: "var(--plum)" }}>{slug === "lorena-salon" ? "Lorena Salon" : slug}</b>
-            </div>
-
-            <div className="mt-7">
-              <div className="mb-3" style={{ fontSize: 13, fontWeight: 600, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                Servizio *
+      <div className="lux-content">
+        <div className="mx-auto max-w-6xl px-4 py-10">
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-10 items-start">
+            {/* SINISTRA */}
+            <section className="lux-card lux-frame p-8 md:p-10">
+              <div className="flex items-start justify-between">
+                <h1 className="lux-title text-3xl md:text-4xl">Prenota</h1>
+                <Link href="/" className="lux-btn lux-btn-ghost" aria-label="Chiudi">
+                  ✕
+                </Link>
               </div>
 
-              <div style={{ position: "relative" }}>
-                <select
-                  className="lux-input"
-                  value={serviceId}
-                  onChange={(e) => setServiceId(e.target.value)}
-                  disabled={!services.length}
-                  style={{
-                    width: "100%",
-                    paddingRight: 52,
-                    paddingLeft: 16,
-                    appearance: "none",
-                    WebkitAppearance: "none",
-                    MozAppearance: "none",
-                    cursor: "pointer",
-                    opacity: services.length ? 1 : 0.6,
-                  }}
-                >
-                  <option value="" disabled>
-                    {services.length ? "Seleziona" : "Caricamento..."}
-                  </option>
-
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-
-                <span
-                  aria-hidden
-                  style={{
-                    position: "absolute",
-                    right: 18,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    pointerEvents: "none",
-                    opacity: 0.55,
-                    fontSize: 14,
-                    fontWeight: 900,
-                  }}
-                >
-                  ▾
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <div className="mb-3" style={{ fontSize: 13, fontWeight: 600, color: "var(--muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                I tuoi dati
+              <div className="mt-3 lux-subtitle">
+                <b style={{ color: "var(--plum)" }}>{slug === "lorena-salon" ? "Lorena Salon" : slug}</b>
               </div>
 
-              <div className="grid gap-3">
-                <input className="lux-input" placeholder="Nome (opzionale)" value={name} onChange={(e) => setName(e.target.value)} />
-                <input className="lux-input" placeholder="Telefono *" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                <input className="lux-input" placeholder="Email (opzionale)" value={email} onChange={(e) => setEmail(e.target.value)} />
-                <input className="lux-input" placeholder="Note (opzionale)" value={note} onChange={(e) => setNote(e.target.value)} />
-              </div>
-
-              {err && <div className="mt-3" style={{ color: "crimson", fontWeight: 800 }}>✖ {err}</div>}
-            </div>
-
-            <div className="mt-6 flex justify-center">
-              <a className="lux-btn lux-btn-primary" style={{ minWidth: 240 }} href="#calendario">
-                Avanti
-              </a>
-            </div>
-          </section>
-
-          {/* DESTRA */}
-          <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
-            <div className="flex items-center justify-between gap-3">
-              <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
-            </div>
-
-            {/* CALENDARIO */}
-            <div className="lux-cal mt-5">
-              <div className="lux-cal-head">
-                <button
-                  type="button"
-                  className="lux-btn"
-                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                  onClick={() => setMonthCursor((d) => addMonths(d, -1))}
-                  aria-label="Mese precedente"
-                >
-                  ‹
-                </button>
-
-                <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
-
-                <button
-                  type="button"
-                  className="lux-btn"
-                  style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
-                  onClick={() => setMonthCursor((d) => addMonths(d, +1))}
-                  aria-label="Mese successivo"
-                >
-                  ›
-                </button>
-              </div>
-
-              <div className="lux-cal-grid lux-cal-dows">
-                {weekDays.map((g) => (
-                  <div key={g} className="lux-cal-dow">
-                    {g}
-                  </div>
-                ))}
-              </div>
-
-              <div className="lux-cal-grid lux-cal-days">
-                {grid.map((cell, idx) => {
-                  const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
-                  const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
-
-                  return (
-                    <div key={idx} className="lux-cal-cell">
-                      <button
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => {
-                          if (!cell.dateStr) return;
-                          setSelectedDate(cell.dateStr);
-                          setSelectedTime("");
-                          timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
-                        }}
-                        className={[
-                          "lux-cal-btn",
-                          disabled ? "is-disabled" : "",
-                          isSelected ? "is-selected" : "",
-                        ].join(" ")}
-                      >
-                        {cell.day ? (
-                          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
-                            <span>{cell.day}</span>
-                            {cell.isoWeekday === 1 ? <span className="lux-closed-tag">CHIUSO</span> : null}
-                          </div>
-                        ) : (
-                          <span />
-                        )}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ORARI */}
-            <div className="mt-6">
-              <div style={{ fontSize: 13, fontWeight: 800, color: "var(--muted)", marginBottom: 10 }}>
-                Orari disponibili{selectedDate ? ` • ${selectedDate}` : ""}
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <button type="button" className="lux-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }} onClick={() => scrollTimes("left")}>
-                  ‹
-                </button>
-
+              <div className="mt-7">
                 <div
-                  ref={timesWrapRef}
-                  className="no-scrollbar"
-                  style={{ overflowX: "auto", overflowY: "hidden", display: "flex", gap: 10, paddingBottom: 6, scrollBehavior: "smooth", width: "100%" }}
+                  className="mb-3"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--muted)",
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                  }}
                 >
-                  {times.map((t) => {
-                    const selected = t === selectedTime;
+                  Servizio *
+                </div>
+
+                <div style={{ position: "relative" }}>
+                  <select
+                    className="lux-input"
+                    value={serviceId}
+                    onChange={(e) => setServiceId(e.target.value)}
+                    disabled={!services.length}
+                    style={{
+                      width: "100%",
+                      paddingRight: 52,
+                      paddingLeft: 16,
+                      appearance: "none",
+                      WebkitAppearance: "none",
+                      MozAppearance: "none",
+                      cursor: "pointer",
+                      opacity: services.length ? 1 : 0.6,
+                    }}
+                  >
+                    <option value="" disabled>
+                      {services.length ? "Seleziona" : "Caricamento..."}
+                    </option>
+                    {services.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <span
+                    aria-hidden
+                    style={{
+                      position: "absolute",
+                      right: 18,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      pointerEvents: "none",
+                      opacity: 0.55,
+                      fontSize: 14,
+                      fontWeight: 900,
+                    }}
+                  >
+                    ▾
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <div
+                  className="mb-3"
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: "var(--muted)",
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  I tuoi dati
+                </div>
+
+                <div className="grid gap-3">
+                  <input className="lux-input" placeholder="Nome (opzionale)" value={name} onChange={(e) => setName(e.target.value)} />
+                  <input className="lux-input" placeholder="Telefono *" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                  <input className="lux-input" placeholder="Email (opzionale)" value={email} onChange={(e) => setEmail(e.target.value)} />
+                  <input className="lux-input" placeholder="Note (opzionale)" value={note} onChange={(e) => setNote(e.target.value)} />
+                </div>
+
+                {err && (
+                  <div className="mt-3" style={{ color: "crimson", fontWeight: 800 }}>
+                    ✖ {err}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 flex justify-center">
+                <a className="lux-btn lux-btn-primary" style={{ minWidth: 240 }} href="#calendario">
+                  Avanti
+                </a>
+              </div>
+            </section>
+
+            {/* DESTRA */}
+            <section id="calendario" className="lux-card lux-frame p-8 md:p-10">
+              <h2 className="lux-title text-2xl md:text-3xl">Scegli data e ora</h2>
+
+              {/* CALENDARIO BELLO */}
+              <div className="lux-cal">
+                <div className="lux-cal-head">
+                  <button
+                    type="button"
+                    className="lux-btn"
+                    style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                    onClick={() => setMonthCursor((d) => addMonths(d, -1))}
+                    aria-label="Mese precedente"
+                  >
+                    ‹
+                  </button>
+
+                  <div className="lux-cal-month">{monthLabelIT(monthCursor)}</div>
+
+                  <button
+                    type="button"
+                    className="lux-btn"
+                    style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                    onClick={() => setMonthCursor((d) => addMonths(d, +1))}
+                    aria-label="Mese successivo"
+                  >
+                    ›
+                  </button>
+                </div>
+
+                <div className="lux-cal-grid">
+                  {weekDays.map((g) => (
+                    <div key={g} className="lux-cal-dow">
+                      {g}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="lux-cal-grid">
+                  {grid.map((cell, idx) => {
+                    const disabled = cell.day === null || isClosedDay(cell.isoWeekday);
+                    const isSelected = !!cell.dateStr && cell.dateStr === selectedDate;
+
                     return (
-                      <button
-                        key={t}
-                        type="button"
-                        onClick={() => setSelectedTime(t)}
-                        className={`lux-slot ${selected ? "selected" : ""}`}
-                        style={{ minWidth: 110, flex: "0 0 auto", opacity: selectedDate ? 1 : 0.5, pointerEvents: selectedDate ? "auto" : "none" }}
-                      >
-                        {t}
-                      </button>
+                      <div key={idx} className="lux-cal-cell">
+                        <button
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => {
+                            if (!cell.dateStr) return;
+                            setSelectedDate(cell.dateStr);
+                            setSelectedTime("");
+                            timesWrapRef.current?.scrollTo({ left: 0, behavior: "smooth" });
+                          }}
+                          className={[
+                            "lux-cal-btn",
+                            disabled ? "disabled" : "",
+                            isSelected ? "selected" : "",
+                          ].join(" ")}
+                        >
+                          {cell.day ? (
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1 }}>
+                              <span>{cell.day}</span>
+                              {cell.isoWeekday === 1 ? <span className="lux-closed-tag">CHIUSO</span> : null}
+                            </div>
+                          ) : (
+                            <span />
+                          )}
+                        </button>
+                      </div>
                     );
                   })}
                 </div>
+              </div>
 
-                <button type="button" className="lux-btn" style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }} onClick={() => scrollTimes("right")}>
-                  ›
+              {/* ORARI */}
+              <div className="mt-6">
+                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--muted)", marginBottom: 10 }}>
+                  Orari disponibili{selectedDate ? ` • ${selectedDate}` : ""}
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <button
+                    type="button"
+                    className="lux-btn"
+                    style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                    onClick={() => scrollTimes("left")}
+                  >
+                    ‹
+                  </button>
+
+                  <div
+                    ref={timesWrapRef}
+                    className="no-scrollbar"
+                    style={{
+                      overflowX: "auto",
+                      overflowY: "hidden",
+                      display: "flex",
+                      gap: 10,
+                      paddingBottom: 6,
+                      scrollBehavior: "smooth",
+                      width: "100%",
+                    }}
+                  >
+                    {times.map((t) => {
+                      const selected = t === selectedTime;
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setSelectedTime(t)}
+                          className={`lux-slot ${selected ? "selected" : ""}`}
+                          style={{
+                            minWidth: 110,
+                            flex: "0 0 auto",
+                            opacity: selectedDate ? 1 : 0.5,
+                            pointerEvents: selectedDate ? "auto" : "none",
+                          }}
+                        >
+                          {t}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="lux-btn"
+                    style={{ width: 44, height: 44, padding: 0, borderRadius: 999 }}
+                    onClick={() => scrollTimes("right")}
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+
+              {/* BOTTONI */}
+              <div className="mt-8 flex gap-3">
+                <button
+                  className="lux-btn lux-btn-primary w-full"
+                  type="button"
+                  onClick={onConfirm}
+                  disabled={!canConfirm}
+                  style={{ opacity: canConfirm ? 1 : 0.45, cursor: canConfirm ? "pointer" : "not-allowed" }}
+                >
+                  {loading ? "Invio..." : "Conferma"}
                 </button>
+
+                <Link className="lux-btn w-full" href="/">
+                  Indietro
+                </Link>
               </div>
-            </div>
 
-            {/* BOTTONI */}
-            <div className="mt-8 flex gap-3">
-              <button
-                className="lux-btn lux-btn-primary w-full"
-                type="button"
-                onClick={onConfirm}
-                disabled={!canConfirm}
-                style={{ opacity: canConfirm ? 1 : 0.45, cursor: canConfirm ? "pointer" : "not-allowed" }}
-              >
-                {loading ? "Invio..." : "Conferma"}
-              </button>
-
-              <Link className="lux-btn w-full" href="/">
-                Indietro
-              </Link>
-            </div>
-
-            <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
-              Dopo la conferma si apre WhatsApp con il messaggio pronto ✨
-            </div>
-
-            {selectedService?.duration_minutes ? (
-              <div className="mt-2" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
-                Durata servizio: <b>{selectedService.duration_minutes} min</b>
+              <div className="mt-3" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
+                Dopo la conferma si apre WhatsApp con il messaggio pronto ✨
               </div>
-            ) : null}
-          </section>
+
+              {selectedService?.duration_minutes ? (
+                <div className="mt-2" style={{ color: "var(--muted)", fontSize: 12, textAlign: "center" }}>
+                  Durata servizio: <b>{selectedService.duration_minutes} min</b>
+                </div>
+              ) : null}
+            </section>
+          </div>
         </div>
       </div>
     </div>
