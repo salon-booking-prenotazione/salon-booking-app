@@ -1,13 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function HomePage() {
+  // evita che la home resti “scrollata” quando torni da altre pagine
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" as any });
+  }, []);
+
   return (
-    <div className="relative lux-bg">
-      {/* HERO full screen */}
+    <div className="lux-bg">
       <section className="h-screen w-full flex items-center justify-end px-6 md:px-10 lg:px-20">
-        {/* blocco testo + bottoni */}
         <div className="max-w-3xl text-right">
           <h1 className="lux-calligraphy text-4xl md:text-6xl">
             Ogni bellezza ha il suo tempo.
