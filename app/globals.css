@@ -280,4 +280,35 @@ body{
   text-transform: uppercase;
 }
 
-body { outline: 6px solid red !important; }
+/* più contrasto dentro il calendario */
+.lux-cal {
+  background: rgba(255,255,255,0.92) !important;
+}
+
+/* celle più "tabelle" */
+.lux-cal-dow {
+  background: rgba(255,255,255,0.92) !important;
+}
+
+.lux-cal-cell {
+  background: rgba(255,255,255,0.86);
+}
+
+/* numeri più visibili */
+.lux-cal-btn {
+  color: rgba(28,28,30,0.88) !important;
+  font-weight: 900 !important;
+}
+
+/* giorni vuoti: metti un “grigino” */
+.lux-cal-btn.disabled {
+  color: rgba(28,28,30,0.18) !important;
+  background: rgba(28,28,30,0.04) !important;
+}
+
+/* selezionato più chiaro e “premium” */
+.lux-cal-btn.selected {
+  background: rgba(91,42,63,0.16) !important;
+  box-shadow: inset 0 0 0 2px rgba(91,42,63,0.18);
+}
+
