@@ -5,13 +5,9 @@ import Link from "next/link";
 export default function HomePage() {
   return (
     <div className="relative lux-bg">
-      {/* VIDEO full screen dietro a tutto */}
-      <video
-        className="lux-video"
-        autoPlay
-        muted
-        loop
-        playsInline
+type:immagine
+      <luxury15.png
+        className="lux-luxury15.png"
         preload="auto"
       >
         <source src="/lotus.mp4" type="video/mp4" />
